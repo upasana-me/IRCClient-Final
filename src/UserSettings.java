@@ -64,26 +64,11 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
     UserSettings()
     {
-	//	super( Constants.userSettingsTitle );
 	this.setTitle(Constants.userSettingsTitle);
-
-	//	start = s;
-	//	mw = m;
-	//	db_conn = new DB_connection();
-	
-	//	conn = new Vector<Connection>();
-	//	db_conn = s.get_db_connection();
-	//	try
-	//	    {
-		initialise();
-		//	    }
-		//	catch( SQLException se )
-		//	    {
-		//		Utility.showError( se.getMessage(), null );
-		//	    }
+	initialise();
     }
 
-    private void initialise() //throws SQLException
+    private void initialise()
     {
 	Container pane = this.getContentPane();
 	pane.setLayout( new GridBagLayout() );
@@ -167,12 +152,10 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	sort_button = Utility.createButton( Constants.sort_button_text, "", Constants.sort_button_ac, this );
 	pane.add( sort_button, gbc );
 
-	//	Vector<String> servers = db_conn.get_network_server();
-	Vector<String> servers = new Vector<String>();
-	servers.add("127.0.0.1");
-	servers.add("irc.freenode.net");
-	servers.add("irc.accessirc.net");
+	init_servlist()
 
+
+	//	Vector<String> servers = db_conn.get_network_server();
 	gbc = Utility.modifyGbc( 0, 9, 2, 8, 1, 2, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 );
 	network_list = new JList<String>( (Vector<String>)(servers) );
 	pane.add( new JScrollPane( network_list ), gbc );
@@ -208,6 +191,15 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
         this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 	this.setVisible( true );
+    }
+
+    protected Vector<String> init_servlist()
+    {
+	Vector<String> servers = new Vector<String>();
+	servers.add("127.0.0.1");
+	servers.add("irc.freenode.net");
+	servers.add("irc.accessirc.net");
+	return servers;
     }
 
     protected void visible()

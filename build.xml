@@ -1,4 +1,4 @@
-<project name="IRC Client" basedir="." default="main">
+<project name="IRC_Client" basedir="." default="main">
 
     <property name="src.dir"     value="src"/>
 
@@ -6,7 +6,7 @@
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="jar.dir"     value="${build.dir}/jar"/>
 
-    <property name="main-class"  value="Starting"/>
+    <property name="main-class"  value="IRC_Client"/>
 
     <property name="lib.dir"     value="lib"/>
 
@@ -14,7 +14,11 @@
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
 
-    <target name="compile">
+    <target name="clean">
+      <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile" depends="clean">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" debug="on">
 	  <compilerarg value="-g" />
@@ -39,4 +43,6 @@
         </java>
     </target>
 
+   <target name="main" depends="clean,run">
+   </target>
 </project>
