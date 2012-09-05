@@ -29,6 +29,8 @@ import java.awt.Insets;
 
 import java.sql.SQLException;
 
+import java.io.File;
+
 class UserSettings extends JDialog implements ActionListener, WindowListener, MouseListener, KeyListener
 {
     //    private Staring start;
@@ -43,7 +45,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     private JLabel user_name;
     private JLabel real_name;
     private JLabel networks;
-
+ 
     private JTextField nick_name_tf;
     private JTextField second_choice_tf;
     private JTextField third_choice_tf;
@@ -152,12 +154,12 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	sort_button = Utility.createButton( Constants.sort_button_text, "", Constants.sort_button_ac, this );
 	pane.add( sort_button, gbc );
 
-	init_servlist()
+	Vector<String> servers = init_servlist();
 
 
 	//	Vector<String> servers = db_conn.get_network_server();
 	gbc = Utility.modifyGbc( 0, 9, 2, 8, 1, 2, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 );
-	network_list = new JList<String>( (Vector<String>)(servers) );
+	network_list = new JList<String>( (Vector<String>)servers );
 	pane.add( new JScrollPane( network_list ), gbc );
 	
 	/*
@@ -196,9 +198,28 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     protected Vector<String> init_servlist()
     {
 	Vector<String> servers = new Vector<String>();
-	servers.add("127.0.0.1");
-	servers.add("irc.freenode.net");
-	servers.add("irc.accessirc.net");
+
+	String file_text = Utility.read_whole_file( "conf" + File.separator + Constants.servlist_file );
+	if( file_text != null )
+	    {
+		int serv_iter = 0;
+		String[] new_lines_toks = file_text.split("\n");
+		for( int i = 0; i < new_lines_toks.length; i++ )
+		    {
+			String cur_tok = new_lines_toks[i];
+			if( cur_tok.startsWith("N") )
+			    {
+				String[] tok_sep_net_name = cur_tok.split("=");
+				servers.add( serv_iter++, tok_sep_net_name[1]);
+			    }
+			else
+			    {
+				//				edit_netlist = new EditNetList();
+				
+			    }
+		    }
+	    }
+	
 	return servers;
     }
 

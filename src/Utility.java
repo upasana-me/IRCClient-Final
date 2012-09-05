@@ -4,6 +4,11 @@
 
 
 //package in.upasna.irc.urc;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.ByteBuffer;
+
+import java.io.FileInputStream;
+import java.io.File;
 
 import java.awt.event.ActionListener;
 
@@ -103,5 +108,30 @@ public final class Utility
 				      JOptionPane.ERROR_MESSAGE);
     }
     */
+
+    protected static String read_whole_file(String file_name)
+    {
+	try 
+	    {
+		ReadableByteChannel channel = new FileInputStream("conf" + File.separator + "servlist_.conf").getChannel();
+		long file_size = new File("conf" + File.separator + "servlist_.conf").length();
+		int numRead = 0;
+		ByteBuffer buf = ByteBuffer.allocate((int)file_size);
+		buf.rewind();
+		if( channel.read(buf) > 0)
+		    {
+			byte[] b = buf.array();
+			return (new String(b , "UTF-8"));
+		    }
+		else
+		    return null;
+	    }
+	catch (Exception e) 
+	    {
+		System.out.println("Exception caught.");
+		System.out.println(e.getMessage());
+		return null;
+	    }
+    }
 
 }

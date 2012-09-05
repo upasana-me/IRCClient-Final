@@ -1,3 +1,10 @@
+import java.nio.channels.ReadableByteChannel;
+import java.nio.ByteBuffer;
+
+import java.io.FileInputStream;
+import java.io.File;
+
+
 public class IRC_Client
 {
     UserSettings us;

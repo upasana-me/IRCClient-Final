@@ -6,6 +6,8 @@ public final class Constants {
     protected static final String userSettingsTitle = "User Settings";
     protected static final String appTitle = "IRC Client";
 
+    protected static final String servlist_file = "servlist_.conf";
+
     protected static final String default_user_name = "user";
     protected static final String default_real_name = "real";
 
