@@ -211,17 +211,22 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		for( int i = 0; i < new_lines_toks.length; i++ )
 		    {
 			String cur_tok = new_lines_toks[i];
+			String[] tokens = cur_tok.split("=");
 			if( cur_tok.startsWith("N") )
 			    {
-				String[] tok_sep_net_name = cur_tok.split("=");
-				last_network = tok_sep_net_name[1];
-				servers.add( serv_iter++, tok_sep_net_name[1]);
+				last_network = tokens[1];
+				servers.add( serv_iter++, tokens[1]);
 			    }
 			else if( cur_tok.startsWith("S"))
+			    {				
+				edit_netlist.add_server(last_network,tokens[1]);
+			    }
+			else if( cur_tok.startsWith("J"))
 			    {
-				edit_netlist.add_server(last_network);
+				edit_netlist.add_auto_join_chan(last_network, tokens[1] );
 			    }
 		    }
+		edit_netlist.show_chans_and_serv();
 	    }
 	
 	return servers;

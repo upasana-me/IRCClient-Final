@@ -1,3 +1,8 @@
+import java.util.Set;
+import java.util.Iterator;
+import java.util.Map;
+
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.JDialog;
@@ -31,23 +36,60 @@ import java.sql.SQLException;
 
 import java.io.File;
 
-import java.util.HashMap;
-
-
 public class EditNetList
 {
-    private HashMap<String> network_2_serv;
+    private HashMap<String, Vector<String>> network_2_serv;
+    private HashMap<String, Vector<String>> network_2_chan;
 
     EditNetList()
     {
-	network_2_serv = new HashMap<String>();	
+	network_2_serv = new HashMap<String, Vector<String>>();	
+	network_2_chan = new HashMap<String, Vector<String>>();
     }
 
-    protected void add_server(String network_name)
+    protected void add_server(String network_name, String server)
     {
-	
-	
+	Vector<String> servers = new Vector<String>();
+	if( network_2_serv.containsKey(network_name))
+	    {
+		servers = (Vector<String>)network_2_serv.get(network_name);		
+	    }
+	servers.add(server);
+	network_2_serv.put(network_name, servers);		
     }
-    
-    
+
+    protected void add_auto_join_chan(String network_name, String channel_list)
+    {
+	String[] chans = channel_list.split(" ");
+	Vector<String> channels = new Vector<String>();
+	for( int i = 0; i < chans.length; i++ )
+	    {
+		channels.add(chans[i]);
+	    }
+	network_2_chan.put(network_name, channels);
+    }
+
+    protected void show_chans_and_serv()
+    {
+	Set set = network_2_chan.entrySet();
+	// Get an iterator
+	Iterator i = set.iterator();
+	// Display elements
+	while(i.hasNext()) 
+	    {
+		Map.Entry me = (Map.Entry)i.next();
+		System.out.print(me.getKey() + ": ");
+		System.out.println(me.getValue());
+	    } 
+	set = network_2_serv.entrySet();
+	// Get an iterator
+	i = set.iterator();
+	// Display elements
+	while(i.hasNext()) 
+	    {
+		Map.Entry me = (Map.Entry)i.next();
+		System.out.print(me.getKey() + ": ");
+		System.out.println(me.getValue());
+	    } 
+    }
 }

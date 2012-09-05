@@ -1,10 +1,22 @@
+import java.nio.channels.ReadableByteChannel;
+import java.nio.ByteBuffer;
+
+import java.io.FileInputStream;
+import java.io.File;
+
+
 public class IRC_Client
 {
     UserSettings us;
 
-    public static void main(String args[])
+    IRC_Client()
     {
 	us = new UserSettings();
-	us.visible()
+	us.visible();	
+    }
+
+    public static void main(String args[])
+    {
+	new IRC_Client();
     }
 }
