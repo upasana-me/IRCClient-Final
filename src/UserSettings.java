@@ -38,6 +38,8 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     //    private DB_connection db_conn;
     //    private MainWindow mw;
 
+    private EditNetList edit_netlist;
+
     private JLabel user_info;
     private JLabel nick_name;
     private JLabel second_choice;
@@ -203,19 +205,21 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	if( file_text != null )
 	    {
 		int serv_iter = 0;
+		String last_network = null;
 		String[] new_lines_toks = file_text.split("\n");
+		edit_netlist = new EditNetList();
 		for( int i = 0; i < new_lines_toks.length; i++ )
 		    {
 			String cur_tok = new_lines_toks[i];
 			if( cur_tok.startsWith("N") )
 			    {
 				String[] tok_sep_net_name = cur_tok.split("=");
+				last_network = tok_sep_net_name[1];
 				servers.add( serv_iter++, tok_sep_net_name[1]);
 			    }
-			else
+			else if( cur_tok.startsWith("S"))
 			    {
-				//				edit_netlist = new EditNetList();
-				
+				edit_netlist.add_server(last_network);
 			    }
 		    }
 	    }
