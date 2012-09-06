@@ -17,6 +17,7 @@ public class IRC_Client
 
     public static void main(String args[])
     {
+	UserPrefs.load_prefs();	
 	new IRC_Client();
     }
 }

@@ -8,6 +8,8 @@ import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -54,8 +56,8 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     private JTextField user_name_tf;
     private JTextField real_name_tf;
     
+    private Vector<String> servers;
     private JList<String> network_list;
-    
     private JButton add_button;
     private JButton remove_button;
     private JButton edit_button;
@@ -110,23 +112,23 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	pane.add( real_name, gbc );
 	
 	gbc = Utility.modifyGbc( 1, 1, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	nick_name_tf = Utility.createTextField( " ", true );
+	nick_name_tf = Utility.createTextField( UserPrefs.get_nick1(), true );
 	pane.add( nick_name_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 2, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	second_choice_tf = Utility.createTextField(" ", true );
+	second_choice_tf = Utility.createTextField( UserPrefs.get_nick2(), true );
 	pane.add( second_choice_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 3, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	third_choice_tf = Utility.createTextField( " ", true );
+	third_choice_tf = Utility.createTextField( UserPrefs.get_nick3(), true );
 	pane.add( third_choice_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 4, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	user_name_tf = Utility.createTextField( " ", true );
+	user_name_tf = Utility.createTextField( UserPrefs.get_username(), true );
 	pane.add( user_name_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 5, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	real_name_tf = Utility.createTextField( " ", true );
+	real_name_tf = Utility.createTextField( UserPrefs.get_realname(), true );
 	pane.add( real_name_tf, gbc );
 
 	gbc = Utility.modifyGbc( 0, 6, GridBagConstraints.RELATIVE, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets( 0, 5, 0, 0 ), 0, 0 );
@@ -156,12 +158,12 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	sort_button = Utility.createButton( Constants.sort_button_text, "", Constants.sort_button_ac, this );
 	pane.add( sort_button, gbc );
 
-	Vector<String> servers = init_servlist();
+	servers = init_servlist();
 
 
 	//	Vector<String> servers = db_conn.get_network_server();
 	gbc = Utility.modifyGbc( 0, 9, 2, 8, 1, 2, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 );
-	network_list = new JList<String>( (Vector<String>)servers );
+	network_list = new JList<String>( servers );
 	pane.add( new JScrollPane( network_list ), gbc );
 	
 	/*
@@ -223,13 +225,39 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 			    }
 			else if( cur_tok.startsWith("J"))
 			    {
-				edit_netlist.add_auto_join_chan(last_network, tokens[1] );
+				if( tokens.length >= 2)
+				    edit_netlist.add_auto_join_chan(last_network, tokens[1] );
 			    }
 		    }
 		edit_netlist.show_chans_and_serv();
 	    }
 	
 	return servers;
+    }
+
+    protected void add_net_to_file(String net_name)
+    {
+	String text = "N=" + net_name + "\n";
+	text += "J=\n";
+	text += "E=IRC (Latin/Unicode Hybrid)\n";
+	text += "F=19\n";
+	text += "D=0\n";
+
+	String tokens[] = net_name.toLowerCase().split(" ");
+	String serv_name = "";
+	for( int i = 0; i < tokens.length; i++ )
+	    serv_name += tokens[i];
+
+	text += "S=" + serv_name + "/6667\n\n";
+	
+	System.out.println("text = " + text);
+
+	String file_text = Utility.read_whole_file( "conf" + File.separator + Constants.servlist_file );
+	text += file_text;
+
+	System.out.println("\n\ntext = " + text);
+
+	Utility.write_whole_file("conf" + File.separator + Constants.servlist_file, text );
     }
 
     protected void visible()
@@ -242,13 +270,54 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	this.setVisible( false );
     }
 
+    protected String get_nick1()
+    {
+	return nick_name_tf.getText();	
+    }
+
+    protected String get_nick2()
+    {
+	return second_choice_tf.getText();
+    }
+
+    protected String get_nick3()
+    {
+	return third_choice_tf.getText();
+    }
+
+    protected String get_username()
+    {
+	return user_name_tf.getText();
+    }
+
+    protected String get_realname()
+    {
+	return real_name_tf.getText();
+    }
+
     public void actionPerformed( ActionEvent ae )
     {
-	/*
 	String action = ae.getActionCommand();
 
-	if( action.equals( Constants.add_button_ac ) )
-	    {}
+	if( action.equals( Constants.connect_button_ac ) )
+	    {
+		UserPrefs.save_nick1( get_nick1() );
+		UserPrefs.save_nick2( get_nick2() );
+		UserPrefs.save_nick3( get_nick3() );
+		UserPrefs.save_username( get_username() );
+		UserPrefs.save_realname( get_realname() );
+		UserPrefs.save_prefs();
+	    }
+	else if( action.equals( Constants.add_button_ac ) )
+	    {		
+		System.out.println("Add button ac");
+		String new_net_name = JOptionPane.showInputDialog(this, "Enter name of the new network", "New Network");
+		servers.add(0, new_net_name);
+		add_net_to_file(new_net_name);
+		network_list.setListData( servers );
+	    }
+
+	/*
 	else if( action.equals( Constants.remove_button_ac ) )
 	    {}
 	else if( action.equals( Constants.edit_button_ac ) )

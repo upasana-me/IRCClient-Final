@@ -5,10 +5,15 @@
 
 //package in.upasna.irc.urc;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+
 import java.nio.ByteBuffer;
 
 import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import java.awt.event.ActionListener;
 
@@ -113,8 +118,8 @@ public final class Utility
     {
 	try 
 	    {
-		ReadableByteChannel channel = new FileInputStream("conf" + File.separator + "servlist_.conf").getChannel();
-		long file_size = new File("conf" + File.separator + "servlist_.conf").length();
+		ReadableByteChannel channel = new FileInputStream(file_name).getChannel();
+		long file_size = new File(file_name).length();
 		int numRead = 0;
 		ByteBuffer buf = ByteBuffer.allocate((int)file_size);
 		buf.rewind();
@@ -132,6 +137,37 @@ public final class Utility
 		System.out.println(e.getMessage());
 		return null;
 	    }
+    }
+
+    protected static void write_whole_file(String file_name, String text)
+    {
+	System.out.println("In write_whole_file :\ntext = " + text);
+	try
+	    {
+		WritableByteChannel channel = new FileOutputStream(file_name).getChannel();
+		ByteBuffer buf = ByteBuffer.allocate(text.length());
+		buf.put(text.getBytes("UTF-8"));
+		buf.rewind();
+		System.out.println(channel.write(buf));
+	    }
+	catch(FileNotFoundException fnfe)
+	    {
+		System.err.println(fnfe.getMessage());
+	    }
+	catch(IOException ioe)
+	    {
+		System.err.println(ioe.getMessage());
+	    }
+	/*
+	  buf.rewind();
+	  if( channel.read(buf) > 0)
+	  {
+	  byte[] b = buf.array();
+	  return (new String(b , "UTF-8"));
+	  }
+	  else
+	  return null;
+	*/
     }
 
 }
