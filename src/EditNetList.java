@@ -69,6 +69,12 @@ public class EditNetList
 	network_2_chan.put(network_name, channels);
     }
 
+    protected void delete_network(String net_name)
+    {
+	network_2_serv.remove(net_name);
+	network_2_chan.remove(net_name);
+    }
+
     protected void show_chans_and_serv()
     {
 	Set set = network_2_chan.entrySet();
@@ -78,8 +84,8 @@ public class EditNetList
 	while(i.hasNext()) 
 	    {
 		Map.Entry me = (Map.Entry)i.next();
-		System.out.print(me.getKey() + ": ");
-		System.out.println(me.getValue());
+		//		System.out.print(me.getKey() + ": ");
+		//		System.out.println(me.getValue());
 	    } 
 	set = network_2_serv.entrySet();
 	// Get an iterator
@@ -88,8 +94,10 @@ public class EditNetList
 	while(i.hasNext()) 
 	    {
 		Map.Entry me = (Map.Entry)i.next();
-		System.out.print(me.getKey() + ": ");
-		System.out.println(me.getValue());
+		//		System.out.print(me.getKey() + ": ");
+		//		System.out.println(me.getValue());
 	    } 
     }
+
+    
 }
