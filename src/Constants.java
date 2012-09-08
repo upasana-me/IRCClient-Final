@@ -114,8 +114,8 @@ public final class Constants {
     protected static final String skUserName = "UserName";
     protected static final String skRealName = "RealName";
     protected static final String skNickName = "NickName";
-    protected static final String skNetworkName = "NetworkName";
-    protected static final String skPort = "Port";
+    protected static final String skNetListSkip = "net_list_skip";
+    protected static final String skSelListIndex = "sel_list_index";
 
     protected static final int nicksCount = 3;
 

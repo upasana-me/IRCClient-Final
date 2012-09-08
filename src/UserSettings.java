@@ -19,6 +19,9 @@ import javax.swing.JScrollPane;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -42,7 +45,7 @@ import java.sql.SQLException;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 
-class UserSettings extends JDialog implements ActionListener, WindowListener, MouseListener, KeyListener
+class UserSettings extends JDialog implements ActionListener, WindowListener, MouseListener, KeyListener, ListSelectionListener
 {
     //    private Staring start;
     //    private Vector<Connection> conn;
@@ -66,6 +69,8 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     private JTextField real_name_tf;
     
     private Vector<String> servers;
+    
+    private JScrollPane scrollpane;
     private JList<String> network_list;
     private JButton add_button;
     private JButton remove_button;
@@ -148,7 +153,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	pane.add( networks, gbc );
 
 	gbc = Utility.modifyGbc( 0, 8, 2, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets( 0, 0, 0, 0 ), 0, 0 );
-	skip_net_list = Utility.createCheckBox( Constants.skip_net_list_text, "", Constants.skip_net_list_ac, this, false );
+	skip_net_list = Utility.createCheckBox( Constants.skip_net_list_text, "", Constants.skip_net_list_ac, this, UserPrefs.get_net_list_skip() );
 	pane.add( skip_net_list, gbc );
 
 	gbc = Utility.modifyGbc( 3, 9, GridBagConstraints.REMAINDER, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, new Insets( 5, 0, 0, 0 ), 28, 0 );
@@ -173,8 +178,25 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	//	Vector<String> servers = db_conn.get_network_server();
 	gbc = Utility.modifyGbc( 0, 9, 2, 8, 1, 2, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 );
 	network_list = new JList<String>( servers );
-	pane.add( new JScrollPane( network_list ), gbc );
-	
+	System.out.println("selectedIndex: " + UserPrefs.get_sel_list_index());
+	network_list.setSelectedIndex(UserPrefs.get_sel_list_index() );
+	System.out.println("Before ensureIndexIsVisible");
+	network_list.addListSelectionListener( new  ListSelectionListener() 
+	    {
+		public void valueChanged(ListSelectionEvent lse)
+		{
+		    System.out.println("In valueChanged" + network_list.getSelectedIndex());
+		    UserPrefs.save_sel_list_index(network_list.getSelectedIndex());
+		    UserPrefs.save_prefs();
+		    System.out.println(UserPrefs.get_sel_list_index());
+		}
+	    }
+	    );
+	scrollpane = new JScrollPane(network_list);
+	scrollpane.setViewportView(network_list);
+	network_list.ensureIndexIsVisible(network_list.getSelectedIndex());
+	pane.add( scrollpane, gbc );
+
 	/*
 	gbc = Utility.modifyGbc( 0, 12, 2, 8, 1, 2, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets( 5, 0, 10, 5 ), 0, 0 );
 	pane.add( Utility.createLabel("",""), gbc );
@@ -205,7 +227,8 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	*/
 
         this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-	this.setVisible( true );
+	if(!UserPrefs.get_net_list_skip() )
+	    this.setVisible( true );
     }
 
     private Vector<String> init_servlist()
@@ -400,6 +423,12 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	    {
 		sort_net_list();
 	    }
+	else if( action.equals( Constants.skip_net_list_ac))
+	    {
+		System.out.println("In action listener, skip_net_list_ac.isSelected():" + skip_net_list.isSelected());
+		UserPrefs.save_net_list_skip(skip_net_list.isSelected());
+		UserPrefs.save_prefs();
+	    }
 	/*
 	else if( action.equals( Constants.edit_button_ac ) )
 	    {}
@@ -526,4 +555,10 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
     public void keyTyped( KeyEvent ke )
     {}
+
+    public void valueChanged(ListSelectionEvent e)
+    {
+	System.out.println("In valueChanged" + network_list.getSelectedIndex());
+	UserPrefs.save_sel_list_index(network_list.getSelectedIndex());
+    }
 }
