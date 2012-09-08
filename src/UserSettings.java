@@ -1,4 +1,12 @@
 import java.util.Vector;
+import java.util.TreeMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -32,6 +40,7 @@ import java.awt.Insets;
 import java.sql.SQLException;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 
 class UserSettings extends JDialog implements ActionListener, WindowListener, MouseListener, KeyListener
 {
@@ -199,7 +208,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	this.setVisible( true );
     }
 
-    protected Vector<String> init_servlist()
+    private Vector<String> init_servlist()
     {
 	Vector<String> servers = new Vector<String>();
 
@@ -209,6 +218,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		int serv_iter = 0;
 		String last_network = null;
 		String[] new_lines_toks = file_text.split("\n");
+
 		edit_netlist = new EditNetList();
 		for( int i = 0; i < new_lines_toks.length; i++ )
 		    {
@@ -235,10 +245,10 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	return servers;
     }
 
-    protected void add_net_to_file(String net_name)
+    private void add_net_to_file(String net_name)
     {
 	String text = "N=" + net_name + "\n";
-	text += "J=\n";
+	text += "J= \n";
 	text += "E=IRC (Latin/Unicode Hybrid)\n";
 	text += "F=19\n";
 	text += "D=0\n";
@@ -250,15 +260,74 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
 	text += "S=" + serv_name + "/6667\n\n";
 	
-	System.out.println("text = " + text);
-
 	String file_text = Utility.read_whole_file( "conf" + File.separator + Constants.servlist_file );
 	text += file_text;
-
-	System.out.println("\n\ntext = " + text);
-
 	Utility.write_whole_file("conf" + File.separator + Constants.servlist_file, text );
     }
+
+    private void del_net_from_file(int index)
+    {
+	String file_text = Utility.read_whole_file("conf" + File.separator + Constants.servlist_file);
+
+	Pattern pattern = Pattern.compile("(N=.*\n(.*\n)??(.*\n)??(.*\n)??E.*\n(C.*\n)??F.*\nD.*\n(S.*\n)*\n){1}" );
+	Matcher matcher = pattern.matcher(file_text);
+
+	int i = 0;
+	StringBuffer replaced = new StringBuffer();
+	while (matcher.find()) 
+	    {
+		if( i == index )
+		    {
+			matcher.appendReplacement(replaced,"");
+			break;
+		    }
+		i++;
+	    }
+
+	matcher.appendTail(replaced);
+	Utility.write_whole_file("conf" + File.separator + Constants.servlist_file, replaced.toString());
+    }
+
+    private void sort_net_list()
+    {
+	String file_text = Utility.read_whole_file("conf" + File.separator + Constants.servlist_file);
+
+	Pattern pattern = Pattern.compile("(N=.*\n(.*\n)??(.*\n)??(.*\n)??E.*\n(C.*\n)??F.*\nD.*\n(S.*\n)*\n){1}" );
+	Matcher matcher = pattern.matcher(file_text);
+
+	TreeMap<String, String> tm = new TreeMap<String, String>(new IgnoreCaseSort<String>());
+
+	while (matcher.find()) 
+	    {
+		String matched_str = matcher.group();
+		Pattern pattern2 = Pattern.compile("N=.*");
+		Matcher matcher2 = pattern2.matcher(matched_str);
+		if( matcher2.find() )
+		    {
+			String match2 = matcher2.group();
+			tm.put(match2, matched_str);
+		    }
+	    }
+
+	Set<Map.Entry<String, String>> set = tm.entrySet();
+	Iterator<Map.Entry<String,String>> iter = set.iterator();
+	String text = "";
+	servers.removeAllElements();
+
+	int i = 0;
+	while( iter.hasNext() )
+	    {
+		Map.Entry me = (Map.Entry)iter.next();
+		String net_name = (String)me.getKey();		
+		String net_desc = (String)me.getValue();
+		text += net_desc;
+		servers.add(i++, net_name.substring(2));
+	    }
+
+	network_list.setListData(servers);
+	Utility.write_whole_file("conf" + File.separator + Constants.servlist_file, text);
+    }
+
 
     protected void visible()
     {
@@ -310,19 +379,29 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	    }
 	else if( action.equals( Constants.add_button_ac ) )
 	    {		
-		System.out.println("Add button ac");
+		//		System.out.println("Add button ac");
 		String new_net_name = JOptionPane.showInputDialog(this, "Enter name of the new network", "New Network");
 		servers.add(0, new_net_name);
 		add_net_to_file(new_net_name);
 		network_list.setListData( servers );
+		init_servlist();
 	    }
-
-	/*
 	else if( action.equals( Constants.remove_button_ac ) )
-	    {}
-	else if( action.equals( Constants.edit_button_ac ) )
-	    {}
+	    {
+		int selected_index = network_list.getSelectedIndex();
+		//		System.out.println("selected_index = " + selected_index);
+		String selected_net = (String)network_list.getSelectedValue();
+		del_net_from_file( selected_index );		
+		servers.removeElementAt(selected_index);
+		network_list.setListData(servers);
+		edit_netlist.delete_network(selected_net);
+	    }
 	else if( action.equals( Constants.sort_button_ac ) )
+	    {
+		sort_net_list();
+	    }
+	/*
+	else if( action.equals( Constants.edit_button_ac ) )
 	    {}
 	else if( action.equals( Constants.close_button_ac ) )
 	    {

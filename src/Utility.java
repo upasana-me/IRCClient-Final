@@ -126,7 +126,7 @@ public final class Utility
 		if( channel.read(buf) > 0)
 		    {
 			byte[] b = buf.array();
-			return (new String(b , "UTF-8"));
+			return (new String(b));
 		    }
 		else
 		    return null;
@@ -141,14 +141,15 @@ public final class Utility
 
     protected static void write_whole_file(String file_name, String text)
     {
-	System.out.println("In write_whole_file :\ntext = " + text);
+	//	System.out.println("In write_whole_file :\ntext = " + text);
 	try
 	    {
 		WritableByteChannel channel = new FileOutputStream(file_name).getChannel();
 		ByteBuffer buf = ByteBuffer.allocate(text.length());
-		buf.put(text.getBytes("UTF-8"));
 		buf.rewind();
-		System.out.println(channel.write(buf));
+		buf.put(text.getBytes());
+		buf.rewind();
+		channel.write(buf);
 	    }
 	catch(FileNotFoundException fnfe)
 	    {
