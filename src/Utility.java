@@ -80,10 +80,12 @@ public final class Utility
 	return b;
     }
 
-    public static JTextField createTextField( String text, boolean editable )
+    public static JTextField createTextField( String text, boolean editable, ActionListener ac, String actionCommand)
     {
 	JTextField tf = new JTextField( text );
 	tf.setEditable( editable );
+	tf.addActionListener(ac);
+	tf.setActionCommand(actionCommand);
 	return tf;
     }
 

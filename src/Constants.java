@@ -26,6 +26,12 @@ public final class Constants {
     protected static final String close_button_ac = "closeButtonAc";
     protected static final String connect_button_ac = "connectButtonAc";
     protected static final String skip_net_list_ac = "skipNetListAc";
+    protected static final String nickname_tf_ac = "nickname_tfAc";
+    protected static final String second_choice_tf_ac = "second_choice_tfAc";
+    protected static final String third_choice_tf_ac = "third_choice_tfAc";
+    protected static final String username_tf_ac = "username_tfAc";
+    protected static final String realname_tf_ac = "realname_tfAc";
+
 
     protected static final String add_button_text = "Add";
     protected static final String remove_button_text = "Remove";

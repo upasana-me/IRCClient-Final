@@ -1,3 +1,15 @@
+import jerklib.ConnectionManager;
+import jerklib.Profile;
+import jerklib.Session;
+
+import jerklib.events.IRCEvent;
+import jerklib.events.JoinCompleteEvent;
+import jerklib.events.MotdEvent;
+import jerklib.events.IRCEvent.Type;
+
+import jerklib.tasks.TaskImpl;
+import jerklib.listeners.IRCEventListener;
+
 import java.util.Vector;
 import java.util.TreeMap;
 import java.util.Iterator;
@@ -50,7 +62,8 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     //    private Staring start;
     //    private Vector<Connection> conn;
     //    private DB_connection db_conn;
-    //    private MainWindow mw;
+    private MainWindow mw;
+    private Connection[] connections;
 
     private EditNetList edit_netlist;
 
@@ -82,9 +95,26 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     private JButton close_button;
     private JButton connect_button;
 
-    UserSettings()
+    private ConnectionManager manager;
+    private Session session;
+
+    private int available;
+
+    UserSettings( MainWindow m )
     {
 	this.setTitle(Constants.userSettingsTitle);
+	mw = m;
+	try
+	    {
+		connections = new Connection[100];
+	    }
+	catch(NullPointerException npe)
+	    {
+		//		System.out.println("In UserSettings : " + npe.getMessage());
+	    }
+	available = 0;
+	//	conn = c;
+	
 	initialise();
     }
 
@@ -126,23 +156,23 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	pane.add( real_name, gbc );
 	
 	gbc = Utility.modifyGbc( 1, 1, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	nick_name_tf = Utility.createTextField( UserPrefs.get_nick1(), true );
+	nick_name_tf = Utility.createTextField( UserPrefs.get_nick1(), true, this, Constants.nickname_tf_ac );
 	pane.add( nick_name_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 2, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	second_choice_tf = Utility.createTextField( UserPrefs.get_nick2(), true );
+	second_choice_tf = Utility.createTextField( UserPrefs.get_nick2(), true, this, Constants.second_choice_tf_ac );
 	pane.add( second_choice_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 3, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	third_choice_tf = Utility.createTextField( UserPrefs.get_nick3(), true );
+	third_choice_tf = Utility.createTextField( UserPrefs.get_nick3(), true, this, Constants.third_choice_tf_ac );
 	pane.add( third_choice_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 4, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	user_name_tf = Utility.createTextField( UserPrefs.get_username(), true );
+	user_name_tf = Utility.createTextField( UserPrefs.get_username(), true, this, Constants.username_tf_ac );
 	pane.add( user_name_tf, gbc );
 
 	gbc = Utility.modifyGbc( 1, 5, GridBagConstraints.REMAINDER, 1, 2, 0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, new Insets( 0, 5, 0, 0 ), 0, 0 );
-	real_name_tf = Utility.createTextField( UserPrefs.get_realname(), true );
+	real_name_tf = Utility.createTextField( UserPrefs.get_realname(), true, this, Constants.realname_tf_ac );
 	pane.add( real_name_tf, gbc );
 
 	gbc = Utility.modifyGbc( 0, 6, GridBagConstraints.RELATIVE, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets( 0, 5, 0, 0 ), 0, 0 );
@@ -178,9 +208,9 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	//	Vector<String> servers = db_conn.get_network_server();
 	gbc = Utility.modifyGbc( 0, 9, 2, 8, 1, 2, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets( 0, 0, 0, 0 ), 0, 0 );
 	network_list = new JList<String>( servers );
-	System.out.println("selectedIndex: " + UserPrefs.get_sel_list_index());
+	//	System.out.println("selectedIndex: " + UserPrefs.get_sel_list_index());
 	network_list.setSelectedIndex(UserPrefs.get_sel_list_index() );
-	System.out.println("Before ensureIndexIsVisible");
+	//	System.out.println("Before ensureIndexIsVisible");
 	network_list.addListSelectionListener( new  ListSelectionListener() 
 	    {
 		public void valueChanged(ListSelectionEvent lse)
@@ -220,7 +250,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	pane.add( close_button, gbc );
 
 	gbc = Utility.modifyGbc( 1, 18, GridBagConstraints.REMAINDER, GridBagConstraints.REMAINDER, 1, 2, GridBagConstraints.LAST_LINE_END, GridBagConstraints.NONE, new Insets( 0, 0, 0, 0 ), 0, 0 );
-	connect_button = Utility.createButton( Constants.connect_button_text, "", Constants.connect_button_ac, this );
+	connect_button = Utility.createButton( Constants.connect_button_text, "Connect", Constants.connect_button_ac, this );
 	pane.add( connect_button, gbc );
 
 	/*
@@ -359,6 +389,11 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
     protected void invisible()
     {
+	UserPrefs.save_nick1( nick_name_tf.getText() );
+	UserPrefs.save_nick2( second_choice_tf.getText() );
+	UserPrefs.save_nick3( third_choice_tf.getText() );
+	UserPrefs.save_username( user_name_tf.getText() );
+	UserPrefs.save_realname( real_name_tf.getText() );
 	this.setVisible( false );
     }
 
@@ -393,31 +428,56 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
 	if( action.equals( Constants.connect_button_ac ) )
 	    {
-		UserPrefs.save_nick1( get_nick1() );
-		UserPrefs.save_nick2( get_nick2() );
-		UserPrefs.save_nick3( get_nick3() );
-		UserPrefs.save_username( get_username() );
-		UserPrefs.save_realname( get_realname() );
+		System.out.println("Connect ac");
+		UserPrefs.save_nick1(nick_name_tf.getText() );
+		UserPrefs.save_nick2(second_choice_tf.getText() );
+		UserPrefs.save_nick3(third_choice_tf.getText() );		
+		UserPrefs.save_username(user_name_tf.getText() );
+		UserPrefs.save_realname(real_name_tf.getText() );
+		String nick = nick_name_tf.getText();
+		String nick2 = second_choice_tf.getText();
+		String nick3 = third_choice_tf.getText();
+		String username = user_name_tf.getText();
+		String realname = real_name_tf.getText();
+		String[] nicks = { nick, nick2, nick3 };
 		UserPrefs.save_prefs();
+		connections[available] = new Connection();
+		connections[available].initialise( nicks, username, realname, (String)network_list.getSelectedValue() );
+		mw.visible();
+		mw.initialise((String)network_list.getSelectedValue(), nicks[0] );
+		invisible();
+		connections[available].setMainWindow(mw);
+		//		System.out.println("before thread.start");
+		new Thread( connections[available++]).start();
 	    }
 	else if( action.equals( Constants.add_button_ac ) )
 	    {		
 		//		System.out.println("Add button ac");
-		String new_net_name = JOptionPane.showInputDialog(this, "Enter name of the new network", "New Network");
-		servers.add(0, new_net_name);
-		add_net_to_file(new_net_name);
-		network_list.setListData( servers );
-		init_servlist();
+		try
+		    {
+			String new_net_name = JOptionPane.showInputDialog(this, "Enter name of the new network", "New Network");
+			servers.add(0, new_net_name);
+			add_net_to_file(new_net_name);
+			network_list.setListData( servers );
+			init_servlist();
+		    }
+		catch(NullPointerException npe)
+		    {}
 	    }
 	else if( action.equals( Constants.remove_button_ac ) )
 	    {
 		int selected_index = network_list.getSelectedIndex();
 		//		System.out.println("selected_index = " + selected_index);
 		String selected_net = (String)network_list.getSelectedValue();
-		del_net_from_file( selected_index );		
-		servers.removeElementAt(selected_index);
-		network_list.setListData(servers);
-		edit_netlist.delete_network(selected_net);
+		del_net_from_file( selected_index );	
+		try
+		    {
+			servers.removeElementAt(selected_index);
+			network_list.setListData(servers);
+			edit_netlist.delete_network(selected_net);
+		    }
+		catch(ArrayIndexOutOfBoundsException exception)
+		    {}
 	    }
 	else if( action.equals( Constants.sort_button_ac ) )
 	    {
@@ -429,6 +489,28 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		UserPrefs.save_net_list_skip(skip_net_list.isSelected());
 		UserPrefs.save_prefs();
 	    }
+	else if( action.equals( Constants.nickname_tf_ac ) )
+	    {
+		System.out.println("In nickname_tf_ac");
+		UserPrefs.save_nick1(nick_name_tf.getText() );
+	    }
+	else if( action.equals( Constants.second_choice_tf_ac ) )
+	    {
+		UserPrefs.save_nick2(second_choice_tf.getText() );
+	    }
+	else if( action.equals( Constants.third_choice_tf_ac ) )
+	    {
+		UserPrefs.save_nick3(third_choice_tf.getText() );		
+	    }
+	else if( action.equals( Constants.username_tf_ac ) )
+	    {
+		UserPrefs.save_username(user_name_tf.getText() );
+	    }
+	else if( action.equals( Constants.realname_tf_ac ) )
+	    {
+		UserPrefs.save_realname(real_name_tf.getText() );
+	    }
+	
 	/*
 	else if( action.equals( Constants.edit_button_ac ) )
 	    {}

@@ -1,5 +1,6 @@
 import java.util.prefs.Preferences;
 
+import java.util.prefs.BackingStoreException;
 /**
    UserPrefs.java
    This class load and save preferences of a user like nick names, user names etc
@@ -56,36 +57,43 @@ public class UserPrefs
     protected static void save_net_list_skip(boolean b)
     {
 	net_list_skip = b;
+	preferences.putBoolean(Constants.skNetListSkip, b);
     }
 
     protected static void save_sel_list_index(int i)
     {
 	sel_list_index = i;
+	preferences.putInt(Constants.skSelListIndex, i);
     }
 
     protected static void save_nick1(String nick)
     {
 	nicks[0] = nick;
+	preferences.put(Constants.skNickName + 0, nick);
     }
 
     protected static void save_nick2(String nick)
     {
 	nicks[1] = nick;
+	preferences.put(Constants.skNickName + 1, nick);
     }
 
     protected static void save_nick3(String nick)
     {
 	nicks[2] = nick;
+	preferences.put(Constants.skNickName + 2, nick);
     }
 
     protected static void save_username(String username)
     {
 	user_name = username;
+	preferences.put(Constants.skUserName, username);
     }
 
     protected static void save_realname(String realname)
     {
 	real_name = realname;
+	preferences.put(Constants.skRealName, realname);
     }
 
     protected static boolean get_net_list_skip()
