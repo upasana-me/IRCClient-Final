@@ -2,7 +2,7 @@ import java.util.Set;
 import java.util.Iterator;
 import java.util.Map;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JDialog;
@@ -38,16 +38,18 @@ import java.io.File;
 
 public class EditNetList
 {
-    private HashMap<String, Vector<String>> network_2_serv;
-    private HashMap<String, Vector<String>> network_2_chan;
+    private TreeMap<String, Vector<String>> network_2_serv;
+    //    private TreeMap<String, Vector<String>> network_2_chan;
+    private TreeMap<String, TreeMap<String, String>> network_2_pswd_chan;
 
     EditNetList()
     {
-	network_2_serv = new HashMap<String, Vector<String>>();	
-	network_2_chan = new HashMap<String, Vector<String>>();
+	network_2_serv = new TreeMap<String, Vector<String>>();	
+	//	network_2_chan = new TreeMap<String, Vector<String>>();
+	network_2_pswd_chan = new TreeMap<String, TreeMap<String, String>>();
     }
 
-    protected void add_server(String network_name, String server)
+    public void add_server(String network_name, String server)
     {
 	Vector<String> servers = new Vector<String>();
 	if( network_2_serv.containsKey(network_name))
@@ -58,24 +60,79 @@ public class EditNetList
 	network_2_serv.put(network_name, servers);		
     }
 
-    protected void add_auto_join_chan(String network_name, String channel_list)
+    public void add_auto_join_chan(String network_name, String channel_list)
     {
-	String[] chans = channel_list.split(" ");
-	Vector<String> channels = new Vector<String>();
-	for( int i = 0; i < chans.length; i++ )
+	//	System.out.println("In add_auto_join_chan, channel_list :\n" + channel_list);
+
+	String[] all_chans_keywords = channel_list.split(" ");
+
+	if( all_chans_keywords.length < 1 )
 	    {
-		channels.add(chans[i]);
+		network_2_pswd_chan.put(network_name, new TreeMap<String, String>());
+		return;
 	    }
-	network_2_chan.put(network_name, channels);
+
+	String[] channels = all_chans_keywords[0].split(",");
+	String[] keys = {};
+	boolean keys_present = false;
+	
+	if( all_chans_keywords.length >= 2 )
+	    {
+		keys_present = true;
+		keys = all_chans_keywords[1].split(",");
+	    }
+
+	TreeMap<String, String> chan_2_keys = new TreeMap<String, String>();
+
+	for( int i = 0; i < channels.length; i++ )
+	    {
+		if( i < keys.length )
+		    chan_2_keys.put(channels[i],keys[i]);
+		else
+		    chan_2_keys.put(channels[i],"");
+	    }
+
+	network_2_pswd_chan.put(network_name, chan_2_keys);
     }
 
-    protected void delete_network(String net_name)
+    public TreeMap<String,String> get_auto_join_channels(String network_name)
+    {
+	/*
+	System.out.println("In get_auto_join_channels");
+	System.out.println("network_name : " + network_name + " hello");
+
+	Vector<Vector<String>> values = (Vector<Vector<String>>)network_2_chan.values();
+	for( int i = 0; i < values.size(); i++ )
+	    {
+		for( int j = 0; j < values.elementAt(i).size(); j++ )
+		    System.out.println(values.elementAt(i).elementAt(j));
+	    }
+	*/
+
+	TreeMap<String, String> treemap = new TreeMap<String, String>();
+	if( network_2_pswd_chan.containsKey(network_name) )
+	    {
+		//		System.out.println("contains");
+		treemap = network_2_pswd_chan.get(network_name);
+	    }
+	/*
+	for( int i = 0; i < vector.size(); i++ )
+	    {
+		System.out.println(vector.elementAt(i));
+	    }
+	*/
+
+	return treemap;
+    }
+
+    public void delete_network(String net_name)
     {
 	network_2_serv.remove(net_name);
-	network_2_chan.remove(net_name);
+	network_2_pswd_chan.remove(net_name);
     }
 
-    protected void show_chans_and_serv()
+    /*
+    public void show_chans_and_serv()
     {
 	Set set = network_2_chan.entrySet();
 	// Get an iterator
@@ -98,6 +155,6 @@ public class EditNetList
 		//		System.out.println(me.getValue());
 	    } 
     }
-
+    */
     
 }

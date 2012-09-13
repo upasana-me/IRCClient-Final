@@ -292,7 +292,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 				    edit_netlist.add_auto_join_chan(last_network, tokens[1] );
 			    }
 		    }
-		edit_netlist.show_chans_and_serv();
+		//		edit_netlist.show_chans_and_serv();
 	    }
 	
 	return servers;
@@ -382,12 +382,12 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     }
 
 
-    protected void visible()
+    public void visible()
     {
 	this.setVisible( true );
     }
 
-    protected void invisible()
+    public void invisible()
     {
 	UserPrefs.save_nick1( nick_name_tf.getText() );
 	UserPrefs.save_nick2( second_choice_tf.getText() );
@@ -397,27 +397,27 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	this.setVisible( false );
     }
 
-    protected String get_nick1()
+    public String get_nick1()
     {
 	return nick_name_tf.getText();	
     }
 
-    protected String get_nick2()
+    public String get_nick2()
     {
 	return second_choice_tf.getText();
     }
 
-    protected String get_nick3()
+    public String get_nick3()
     {
 	return third_choice_tf.getText();
     }
 
-    protected String get_username()
+    public String get_username()
     {
 	return user_name_tf.getText();
     }
 
-    protected String get_realname()
+    public String get_realname()
     {
 	return real_name_tf.getText();
     }
@@ -443,6 +443,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		UserPrefs.save_prefs();
 		connections[available] = new Connection();
 		connections[available].initialise( nicks, username, realname, (String)network_list.getSelectedValue() );
+		connections[available].setEditNetList(edit_netlist);
 		mw.visible();
 		mw.initialise((String)network_list.getSelectedValue(), nicks[0] );
 		invisible();

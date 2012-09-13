@@ -21,7 +21,7 @@ public class UserPrefs
 	preferences = Preferences.userNodeForPackage( UserPrefs.class );
     }
 
-    protected static void load_prefs()
+    public static void load_prefs()
     {
 	String s = System.getProperty("user.name");
 	nicks = new String[Constants.nicksCount];
@@ -41,7 +41,7 @@ public class UserPrefs
 	
     }
     
-    protected static void save_prefs()
+    public static void save_prefs()
     {
 	for(int i = 0; i < nicks.length; i++) 
 	    {
@@ -54,79 +54,79 @@ public class UserPrefs
 	preferences.putInt(Constants.skSelListIndex, sel_list_index);
     }
     
-    protected static void save_net_list_skip(boolean b)
+    public static void save_net_list_skip(boolean b)
     {
 	net_list_skip = b;
 	preferences.putBoolean(Constants.skNetListSkip, b);
     }
 
-    protected static void save_sel_list_index(int i)
+    public static void save_sel_list_index(int i)
     {
 	sel_list_index = i;
 	preferences.putInt(Constants.skSelListIndex, i);
     }
 
-    protected static void save_nick1(String nick)
+    public static void save_nick1(String nick)
     {
 	nicks[0] = nick;
 	preferences.put(Constants.skNickName + 0, nick);
     }
 
-    protected static void save_nick2(String nick)
+    public static void save_nick2(String nick)
     {
 	nicks[1] = nick;
 	preferences.put(Constants.skNickName + 1, nick);
     }
 
-    protected static void save_nick3(String nick)
+    public static void save_nick3(String nick)
     {
 	nicks[2] = nick;
 	preferences.put(Constants.skNickName + 2, nick);
     }
 
-    protected static void save_username(String username)
+    public static void save_username(String username)
     {
 	user_name = username;
 	preferences.put(Constants.skUserName, username);
     }
 
-    protected static void save_realname(String realname)
+    public static void save_realname(String realname)
     {
 	real_name = realname;
 	preferences.put(Constants.skRealName, realname);
     }
 
-    protected static boolean get_net_list_skip()
+    public static boolean get_net_list_skip()
     {
 	return net_list_skip;
     }
 
-    protected static int get_sel_list_index()
+    public static int get_sel_list_index()
     {
 	return sel_list_index;
     }
 
-    protected static String get_nick1()
+    public static String get_nick1()
     {
 	return nicks[0];
     }
 
-    protected static String get_nick2()
+    public static String get_nick2()
     {
 	return nicks[1];
     }
 
-    protected static String get_nick3()
+    public static String get_nick3()
     {
 	return nicks[2];
     }
 
-    protected static String get_username()
+    public static String get_username()
     {
 	return user_name;
     }
 
-    protected static String get_realname()
+    public static String get_realname()
     {
 	return real_name;
     }

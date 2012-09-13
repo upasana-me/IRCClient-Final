@@ -31,7 +31,7 @@ import java.awt.Insets;
 
 public final class Utility 
 {
-    protected static String join_tokens( String[] tokens, int start, int end )
+    public static String join_tokens( String[] tokens, int start, int end )
     {
 	String s = "";
 	System.out.println( s );
@@ -98,7 +98,7 @@ public final class Utility
 	return cb;
     }
 
-    protected static GridBagConstraints modifyGbc( int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor, int fill, Insets insets, int ipadx, int ipady )
+    public static GridBagConstraints modifyGbc( int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor, int fill, Insets insets, int ipadx, int ipady )
     {
 	GridBagConstraints gbc = new GridBagConstraints(gridx, gridy, gridwidth, gridheight, weightx, weighty, anchor, fill, insets, ipadx, ipady );
 	return gbc;
@@ -116,7 +116,7 @@ public final class Utility
     }
     */
 
-    protected static String read_whole_file(String file_name)
+    public static String read_whole_file(String file_name)
     {
 	try 
 	    {
@@ -141,7 +141,7 @@ public final class Utility
 	    }
     }
 
-    protected static void write_whole_file(String file_name, String text)
+    public static void write_whole_file(String file_name, String text)
     {
 	//	System.out.println("In write_whole_file :\ntext = " + text);
 	try
