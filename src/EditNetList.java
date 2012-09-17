@@ -54,10 +54,15 @@ public class EditNetList
 	Vector<String> servers = new Vector<String>();
 	if( network_2_serv.containsKey(network_name))
 	    {
-		servers = (Vector<String>)network_2_serv.get(network_name);		
+		servers = network_2_serv.get(network_name);		
 	    }
 	servers.add(server);
 	network_2_serv.put(network_name, servers);		
+    }
+
+    public void getServers(String networkName)
+    {
+	return network_2_serv.get(networkName);
     }
 
     public void add_auto_join_chan(String network_name, String channel_list)

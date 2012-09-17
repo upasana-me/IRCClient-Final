@@ -370,9 +370,9 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	int i = 0;
 	while( iter.hasNext() )
 	    {
-		Map.Entry me = (Map.Entry)iter.next();
-		String net_name = (String)me.getKey();		
-		String net_desc = (String)me.getValue();
+		Map.Entry<String, String> me = iter.next();
+		String net_name = me.getKey();		
+		String net_desc = me.getValue();
 		text += net_desc;
 		servers.add(i++, net_name.substring(2));
 	    }
@@ -428,7 +428,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
 	if( action.equals( Constants.connect_button_ac ) )
 	    {
-		System.out.println("Connect ac");
+		//		System.out.println("Connect ac");
 		UserPrefs.save_nick1(nick_name_tf.getText() );
 		UserPrefs.save_nick2(second_choice_tf.getText() );
 		UserPrefs.save_nick3(third_choice_tf.getText() );		
@@ -440,14 +440,17 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		String username = user_name_tf.getText();
 		String realname = real_name_tf.getText();
 		String[] nicks = { nick, nick2, nick3 };
+		String networkName = network_list.getSelectedValue();
 		UserPrefs.save_prefs();
-		connections[available] = new Connection();
-		connections[available].initialise( nicks, username, realname, (String)network_list.getSelectedValue() );
+		Vector<String> servers = edit_netlist.getServers(networkName);
+		connections[available] = new Connection(servers);
+		connections[available].initialise( nicks, username, realname, network_list.getSelectedValue() );
 		connections[available].setEditNetList(edit_netlist);
 		mw.visible();
-		mw.initialise((String)network_list.getSelectedValue(), nicks[0] );
+		mw.initialise( networkName, nicks[0] );
 		invisible();
 		connections[available].setMainWindow(mw);
+		mw.addConnection(networkName,connections[available]);
 		//		System.out.println("before thread.start");
 		new Thread( connections[available++]).start();
 	    }
@@ -469,7 +472,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	    {
 		int selected_index = network_list.getSelectedIndex();
 		//		System.out.println("selected_index = " + selected_index);
-		String selected_net = (String)network_list.getSelectedValue();
+		String selected_net = network_list.getSelectedValue();
 		del_net_from_file( selected_index );	
 		try
 		    {

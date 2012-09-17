@@ -8,6 +8,8 @@ public final class Constants {
     public static final String userSettingsTitle = "User Settings";
     public static final String appTitle = "IRC Client";
 
+    public static final String topicStr = "Topic for ";
+
     public static final String servlist_file = "servlist_.conf";
     public static final String op_sign_file_path = "Images" + File.separator + "op_sign.png";
     public static final String voice_sign_file_path = "Images" + File.separator + "voice_sign.png";
@@ -36,7 +38,6 @@ public final class Constants {
     public static final String third_choice_tf_ac = "third_choice_tfAc";
     public static final String username_tf_ac = "username_tfAc";
     public static final String realname_tf_ac = "realname_tfAc";
-
 
     public static final String add_button_text = "Add";
     public static final String remove_button_text = "Remove";
@@ -121,6 +122,10 @@ public final class Constants {
     public static final String update_real_name = "UPDATE NICKS SET Real_name=? WHERE Nick_name=? AND Second_choice=? AND Third_choice=? AND User_name=?;";
 
     public static final String user_real_necessary = "Username & realname cannot be left blank";
+    public static final String promptNick = "Enter new nickname : ";
+
+    public static final String nickChangeText = " is now known as ";
+    public static final String selfNickChangeText = "You are now known as ";
 
     public static final String skUserName = "UserName";
     public static final String skRealName = "RealName";
