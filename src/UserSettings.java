@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.HashMap;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -442,15 +443,25 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		String[] nicks = { nick, nick2, nick3 };
 		String networkName = network_list.getSelectedValue();
 		UserPrefs.save_prefs();
-		Vector<String> servers = edit_netlist.getServers(networkName);
-		connections[available] = new Connection(servers);
+		HashMap<String, String> serversPort = edit_netlist.getServersPort(networkName);
+		/*
+		for( int i = 0; i < servers.size(); i++ )
+		    {
+			System.out.println("servers( " + i + " ) = " + servers.elementAt(i));
+		    }
+		*/
+		connections[available] = new Connection(serversPort);
 		connections[available].initialise( nicks, username, realname, network_list.getSelectedValue() );
 		connections[available].setEditNetList(edit_netlist);
+		TabGroup tabGroup = new TabGroup(networkName,connections[available]);
+		tabGroup.setJTabbedPane(mw.getJTabbedPane());
+		tabGroup.setMainWindow(mw);
+		connections[available].setTabGroup(tabGroup);
 		mw.visible();
-		mw.initialise( networkName, nicks[0] );
+		tabGroup.initialise( nicks[0] );
 		invisible();
-		connections[available].setMainWindow(mw);
-		mw.addConnection(networkName,connections[available]);
+		//		connections[available].setMainWindow(mw);
+		//		mw.addConnection(networkName,connections[available]);
 		//		System.out.println("before thread.start");
 		new Thread( connections[available++]).start();
 	    }
@@ -644,7 +655,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 
     public void valueChanged(ListSelectionEvent e)
     {
-	System.out.println("In valueChanged" + network_list.getSelectedIndex());
+	//	System.out.println("In valueChanged" + network_list.getSelectedIndex());
 	UserPrefs.save_sel_list_index(network_list.getSelectedIndex());
     }
 }

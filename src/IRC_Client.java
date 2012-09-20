@@ -29,7 +29,7 @@ public class IRC_Client
 	    }
 	catch(NullPointerException npe)
 	    {
-		//		System.out.println(npe.getMessage());
+		System.out.println(npe.getMessage());
 	    }
     }
 }

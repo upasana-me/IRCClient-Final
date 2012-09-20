@@ -4,6 +4,10 @@ import java.util.Map;
 
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.HashMap;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -60,9 +64,27 @@ public class EditNetList
 	network_2_serv.put(network_name, servers);		
     }
 
-    public void getServers(String networkName)
+    public HashMap<String, String> getServersPort(String networkName)
     {
-	return network_2_serv.get(networkName);
+	Vector<String> serversPorts = network_2_serv.get(networkName);
+	HashMap<String, String> serverPort = new HashMap<String, String>();
+
+	for( int i = 0; i < serversPorts.size(); i++ )
+	    {
+		Pattern pattern = Pattern.compile("(.*)(/)(.*)");
+		Matcher matcher = pattern.matcher(serversPorts.elementAt(i));
+		while(matcher.find() )
+		    {
+			String server = matcher.group(1);
+			String port = "6667";
+			String portString = matcher.group(3);
+			if( !portString.equals("") && !portString.equals(null))
+			    port = portString;
+			serverPort.put(server, port);
+		    }
+	    }
+
+	return serverPort;
     }
 
     public void add_auto_join_chan(String network_name, String channel_list)

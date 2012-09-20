@@ -7,6 +7,7 @@ import jerklib.Channel;
 import jerklib.events.*;
 
 import jerklib.events.IRCEvent.Type;
+import jerklib.events.ErrorEvent.ErrorType;
 
 import jerklib.events.modes.*;
 
@@ -25,6 +26,7 @@ import java.util.TreeMap;
 import java.util.Set;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.HashMap;
 
 import java.net.Socket;
 
@@ -37,8 +39,12 @@ public class Connection implements Runnable, IRCEventListener
     private String user_name;
     private String real_name;
     private int cur_nick;
+    private int curServer;
     private String network_name;
-    private Vector<String> servers;
+    private HashMap<String, String> serversPorts;
+    private Set<Map.Entry<String, String>> servPortES;
+    private Iterator<Map.Entry<String, String>> serverPortIter;
+    private Map.Entry<String, String> serverPort;
     private TreeMap<String, String> channels;
     private TreeMap<String, TreeMap<String, Vector<String>>> chanName_2_chanMembers;
     private Vector<String> nicks_pms;
@@ -52,16 +58,40 @@ public class Connection implements Runnable, IRCEventListener
     private Session session;
     private Profile profile;
 
-    Connection(Vector<String> serv)
+    private TabGroup tabGroup;
+
+    private enum EventType 
+    {
+	CHANNEL_NICKS,
+	END_OF_NAMES_LIST,
+        NO_SUCH_NICK_OR_CHANNEL,
+	KICK_EVENT,
+	STARTING_INFO
+    }
+
+    Connection(HashMap<String, String> servPorts)
     {
 	cur_nick = 0;
 	channels = new TreeMap<String, String>();
 	chanName_2_chanMembers = new TreeMap<String, TreeMap<String, Vector<String>>>();
 	nicks_pms = new Vector<String>();
-	servers = serv;
+	serversPorts = servPorts;
+	curServer = 0;
+	
+	servPortES = serversPorts.entrySet();
+	serverPortIter = servPortES.iterator();
+
 	//	free_socket = 0;
 	//	no_of_sockets = 100;
 	//	sockets = new Socket[no_of_sockets];
+    }
+
+    private Map.Entry<String, String> getNextServPort()
+    {
+	if(serverPortIter.hasNext())
+	    return serverPortIter.next();
+	else 
+	    return null;
     }
 
     public void initialise(String n[], String username, String realname, String net_name)
@@ -86,7 +116,7 @@ public class Connection implements Runnable, IRCEventListener
 
     public void receiveEvent(IRCEvent e)
     {
-	boolean initial_text = (e.getType() == Type.SERVER_VERSION_EVENT || e.getType() == Type.SERVER_INFORMATION || e.getType() == Type.MOTD);
+	boolean initial_text = (e.getType() == Type.SERVER_VERSION_EVENT || e.getType() == Type.SERVER_INFORMATION );
 
 	//	System.out.println(e.getRawEventData());
 	if( e.getType() == Type.NICK_IN_USE )
@@ -95,17 +125,16 @@ public class Connection implements Runnable, IRCEventListener
 		String inUseNick = ne.getInUseNick();
 		cur_nick++;
 		nick_name = nicks[cur_nick];
-		mw.setText(network_name, inUseNick + " is already in use.");
-		mw.setText(network_name, "Retrying with " + nick_name);
-		mw.setNickButtonText(network_name, nick_name);
+		tabGroup.setText(network_name, inUseNick + " is already in use.");
+		tabGroup.setText(network_name, "Retrying with " + nick_name);
+		tabGroup.setNickButtonText(nick_name);
 	    }
 	else if( e.getType() == Type.AWAY_EVENT )
 	    {
-		System.out.println("In Awayevent");
 		AwayEvent ae = (AwayEvent)e;
 		String nick = ae.getNick();
 		String awayMessage = ae.getAwayMessage();
-		mw.setAway(network_name, nick);
+		tabGroup.setAway(nick);
 	    }
 	else if( e.getType() == Type.NOTICE )
 	    {
@@ -119,7 +148,27 @@ public class Connection implements Runnable, IRCEventListener
 		    {}
 
 		if( ne.toWho().equals("*"))
-		    mw.setText(network_name, ne.getNoticeMessage());		
+		    tabGroup.setText(network_name, ne.getNoticeMessage());		
+	    }
+	else if( e.getType() == Type.QUIT )
+	    {
+		System.out.println("In quit");
+		QuitEvent qe = (QuitEvent)e;
+		String nick = qe.getNick();
+		String message = qe.getQuitMessage();
+		Vector<Channel> channelsQuit = new Vector<Channel>(qe.getChannelList());
+		Vector<Channel> userChannels = new Vector<Channel>(session.getChannels());
+		for( int i = 0; i < channelsQuit.size(); i++ )
+		    {
+			if( channelsQuit.elementAt(i).equals(userChannels.elementAt(i)) )
+			    {
+				String channelName = channelsQuit.elementAt(i).getName();
+				tabGroup.setText(channelName, nick + " has quit (" + message + ")");
+				TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channelsQuit.elementAt(i), channelName);
+				tabGroup.set_chan_members(channelName, status_2_members);
+			    }
+		    }
+		
 	    }
 	else if( e.getType() == Type.MOTD )
 	    {
@@ -135,7 +184,7 @@ public class Connection implements Runnable, IRCEventListener
  
 		//		String s = extract_serv_info(motd);
 		System.out.println("s  : " + s);
-		mw.setText(network_name, s);
+		tabGroup.setText(network_name, s);
 
 		//		mw.setText(network_name, "host name : " + host_name );
 		//		mw.setText(network_name, "motd line : " + motd_line );
@@ -158,15 +207,10 @@ public class Connection implements Runnable, IRCEventListener
 		String nick = je.getNick();
 		String hostName = je.getHostName();
 		String userName = je.getUserName();
-		mw.setText( channelName, nick + " (" + userName + "@" + hostName + ") has joined " + channelName );
+		tabGroup.setText( channelName, nick + " (" + userName + "@" + hostName + ") has joined " + channelName );
 
-		TreeMap<String, Vector<String>> status_2_members = chanName_2_chanMembers.get(channelName);
-		Vector<String> rest = status_2_members.get("r"); 
-		//		Vector<String> rest = channelMembers.get("r");
-		rest.add(nick);
-		status_2_members.put("r",rest);
-		chanName_2_chanMembers.put(channelName, status_2_members);
-		mw.set_chan_members(network_name, channelName, status_2_members);
+		TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
+		tabGroup.set_chan_members(channelName, status_2_members);
 		
 	    }
 	else if( e.getType() == Type.PART )
@@ -177,89 +221,111 @@ public class Connection implements Runnable, IRCEventListener
 		String partMessage = pe.getPartMessage();
 		String userName = pe.getUserName();
 		String partedNick = pe.getWho();
-		
-		mw.setText(channelName, partedNick + " (" + userName + "@" + hostName + ") has left " + channelName + " (" + partMessage + ")");
 
-		TreeMap<String, Vector<String>> status_2_members = chanName_2_chanMembers.get(channelName);
-		status_2_members.get("r").remove(partedNick); 
-		status_2_members.get("o").remove(partedNick); 
-		status_2_members.get("v").remove(partedNick); 
+		if(partedNick.equals(nick_name))
+		    {
+			tabGroup.removeTab(channelName);
+		    }
+		else
+		    {
+			tabGroup.setText(channelName, partedNick + " (" + userName + "@" + hostName + ") has left " + channelName + " (" + partMessage + ")");
 
-		chanName_2_chanMembers.put(channelName, status_2_members);
-		mw.set_chan_members(network_name, channelName, status_2_members);
-	    }
-	else if( e.getType() == Type.TOPIC )
-	    {
-		/*
-		TopicEvent te = (TypeEvent)e;
-		Channel channel = te.getChannel();
-		String topicSetter = te.getSetBy();
-		Date date = te.getSetWhen();
-		*/
+			TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
+			tabGroup.set_chan_members(channelName, status_2_members);
+		    }
 	    }
 	else if( e.getType() == Type.JOIN_COMPLETE )
 	    {
 		JoinCompleteEvent jce = (JoinCompleteEvent)e;
 		Channel channel = jce.getChannel();
-
+		
 		String channel_name = channel.getName();
-		mw.create_chan_tab(network_name, channel_name);
 		
-		try
+		if( !tabGroup.getChannelTabExisted(channel_name) || !tabGroup.channelExisted(channel_name))
+		   {
+		       if( !channels.containsKey(channel_name))
+			   channels.put(channel_name," ");
+		       tabGroup.create_chan_tab(channel_name);
+		       
+		       try
+			   {
+			       Thread.sleep(500);
+			   }
+		       catch(InterruptedException ie)
+			   {}
+
+		       TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
+		       tabGroup.set_chan_members(channel_name, status_2_members);
+		       
+		       String topic = channel.getTopic();
+		       String topicSetter = channel.getTopicSetter();
+		       Date topicDate = channel.getTopicSetTime();
+		       DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
+		       tabGroup.setTopic(channel_name, topic);
+		       if( !topic.equals("") )
+			   {
+			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
+			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
+			   }
+		   }
+		else
 		    {
-			Thread.sleep(500);
+		       tabGroup.reInitialiseChannel(channel_name);
+
+		       try
+			   {
+			       Thread.sleep(500);
+			   }
+		       catch(InterruptedException ie)
+			   {}
+
+
+		       TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
+		       tabGroup.set_chan_members(channel_name, status_2_members);
+		       
+		       String topic = channel.getTopic();
+		       String topicSetter = channel.getTopicSetter();
+		       Date topicDate = channel.getTopicSetTime();
+		       DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
+		       tabGroup.setTopic(channel_name, topic);
+		       if( !topic.equals("") )
+			   {
+			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
+			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
+			   }
 		    }
-		catch(InterruptedException ie)
-		    {}
-
-		//		TreeSet<String> treeset = new TreeSet<String>();
-
-		Vector<String> ops = new Vector<String>(channel.getNicksForMode(ModeAdjustment.Action.valueOf("PLUS"),'o'));
-		//		treeset.addAll(ops);
-		TreeMap<String, Vector<String>> status_2_members = new TreeMap<String, Vector<String>>();
-		status_2_members.put("o", ops);
-		
-		Vector<String> voiced = new Vector<String>(channel.getNicksForMode(ModeAdjustment.Action.valueOf("PLUS"),'v'));
-		//		treeset.addAll(voiced);
-		status_2_members.put("v", voiced);
-
-		Vector<String> rest = new Vector<String>(channel.getNicks());
-		Vector<String> rest_copy = new Vector<String>(rest.subList(0, rest.size()));
-		int rest_size = rest.size();
-
-		for(int i = 0; i < rest_copy.size(); i++ )
-		    {
-			String s = rest_copy.elementAt(i);
-			try
-			    {
-				if( status_2_members.get("o").contains(s) || status_2_members.get("v").contains(s) )
-				    {
-					rest.remove(s);
-				    }
-				else
-				    {
-					//			treeset.add(s);
-				    }
-			    }
-			catch(NullPointerException npe)
-			    {}
-		    }
-
-		status_2_members.put("r", rest);
-		status_2_members.put("a", new Vector<String>());
-		
-		chanName_2_chanMembers.put(channel_name, status_2_members);
-		mw.set_chan_members(network_name, channel_name, status_2_members);
-
+	    }
+	else if( e.getType() == Type.TOPIC )
+	    {
+		TopicEvent te = (TopicEvent)e;
+		Channel channel = te.getChannel();
+		String channelName = channel.getName();
 		String topic = channel.getTopic();
 		String topicSetter = channel.getTopicSetter();
-		Date topicDate = channel.getTopicSetTime();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
-		mw.setTopic(channel_name, topic);
+		tabGroup.setTopic(channelName, topic);
 		if( !topic.equals("") )
 		    {
-			mw.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
-			mw.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
+			Date date = new Date();
+			DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
+			String currentDateTime = dateFormat.format(date);			
+			Date topicDate = channel.getTopicSetTime();
+			String dateTime = dateFormat.format(topicDate);
+
+			/*
+			String[] tokens = dateTime.split(" ");
+			String day = getDay(tokens);
+			String date = getDate(tokens);
+			String month = getMonth(tokens);
+			String year = getYear(tokens);
+			String[] tokensTime = tokens[4].split(":");
+			String hour = getHour(tokensTime);
+			String minute = getMinute(tokensTime);
+			String second = getSecond(tokensTime);
+			String amPm = getAmPm(tokens);
+			*/
+			
+			if( dateTime.equals(currentDateTime))
+			    tabGroup.setText( channelName, topicSetter + " has changed the topic to: " + topic );
 		    }
 	    }
 	else if( e.getType() == Type.CHANNEL_MESSAGE )
@@ -269,7 +335,7 @@ public class Connection implements Runnable, IRCEventListener
 		String nick = me.getNick();
 		Channel channel = me.getChannel();
 		String channelName = channel.getName();
-		mw.setText(channelName, "< " + nick + " > : " + message);
+		tabGroup.setText(channelName, "< " + nick + " > : " + message);
 	    }
 	else if( e.getType() == Type.NICK_CHANGE )
 	    {
@@ -287,14 +353,13 @@ public class Connection implements Runnable, IRCEventListener
 		if( oldNick.equals(nick_name) )
 		    {
 			nick_name = newNick;
-			mw.appendToAllTa( network_name, Constants.selfNickChangeText + newNick );
-			mw.setNickButtonText(network_name, newNick );
-			mw.modifyChannelList(network_name, oldNick, newNick);
+			tabGroup.appendToAllTa(Constants.selfNickChangeText + newNick );
+			tabGroup.setNickButtonText(newNick );
+			tabGroup.modifyChannelList(oldNick, newNick);
 		    }
 		else
 		    {
-			mw.appendToAllTa( network_name, oldNick + Constants.nickChangeText + newNick ); 
-			mw.modifyChannelList( network_name, oldNick, newNick);
+			nickChange(oldNick, newNick);
 		    }
 	    }
 	
@@ -304,24 +369,43 @@ public class Connection implements Runnable, IRCEventListener
 		String message = me.getMessage();
 		String nick = me.getNick();
 		String hostname = me.getHostName();
-		if( !nicks_pms.contains(nick) )
+		if( !tabGroup.getPmExists(nick) )
 		    {
 			nicks_pms.add(nick);
-			mw.create_privmsg_tab(network_name, nick, hostname, "< " + nick + " > : " + message );
+			tabGroup.create_privmsg_tab(nick, hostname, "< " + nick + " > : " + message );
 		    }
 		else
 		    {
-			mw.setText( nick, "< " + nick + " > : " + message );
+			tabGroup.setText( nick, "< " + nick + " > : " + message );
 		    }
 	    }
+	/*
 	else if( initial_text )
 	    {
 		String s = extract_serv_info(e.getRawEventData());
-		mw.setText( network_name, s);
+		tabGroup.setText( network_name, s);
 	    }
+	*/
 	else if( e.getType() == Type.ERROR )
 	    {
 		ErrorEvent ee = (ErrorEvent) e;
+		if( ee.getErrorType() == ErrorType.UNRESOLVED_HOSTNAME )
+		    {
+			UnresolvedHostnameErrorEvent uhee = (UnresolvedHostnameErrorEvent)ee;
+			String hostName = uhee.getHostName();
+			String errMessage = "Unknown host, " + hostName + "\nCycling to next server in " + network_name;
+			tabGroup.setText(network_name, errMessage);
+			Map.Entry<String, String> servPortPair = getNextServPort();
+			String server = servPortPair.getKey();
+			String port = servPortPair.getValue();
+			try
+			    {
+				session = manager.requestConnection(server,Integer.parseInt(port));
+				session.addIRCEventListener(this);
+			    }
+			catch(NumberFormatException nfe)
+			    {}
+		    }
 	    }
 	else if( e.getType() == Type.EXCEPTION )
 	    {
@@ -331,13 +415,52 @@ public class Connection implements Runnable, IRCEventListener
 	    {}
 	else 
 	    {
-		String rawData = e.getRawEventData();
-		String s = extract_serv_info(rawData);
+		System.out.println("In last else.");
+		System.out.println(e.getRawEventData());
 
+		String rawData = e.getRawEventData();
+		//		String suffix = extractSuffix(rawData);
+		String tokens[] = rawData.split(" ");
+		String prefix = extractNumericOrString(tokens);
+		EventType eventType = getEventType(prefix);
+		
+		if( eventType == EventType.CHANNEL_NICKS || eventType == EventType.END_OF_NAMES_LIST )
+		    {}
+		else if( eventType == EventType.NO_SUCH_NICK_OR_CHANNEL )
+		    {
+			//extract group 3
+		    }
+		else if( eventType == EventType.KICK_EVENT )
+		    {
+			String kickedNick = getKickedNick(tokens);
+			String channelName = getKickChannel(tokens);
+			String byWho = getKickedByWho(tokens);
+			String reason = getKickReason(tokens);
+			if( kickedNick.equals(nick_name) )
+			    {
+				tabGroup.setText( channelName, "You have been kicked from " + channelName + " by " + byWho + " (" + reason + ")");
+				tabGroup.clearChanMembersList(channelName);
+			    }
+			else
+			    {
+				tabGroup.setText( channelName, byWho + " has kicked " + kickedNick + " from " + channelName + " (" + reason + ")");
+
+				TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
+				tabGroup.set_chan_members(channelName, status_2_members);
+			    }
+			
+		    }
+		else if( eventType == EventType.STARTING_INFO )
+		    {
+			String startingInfo = extractStartInfo(rawData);
+			System.out.println("startingInfo = " + startingInfo );
+			tabGroup.setText(network_name, startingInfo );
+		    }
+		/*
 		if( s.equals("") )
 		    {
 			s = extract_start_info(rawData);
-			mw.setText(network_name, s);
+			tabGroup.setText(network_name, s);
 		    }
 		else
 		    {
@@ -351,15 +474,16 @@ public class Connection implements Runnable, IRCEventListener
 				    {
 					if( !(channels.containsKey(tokens_ws[1]) || channels.containsKey(tokens_ws[0])) )
 					    {
-						mw.setText(network_name, s);
+						tabGroup.setText(network_name, s);
 					    }
 				    }
 				else
 				    {
-					mw.setText(network_name, s);
+					tabGroup.setText(network_name, s);
 				    }
 			    }
 		    }
+		*/
 	    }
 	
     }
@@ -369,14 +493,160 @@ public class Connection implements Runnable, IRCEventListener
 	mw = m;
     }
 
+    public void setTabGroup(TabGroup tabGroup)
+    {
+	this.tabGroup = tabGroup;
+    }
+
+    private EventType getEventType(String str)
+    {
+	System.out.println("In getEventType, str = " + str);
+	if(str.equals("353"))
+	    return EventType.CHANNEL_NICKS;
+	else if(str.equals("366"))
+	    return EventType.END_OF_NAMES_LIST ;
+	else if(str.equals("401"))
+	    return EventType.NO_SUCH_NICK_OR_CHANNEL;
+	else if(str.equals("KICK"))
+	    return EventType.KICK_EVENT;
+	else if(str.equals("001") || str.equals("002") || str.equals("003") || str.equals("004") || str.equals("005") )
+	    return EventType.STARTING_INFO;
+	
+	return null;
+    } 
+
+    private void nickChange(String oldNick, String newNick)
+    {
+	Vector<Channel> channels = new Vector<Channel>(session.getChannels());
+	for(int i = 0; i < channels.size(); i++ )
+	    {
+		Vector<String> nicks = new Vector<String>(channels.elementAt(i).getNicks());
+		if( nicks.contains(newNick))
+		    {
+			String channelName = channels.elementAt(i).getName();
+			tabGroup.setText(channels.elementAt(i).getName(), oldNick + Constants.nickChangeText + newNick );
+			tabGroup.modifyChannelList(oldNick, newNick );
+		    }
+	    }
+    }
+
+
+    private TreeMap<String, Vector<String>> setStatus2Members(Channel channel, String channelName)
+    {
+	Vector<String> ops = new Vector<String>(channel.getNicksForMode(ModeAdjustment.Action.valueOf("PLUS"),'o'));
+	//		treeset.addAll(ops);
+	TreeMap<String, Vector<String>> status_2_members = new TreeMap<String, Vector<String>>();
+	status_2_members.put("o", ops);
+		
+	Vector<String> voiced = new Vector<String>(channel.getNicksForMode(ModeAdjustment.Action.valueOf("PLUS"),'v'));
+	//		treeset.addAll(voiced);
+	status_2_members.put("v", voiced);
+
+	Vector<String> rest = new Vector<String>(channel.getNicks());
+	Vector<String> rest_copy = new Vector<String>(rest.subList(0, rest.size()));
+	int rest_size = rest.size();
+	
+	for(int i = 0; i < rest_copy.size(); i++ )
+	    {
+		String s = rest_copy.elementAt(i);
+		try
+		    {
+			if( status_2_members.get("o").contains(s) || status_2_members.get("v").contains(s) )
+			    {
+				rest.remove(s);
+			    }
+			else
+			    {
+				//			treeset.add(s);
+			    }
+		    }
+		catch(NullPointerException npe)
+		    {}
+	    }
+	
+	status_2_members.put("r", rest);
+	status_2_members.put("a", new Vector<String>());
+					
+	chanName_2_chanMembers.put(channelName, status_2_members);
+	return status_2_members;
+    }
+
+
+    private String getDay(String[] tokens)
+    {
+	if( tokens.length >= 1 )
+	    return tokens[0].substring(0, tokens[0].length() - 2);
+	return null;
+    }
+
+    private String getMonth(String[] tokens)
+    {
+	if( tokens.length >= 2 )
+	    return tokens[1];
+	return null;
+    }
+
+    private String getDate(String[] tokens)
+    {
+	if( tokens.length >= 3 )
+	    return tokens[2].substring(0, tokens[2].length() - 2);;
+	return null;
+    }
+
+    private String getYear(String[] tokens)
+    {
+	if( tokens.length >= 4 )
+	    return tokens[3];
+	return null;
+    }
+
+    private String getHour(String[] tokens)
+    {
+	if(tokens.length >= 1)
+	    return tokens[0];
+	return null;
+    }
+
+    private String getMinute(String[] tokens)
+    {
+	if(tokens.length >= 2)
+	    return tokens[1];
+	return null;
+    }
+
+    private String getSeconds(String[] tokens)
+    {
+	if(tokens.length >= 3)
+	    return tokens[2];
+	return null;
+    }
+    
+    private String getAmPm(String[] tokens)
+    {
+	if(tokens.length >= 6)
+	    return tokens[5];
+	return null;
+    }
+
     public void connect()
     {
 	try
 	    {
 		profile = new Profile(user_name, nicks[0], nicks[1], nicks[2]);
 		manager = new ConnectionManager(profile);
-		session = manager.requestConnection(servers[curServ]);
-		session.addIRCEventListener(this);
+		Map.Entry<String, String> servPortPair = getNextServPort();
+		String server = servPortPair.getKey();
+		String port = servPortPair.getValue();
+		try
+		    {
+			session = manager.requestConnection(server, Integer.parseInt(port));
+			System.out.println("In connect, after requestConnection().");
+			session.addIRCEventListener(this);
+			session.setRejoinOnKick(false);
+		    }
+		catch(NumberFormatException nfe)
+		    {}
+		
 	    }
 	catch(InstantiationError ie)
 	    {
@@ -405,11 +675,11 @@ public class Connection implements Runnable, IRCEventListener
     }
 
     /**
-       This method is for parsing the lines sent by the server in the beginning of connection establishment
+     * This method is for parsing the lines sent by the server in the beginning of connection establishment
      */
-    private String extract_start_info(String data)
+    private String extractStartInfo(String data)
     {
-	Pattern pattern = Pattern.compile("(^:.*)( " + nick_name + " :)(.*)");
+	Pattern pattern = Pattern.compile("(^:.*)( " + nick_name + " [:]*)(.*)");
 	Matcher matcher = pattern.matcher(data);
 	String s = "";
 
@@ -422,11 +692,11 @@ public class Connection implements Runnable, IRCEventListener
     }
 
     /**
-       this method is for parsing SERVER_INFORMATION, SERVER_VERSION & Channel List
+    * this method is for parsing SERVER_INFORMATION, SERVER_VERSION & Channel List
     */
     private String extract_serv_info(String data)
     {
-	//	mw.setText(network_name, si.getCaseMapping());
+	//	tabGroup.setText(network_name, si.getCaseMapping());
 	//	System.out.println("In extract_serv_info");
 
 	Pattern pattern = Pattern.compile("(^:.*)( " + nick_name + " )([^:].*)");
@@ -444,10 +714,53 @@ public class Connection implements Runnable, IRCEventListener
 
 		String group3 = matcher.group(3);
 		parsed_str += group3;
-		//		mw.setText(network_name, group3);
+		//		tabGroup.setText(network_name, group3);
 	    }
 
 	return parsed_str;
+    }
+
+    private String getKickedNick(String[] tokens)
+    {
+	if( tokens.length >= 4 )
+	    return tokens[3];
+	return null;
+    }
+
+    private String getKickChannel(String[] tokens)
+    {
+	if( tokens.length >= 3 )
+	    return tokens[2];
+	return null;
+    }
+
+    private String getKickedByWho(String[] tokens)
+    {
+	
+	if( tokens.length >= 1 )
+	    {
+		return tokens[0].substring(tokens[0].indexOf(":") + 1, tokens[0].indexOf("!") );
+	    }
+	return null;
+    }
+
+    private String getKickReason(String[] tokens)
+    {
+	if( tokens.length >= 5 )
+	    {
+		String s = tokens[4].substring(1);
+		for( int i = 5; i < tokens.length; i++ )
+		    s += (" " + tokens[i]);
+		return s;
+	    }
+	return null;
+    }
+
+    private String extractNumericOrString(String[] tokens)
+    {
+	if( tokens.length >= 2 )
+	    return tokens[1];
+	return null;
     }
 
     public void executeCommand(String command)
@@ -475,5 +788,42 @@ public class Connection implements Runnable, IRCEventListener
     public void changeNick(String newNick)
     {
 	session.changeNick(newNick);
+    }
+
+    public void joinChannel(String channelName)
+    {
+	session.join(channelName);
+    }
+
+    public void joinChannel(String channelName, String key)
+    {
+	session.join(channelName, key);
+    }
+
+    public void part(String channelName, String partMessage)
+    {
+	try
+	    {
+		Channel channel = session.getChannel(channelName);
+		channel.part(partMessage);
+	    }
+	catch(NullPointerException npe)
+	    {}
+    }
+
+    public void kick(String channelName, String nick, String reason)
+    {
+	try
+	    {
+		Channel channel = session.getChannel(channelName);
+		channel.kick(nick, reason);
+	    }
+	catch(NullPointerException npe)
+	    {}
+    }
+
+    public void quit(String message)
+    {
+	session.close(message);
     }
 }

@@ -2,7 +2,7 @@ import java.io.File;
 
 /*
  * Constants.java
-*/
+ */
 
 public final class Constants {
     public static final String userSettingsTitle = "User Settings";
