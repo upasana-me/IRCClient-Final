@@ -105,6 +105,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
     {
 	this.setTitle(Constants.userSettingsTitle);
 	mw = m;
+	mw.setUserSettings(this);
 	try
 	    {
 		connections = new Connection[100];

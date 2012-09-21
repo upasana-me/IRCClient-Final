@@ -107,6 +107,19 @@ public class TabGroup
 	this.mw = f;
     }
 
+    public void setTextOnSelectedTab(String text)
+    {
+	String selectedTab = getSelectedTab();
+	setText(selectedTab, text);
+    }
+
+    public String getSelectedTab()
+    {
+	int selectedIndex = tabbedPane.getSelectedIndex();
+	String title = tabbedPane.getTitleAt(selectedIndex);
+	return title;
+    }
+
     public void setJTabbedPane(JTabbedPane tabbedPane)
     {
 	this.tabbedPane = tabbedPane;
@@ -201,9 +214,11 @@ public class TabGroup
 	p.add( p5, BorderLayout.NORTH );
 	p.add( p1, BorderLayout.CENTER );
 	p.add( p4, BorderLayout.SOUTH );
+
 	
 	tabbedPane.add( networkName, p );
 	tabbedPane.setTabComponentAt( tabbedPane.getTabCount() - 1, p6);
+	System.out.println("Added panel on JTabbedPane.");
 	//need modification
 	//	tabNumber++;
 	//	tp.setComponentAt(tp.indexOfTab(tabname), new ButtonTabComponent(tp));
@@ -300,9 +315,12 @@ public class TabGroup
 			}
 		    else
 			{
-			    connection.sendChannelMessage(channel_name, s);
-			    //			    tm_netname_2_conn.get(network_name).sendChannelMessage(channel_name, s);
-			    setText(channel_name, "< " + nick_button.getText() + " > : " + s);
+			    if( !s.equals(""))
+				{
+				    connection.sendChannelMessage(channel_name, s);
+				    //			    tm_netname_2_conn.get(network_name).sendChannelMessage(channel_name, s);
+				    setText(channel_name, "<" + nick_button.getText() + "> : " + s);
+				}
 			}
 		}
 	    });

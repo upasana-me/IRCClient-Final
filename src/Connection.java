@@ -365,7 +365,7 @@ public class Connection implements Runnable, IRCEventListener
 		String nick = me.getNick();
 		Channel channel = me.getChannel();
 		String channelName = channel.getName();
-		tabGroup.setText(channelName, "< " + nick + " > : " + message);
+		tabGroup.setText(channelName, "<" + nick + "> : " + message);
 	    }
 	else if( e.getType() == Type.NICK_CHANGE )
 	    {
@@ -402,12 +402,22 @@ public class Connection implements Runnable, IRCEventListener
 		if( !tabGroup.getPmExists(nick) )
 		    {
 			nicks_pms.add(nick);
-			tabGroup.create_privmsg_tab(nick, hostname, "< " + nick + " > : " + message );
+			tabGroup.create_privmsg_tab(nick, hostname, "<" + nick + "> : " + message );
 		    }
 		else
 		    {
-			tabGroup.setText( nick, "< " + nick + " > : " + message );
+			tabGroup.setText( nick, "<" + nick + "> : " + message );
 		    }
+	    }
+	else if( e.getType() == Type.INVITE_EVENT )
+	    {
+		InviteEvent ie = (InviteEvent)e;
+		String channelName = ie.getChannelName();
+		String hostName = ie.getHostName();
+		String nick = ie.getNick();
+		String userName = ie.getUserName();
+		String toBeDisplayed = "You have been invited to " + channelName + " by " + nick + " (" + hostName + ")";
+		tabGroup.setTextOnSelectedTab(toBeDisplayed);
 	    }
 	/*
 	else if( initial_text )
