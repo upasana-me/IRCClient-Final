@@ -216,10 +216,10 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 	    {
 		public void valueChanged(ListSelectionEvent lse)
 		{
-		    System.out.println("In valueChanged" + network_list.getSelectedIndex());
+		    //		    System.out.println("In valueChanged" + network_list.getSelectedIndex());
 		    UserPrefs.save_sel_list_index(network_list.getSelectedIndex());
 		    UserPrefs.save_prefs();
-		    System.out.println(UserPrefs.get_sel_list_index());
+		    //		    System.out.println(UserPrefs.get_sel_list_index());
 		}
 	    }
 	    );

@@ -112,8 +112,13 @@ public class CellRenderer extends JLabel implements ListCellRenderer<Object>
 
 	if (isSelected) {
 	    setBackground(list.getSelectionBackground());
+	    if( others.contains(s) )
+		{
+		    setIcon(null);
+		    setText("  " + s);
+		}
 	    if( !away.contains(s) )
-		setForeground(list.getSelectionForeground());
+		setForeground(list.getSelectionForeground());	    
 	} else {
 	    setBackground(list.getBackground());
 	    if( !away.contains(s) )

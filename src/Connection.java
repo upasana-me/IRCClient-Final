@@ -11,6 +11,9 @@ import jerklib.events.ErrorEvent.ErrorType;
 
 import jerklib.events.modes.*;
 
+import jerklib.events.modes.ModeEvent.ModeType;
+import jerklib.events.modes.ModeAdjustment.Action;
+
 import jerklib.tasks.TaskImpl;
 import jerklib.listeners.IRCEventListener;
 
@@ -47,6 +50,8 @@ public class Connection implements Runnable, IRCEventListener
     private Map.Entry<String, String> serverPort;
     private TreeMap<String, String> channels;
     private TreeMap<String, TreeMap<String, Vector<String>>> chanName_2_chanMembers;
+    private TreeMap<String, String> previousTopicTime;
+
     private Vector<String> nicks_pms;
 
     private Socket[] sockets;
@@ -77,7 +82,7 @@ public class Connection implements Runnable, IRCEventListener
 	nicks_pms = new Vector<String>();
 	serversPorts = servPorts;
 	curServer = 0;
-	
+	previousTopicTime = new TreeMap<String, String>();
 	servPortES = serversPorts.entrySet();
 	serverPortIter = servPortES.iterator();
 
@@ -199,6 +204,14 @@ public class Connection implements Runnable, IRCEventListener
 			Map.Entry<String, String> me = i.next();
 			e.getSession().join(me.getKey(), me.getValue());
 		    }
+
+		try
+		    {
+			Thread.sleep(2000);
+		    }
+		catch(InterruptedException ie)
+		    {}
+
 	    }
 	else if( e.getType() == Type.JOIN )
 	    {
@@ -215,6 +228,7 @@ public class Connection implements Runnable, IRCEventListener
 	    }
 	else if( e.getType() == Type.PART )
 	    {
+		System.out.println("In PART event");
 		PartEvent pe = (PartEvent)e;
 		String channelName = pe.getChannelName();
 		String hostName = pe.getHostName();
@@ -222,9 +236,12 @@ public class Connection implements Runnable, IRCEventListener
 		String userName = pe.getUserName();
 		String partedNick = pe.getWho();
 
-		if(partedNick.equals(nick_name))
+		if(partedNick.equals(nick_name) )
 		    {
-			tabGroup.removeTab(channelName);
+			//			System.out.println("Before tabGroup.removeTab( " + channelName + " )");
+			if(!tabGroup.tabAlreadyRemoved(channelName))
+			    tabGroup.removeTab(channelName);
+			//			System.out.println("After tabGroup.removeTab( " + channelName + " )");
 		    }
 		else
 		    {
@@ -234,6 +251,28 @@ public class Connection implements Runnable, IRCEventListener
 			tabGroup.set_chan_members(channelName, status_2_members);
 		    }
 	    }
+	else if( e.getType() == Type.NICK_LIST_EVENT )
+	    {
+		NickListEvent nle = (NickListEvent)e;
+		Channel channel = nle.getChannel();
+		String channel_name = channel.getName();
+
+		TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
+		tabGroup.set_chan_members(channel_name, status_2_members);
+
+		/*
+		String topic = channel.getTopic();
+		String topicSetter = channel.getTopicSetter();
+		Date topicDate = channel.getTopicSetTime();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
+		tabGroup.setTopic(channel_name, topic);
+		if( !topic.equals("") )
+		    {
+			tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
+			tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
+		    }
+		*/
+	    }
 	else if( e.getType() == Type.JOIN_COMPLETE )
 	    {
 		JoinCompleteEvent jce = (JoinCompleteEvent)e;
@@ -241,19 +280,15 @@ public class Connection implements Runnable, IRCEventListener
 		
 		String channel_name = channel.getName();
 		
-		if( !tabGroup.getChannelTabExisted(channel_name) || !tabGroup.channelExisted(channel_name))
+		if( !tabGroup.channelExisted(channel_name))
 		   {
+		       //		       System.out.println("Channel doesn't Exist");
 		       if( !channels.containsKey(channel_name))
 			   channels.put(channel_name," ");
 		       tabGroup.create_chan_tab(channel_name);
-		       
-		       try
-			   {
-			       Thread.sleep(500);
-			   }
-		       catch(InterruptedException ie)
-			   {}
 
+		       /*
+		       
 		       TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
 		       tabGroup.set_chan_members(channel_name, status_2_members);
 		       
@@ -267,19 +302,14 @@ public class Connection implements Runnable, IRCEventListener
 			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
 			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
 			   }
+		       */
 		   }
 		else
 		    {
+			//		       System.out.println("Channel Existed");
 		       tabGroup.reInitialiseChannel(channel_name);
 
-		       try
-			   {
-			       Thread.sleep(500);
-			   }
-		       catch(InterruptedException ie)
-			   {}
-
-
+		       /*
 		       TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
 		       tabGroup.set_chan_members(channel_name, status_2_members);
 		       
@@ -293,6 +323,7 @@ public class Connection implements Runnable, IRCEventListener
 			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
 			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
 			   }
+		       */
 		    }
 	    }
 	else if( e.getType() == Type.TOPIC )
@@ -303,29 +334,28 @@ public class Connection implements Runnable, IRCEventListener
 		String topic = channel.getTopic();
 		String topicSetter = channel.getTopicSetter();
 		tabGroup.setTopic(channelName, topic);
-		if( !topic.equals("") )
+		
+		if( previousTopicTime.containsKey(channelName) )
 		    {
-			Date date = new Date();
-			DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
-			String currentDateTime = dateFormat.format(date);			
+			tabGroup.setText( channelName, topicSetter + " has changed the topic to : " + topic );
+		    }
+		else 
+		    {
 			Date topicDate = channel.getTopicSetTime();
-			String dateTime = dateFormat.format(topicDate);
-
-			/*
-			String[] tokens = dateTime.split(" ");
-			String day = getDay(tokens);
-			String date = getDate(tokens);
-			String month = getMonth(tokens);
-			String year = getYear(tokens);
-			String[] tokensTime = tokens[4].split(":");
-			String hour = getHour(tokensTime);
-			String minute = getMinute(tokensTime);
-			String second = getSecond(tokensTime);
-			String amPm = getAmPm(tokens);
-			*/
-			
-			if( dateTime.equals(currentDateTime))
-			    tabGroup.setText( channelName, topicSetter + " has changed the topic to: " + topic );
+			DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
+			previousTopicTime.put(channelName, dateFormat.format(topicDate));
+			tabGroup.setText( channelName, Constants.topicStr + channelName + " is : " + topic );
+			tabGroup.setText( channelName, Constants.topicStr + channelName + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
+		    }
+	    }
+	else if( e.getType() == Type.CHANNEL_LIST_EVENT )
+	    {
+		ChannelListEvent cle = (ChannelListEvent)e;
+		String channelName = cle.getChannelName();
+		String topic = cle.getTopic();		
+		if(topic.equals(""))
+		    {
+			previousTopicTime.put(channelName,"NOTOPIC");
 		    }
 	    }
 	else if( e.getType() == Type.CHANNEL_MESSAGE )
@@ -412,7 +442,112 @@ public class Connection implements Runnable, IRCEventListener
 		System.out.println("Exception");		
 	    }
 	else if( e.getType() == Type.MODE_EVENT )
-	    {}
+	    {
+		ModeEvent me = (ModeEvent)e;
+		String rawEventData = e.getRawEventData();
+		System.out.println("In MODE_EVENT");
+		//		System.out.println("me.getRawEventData() : " + me.getRawEventData());
+		String setter = me.setBy();
+		
+		if( me.getModeType() == ModeType.USER )
+		    {
+			Vector<ModeAdjustment> modeAdjustments = new Vector<ModeAdjustment>(me.getModeAdjustments());
+			for( int i = 0; i < modeAdjustments.size(); i++ )
+			    {
+				//				System.out.println("Mode USER Event");
+				ModeAdjustment ma = modeAdjustments.elementAt(i);
+				String argument = ma.getArgument();
+				String action = "-";
+				if( ma.getAction() == Action.PLUS )
+				    action = "+";
+				action += ma.getMode();
+				String user = "";
+				String tokens[] = rawEventData.split(" ");
+				if( tokens.length > 2 )
+				    {
+					user = tokens[2];
+				    }
+				
+				String toBeDisplayed = "";
+				if( argument.equals("") || argument == null )
+				    toBeDisplayed = "User mode for " + user + " is now " + action;
+				else
+				    toBeDisplayed = "User mode for " + user + " is now " + action + "(" + argument + ")";
+				/*
+				System.out.println("argument : " + argument );
+				System.out.println("action : " + action );
+				System.out.println("setter : " + setter );
+				System.out.println("ma.toString() : " + ma.toString() );
+				*/
+				tabGroup.setText(network_name, toBeDisplayed);
+			    }
+		    }
+		else if( me.getModeType() == ModeType.CHANNEL )
+		    {
+			Channel channel = me.getChannel();
+			String channelName = channel.getName();
+			Vector<ModeAdjustment> modeAdjustments = new Vector<ModeAdjustment>(me.getModeAdjustments());
+			for(int i = 0; i < modeAdjustments.size(); i++ )
+			    {
+				ModeAdjustment ma = modeAdjustments.elementAt(i);
+				String action = "-";
+				if( ma.getAction() == Action.PLUS )
+					action = "+";
+				char modeChar = ma.getMode();
+				String argument = ma.getArgument();
+				String toBeDisplayed = "";
+				if( modeChar == 'o' )
+				    {
+					if( action.equals("+") )
+					    toBeDisplayed = setter + Constants.modePlusO + argument;
+					else 
+					    toBeDisplayed = setter + Constants.modeMinusO + argument;
+					TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
+					tabGroup.set_chan_members(channelName, status_2_members);
+				    }
+				else if( modeChar == 'v' )
+				    {
+					if( action.equals("+") )
+					    toBeDisplayed = setter + Constants.modePlusV + argument;
+					else
+					    toBeDisplayed = setter + Constants.modeMinusV  + argument;					    
+					TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
+					tabGroup.set_chan_members(channelName, status_2_members);
+				    }
+				else if( modeChar == 'l' )
+				    {
+					if( action.equals("+") )
+					    toBeDisplayed = setter + Constants.modePlusL + argument;
+					else
+					    toBeDisplayed = setter + Constants.modeMinusL + argument;					    					
+				    }
+				else if( modeChar == 'k' )
+				    {
+					if( action.equals("+") )
+					    toBeDisplayed = setter + Constants.modePlusK + argument;
+					else
+					    toBeDisplayed = setter + Constants.modeMinusK + argument;
+				    }
+				else if( modeChar == 'b' )
+				    {
+					if( action.equals("+") )
+					    toBeDisplayed = setter + Constants.modePlusB + argument;
+					else
+					    toBeDisplayed = setter + Constants.modeMinusB + argument;
+				    }
+				else if( modeChar == 'e' )
+				    {
+					if( action.equals("+") )
+					    toBeDisplayed = setter + Constants.modePlusE + argument;
+					else
+					    toBeDisplayed = setter + Constants.modeMinusE + argument;
+				    }
+				else
+				    toBeDisplayed = setter + " sets mode " + action + modeChar + " " +  channelName;
+				tabGroup.setText(channelName, toBeDisplayed);
+			    }
+		    }
+	    }
 	else 
 	    {
 		System.out.println("In last else.");
@@ -438,8 +573,17 @@ public class Connection implements Runnable, IRCEventListener
 			String reason = getKickReason(tokens);
 			if( kickedNick.equals(nick_name) )
 			    {
+				/*
+				System.out.println("KICK_EVENT");
+				System.out.println("channelName : " + channelName);
+				System.out.println("kickedNick : " + kickedNick);
+				System.out.println("byWho : " + byWho);
+				System.out.println("reason : " + reason);
+				*/
+
 				tabGroup.setText( channelName, "You have been kicked from " + channelName + " by " + byWho + " (" + reason + ")");
 				tabGroup.clearChanMembersList(channelName);
+				System.out.println("In Conenction after clearChannelMembersList");
 			    }
 			else
 			    {

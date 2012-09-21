@@ -18,6 +18,19 @@ public final class Constants {
     public static final String default_user_name = "user";
     public static final String default_real_name = "real";
 
+    public static final String modePlusO = " gives channel operator status to ";
+    public static final String modeMinusO = " removes channel operator status from ";
+    public static final String modePlusV = " gives voice to ";
+    public static final String modeMinusV = " removes voice from ";
+    public static final String modePlusL = " sets channel limit to ";
+    public static final String modeMinusL = " removes channel limit";
+    public static final String modePlusK = " sets channel keyword to ";
+    public static final String modeMinusK = " removes channel keyword";
+    public static final String modePlusB = " sets ban on ";
+    public static final String modeMinusB = " removes ban on ";
+    public static final String modePlusE = " sets exempt on ";
+    public static final String modeMinusE = " removes exempt on ";
+
     public static final String user_info_label = "User Information";
     public static final String nick_name_label = "Nick name";
     public static final String second_choice_label = "Second choice";

@@ -60,11 +60,13 @@ public class TabGroup
     //    private TreeMap<String, Connection> tm_netname_2_conn;
     private TreeMap<String, JTextField> tm_nick_2_hostname_tf;
     //    private TreeMap<String, String> tm_usage_messages;
-    private TreeMap<String, Vector<String>> tmExistedNetwork2Channels;
+    //    private TreeMap<String, Vector<String>> tmExistedNetwork2Channels;
+    private TreeMap<String, String> tmTopicSet;
 
     private Vector<String> channels;
     private Vector<String> pms; 
     private Vector<JButton> ht_nick_buttons;
+    private Vector<String> existedChannels;
 
     private JTextArea server_ta;
     private JTextField server_tf;
@@ -91,13 +93,13 @@ public class TabGroup
 	tm_list_labels = new TreeMap<String, JLabel>();
 	tm_nick_2_hostname_tf = new TreeMap<String, JTextField>();
 	//	tm_usage_messages = new TreeMap<String, String>();
-	tmExistedNetwork2Channels = new TreeMap<String, Vector<String>>();
-
+	//	tmExistedNetwork2Channels = new TreeMap<String, Vector<String>>();
+	tmTopicSet = new TreeMap<String, String>();
 	ht_nick_buttons = new Vector<JButton>();
 
 	channels = new Vector<String>();
 	pms = new Vector<String>();
-
+	existedChannels = new Vector<String>();
     }
 
     public void setMainWindow(JFrame f)
@@ -568,10 +570,13 @@ public class TabGroup
 	return tm_netname_2_conn.get(netname);
     }
 */
+
+
     public void removeTab(String channelName)
     {
 	if( channels.contains(channelName))
 	    {
+		System.out.println("channles contains " + channelName);
 		tmta.remove(channelName);
 		tmtf.remove(channelName);
 		channels.remove(channelName);
@@ -595,9 +600,11 @@ public class TabGroup
 	
 		ht_nick_buttons.removeElementAt(indexOfChannel-1);
 		connection.part(channelName, null);
+		System.out.println("At the end of if block");
 	    }
 	else
 	    {
+		System.out.println("channles doesn't contain contains " + channelName);
 		pms.remove(channelName);
 		tm_nick_2_hostname_tf.remove(channelName);
 		tmta.remove(channelName);
@@ -608,6 +615,14 @@ public class TabGroup
 		ht_nick_buttons.removeElementAt(indexOfChannel-1);
 	    }
 	
+    }
+
+    public boolean tabAlreadyRemoved(String channelName)
+    {
+	int indexOfTab = tabbedPane.indexOfTab(channelName);
+	if( indexOfTab < 0 )
+	    return true;
+	return false;
     }
 
     public boolean getPmExists(String channelName)
@@ -622,7 +637,7 @@ public class TabGroup
 
     public boolean channelExisted(String channelName)
     {
-	return channels.contains(channelName);
+	return existedChannels.contains(channelName);
     }
 
     public void quit()
@@ -653,6 +668,7 @@ public class TabGroup
 		//		System.out.println();
 		//		System.out.println( topic_tf.toString() );
 		topic_tf.setText( topic );
+		
 	    }
 	catch( NullPointerException npe )
 	    {
@@ -731,6 +747,7 @@ public class TabGroup
 	list.setListData( for_list );
     }
 
+    /*
     public boolean getChannelTabExisted(String channelName)
     {
 	if( tmExistedNetwork2Channels.containsKey(networkName))
@@ -739,6 +756,7 @@ public class TabGroup
 	    }
 	return false;
     }
+    */
 
     public void reInitialiseChannel(String channelName)
     {
@@ -756,6 +774,7 @@ public class TabGroup
 
     public void clearChanMembersList(String channelName)
     {
+	System.out.println("In clearChannelMembersList");
 	JList<String> list = tm_members_list.get(channelName);
 	list.setListData(new Vector<String>());
 	tm_cell_renderers.remove(channelName);
@@ -765,18 +784,8 @@ public class TabGroup
 	tm_chan_members.remove(channelName);
 	channels.remove(channelName);
 	tm_topic_tf.get(channelName).setText("");
-	if( tmExistedNetwork2Channels.containsKey(networkName) )
-	    {
-		Vector<String> existedChannels = tmExistedNetwork2Channels.get(networkName);
-		existedChannels.add(channelName);
-		tmExistedNetwork2Channels.put(networkName, existedChannels);
-	    }
-	else
-	    {
-		Vector<String> existedChannels = new Vector<String>();
-		existedChannels.add(channelName);
-		tmExistedNetwork2Channels.put(networkName, existedChannels);
-	    }
+	existedChannels.add(channelName);
+	System.out.println("At the end of clearChannelMembersList");
     }
 
     public int getChannelCount()
