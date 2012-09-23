@@ -75,6 +75,7 @@ public class TabGroup
     private JButton nick_button;
 
     private JTabbedPane tabbedPane;
+    private JTabbedPane parentPane;
     private int tabNumber;
 
     public TabGroup(String networkName, Connection connection)
@@ -123,6 +124,11 @@ public class TabGroup
     public void setJTabbedPane(JTabbedPane tabbedPane)
     {
 	this.tabbedPane = tabbedPane;
+    }
+
+    public void setParentPane(JTabbedPane pp)
+    {
+	parentPane = pp;
     }
 
     public void initialise( String nick )
@@ -660,14 +666,11 @@ public class TabGroup
 
     public void quit()
     {
-	System.out.println("In quit.");
 	connection.quit("");
-	for( int i = 0; i < channels.size(); i++ )
-	    {
-		int indexOfChannel = tabbedPane.indexOfTab(channels.elementAt(i));
-		tabbedPane.removeTabAt(indexOfChannel);
-	    }
-	setText(networkName, "Disconnected.");
+	int indexOfChannel = parentPane.indexOfComponent(tabbedPane);
+	tabbedPane.removeAll();
+	parentPane.remove(tabbedPane);
+	//	setText(networkName, "Disconnected.");
     }
 
     public void setTopic( String channel_name, String topic )

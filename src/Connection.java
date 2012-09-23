@@ -85,6 +85,7 @@ public class Connection implements Runnable, IRCEventListener
 	previousTopicTime = new TreeMap<String, String>();
 	servPortES = serversPorts.entrySet();
 	serverPortIter = servPortES.iterator();
+	//	sessions = new Vector<Session>();
 
 	//	free_socket = 0;
 	//	no_of_sockets = 100;
@@ -173,7 +174,6 @@ public class Connection implements Runnable, IRCEventListener
 				tabGroup.set_chan_members(channelName, status_2_members);
 			    }
 		    }
-		
 	    }
 	else if( e.getType() == Type.MOTD )
 	    {
@@ -238,10 +238,8 @@ public class Connection implements Runnable, IRCEventListener
 
 		if(partedNick.equals(nick_name) )
 		    {
-			//			System.out.println("Before tabGroup.removeTab( " + channelName + " )");
 			if(!tabGroup.tabAlreadyRemoved(channelName))
 			    tabGroup.removeTab(channelName);
-			//			System.out.println("After tabGroup.removeTab( " + channelName + " )");
 		    }
 		else
 		    {
@@ -256,22 +254,11 @@ public class Connection implements Runnable, IRCEventListener
 		NickListEvent nle = (NickListEvent)e;
 		Channel channel = nle.getChannel();
 		String channel_name = channel.getName();
+		System.out.println("NICK_LIST EVENT for " + channel_name);
 
 		TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
 		tabGroup.set_chan_members(channel_name, status_2_members);
-
-		/*
-		String topic = channel.getTopic();
-		String topicSetter = channel.getTopicSetter();
-		Date topicDate = channel.getTopicSetTime();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
-		tabGroup.setTopic(channel_name, topic);
-		if( !topic.equals("") )
-		    {
-			tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
-			tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
-		    }
-		*/
+		System.out.println("After setting nicks for " + channel_name);
 	    }
 	else if( e.getType() == Type.JOIN_COMPLETE )
 	    {
@@ -282,48 +269,13 @@ public class Connection implements Runnable, IRCEventListener
 		
 		if( !tabGroup.channelExisted(channel_name))
 		   {
-		       //		       System.out.println("Channel doesn't Exist");
 		       if( !channels.containsKey(channel_name))
 			   channels.put(channel_name," ");
 		       tabGroup.create_chan_tab(channel_name);
-
-		       /*
-		       
-		       TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
-		       tabGroup.set_chan_members(channel_name, status_2_members);
-		       
-		       String topic = channel.getTopic();
-		       String topicSetter = channel.getTopicSetter();
-		       Date topicDate = channel.getTopicSetTime();
-		       DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
-		       tabGroup.setTopic(channel_name, topic);
-		       if( !topic.equals("") )
-			   {
-			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
-			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
-			   }
-		       */
-		   }
+ 		   }
 		else
 		    {
-			//		       System.out.println("Channel Existed");
 		       tabGroup.reInitialiseChannel(channel_name);
-
-		       /*
-		       TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
-		       tabGroup.set_chan_members(channel_name, status_2_members);
-		       
-		       String topic = channel.getTopic();
-		       String topicSetter = channel.getTopicSetter();
-		       Date topicDate = channel.getTopicSetTime();
-		       DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
-		       tabGroup.setTopic(channel_name, topic);
-		       if( !topic.equals("") )
-			   {
-			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " is : " + topic );
-			       tabGroup.setText( channel_name, Constants.topicStr + channel_name + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
-			   }
-		       */
 		    }
 	    }
 	else if( e.getType() == Type.TOPIC )
