@@ -8,19 +8,13 @@
 
     <property name="main-class"  value="IRC_Client"/>
 
-    <property name="lib.dir"     value="lib"/>
-
-    <path id="classpath">
-        <fileset dir="${lib.dir}" includes="**/*.jar"/>
-    </path>
-
     <target name="clean">
       <delete dir="${build.dir}"/>
     </target>
 
     <target name="compile" depends="clean">
         <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" debug="on">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" debug="on">
 	  <compilerarg value="-g"/>
 	</javac>
     </target>
@@ -37,7 +31,6 @@
     <target name="run" depends="jar">
         <java fork="true" classname="${main-class}">
             <classpath>
-                <path refid="classpath"/>
                 <path location="${jar.dir}/${ant.project.name}.jar"/>
             </classpath>
         </java>
