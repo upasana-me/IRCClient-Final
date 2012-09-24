@@ -542,6 +542,7 @@ public class TabGroup
 	if( text.equals("\n") || text.equals("") || text.equals(" ") || text.equals(null) || text == null )
 	    return;
 	ta.append( text + "\n" );
+	ta.setCaretPosition(ta.getDocument().getLength());
     }
 
     public void setNickButtonText( String nick )

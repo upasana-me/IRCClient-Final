@@ -101,6 +101,10 @@ public class ButtonTabOuterComponent extends JPanel
 					pane.removeTabAt(indexOfTab);
 					System.out.println("indexOfTab : " + indexOfTab);
 					mainWindow.removeConnection(panel);
+					if(pane.getTabCount() == 0 )
+					    {
+						//						mainWindow.setTextArea();
+					    }
 				    }
 			    }
 			catch(HeadlessException he)

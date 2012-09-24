@@ -51,6 +51,7 @@ public class Connection implements Runnable, IRCEventListener
     private TreeMap<String, String> channels;
     private TreeMap<String, TreeMap<String, Vector<String>>> chanName_2_chanMembers;
     private TreeMap<String, String> previousTopicTime;
+    //    private IdentityHashMap<TabGroup, Session> tabGroup2Session;
 
     private Vector<String> nicks_pms;
 
@@ -59,7 +60,9 @@ public class Connection implements Runnable, IRCEventListener
     private int no_of_sockets;
     private int free_socket;
 
-    private ConnectionManager manager;
+    private static ConnectionManager manager;
+    private static Profile defaultProfile;
+
     private Session session;
     private Profile profile;
 
@@ -74,7 +77,13 @@ public class Connection implements Runnable, IRCEventListener
 	STARTING_INFO
     }
 
-    Connection(HashMap<String, String> servPorts)
+    static 
+    {
+	defaultProfile = new Profile("");
+	manager = new ConnectionManager(defaultProfile);
+    }
+
+    public Connection(HashMap<String, String> servPorts)
     {
 	cur_nick = 0;
 	channels = new TreeMap<String, String>();
@@ -85,6 +94,7 @@ public class Connection implements Runnable, IRCEventListener
 	previousTopicTime = new TreeMap<String, String>();
 	servPortES = serversPorts.entrySet();
 	serverPortIter = servPortES.iterator();
+	//	tabGroup2Session = new IdentityHashMap<TabGroup, Session>();
 	//	sessions = new Vector<Session>();
 
 	//	free_socket = 0;
@@ -408,7 +418,7 @@ public class Connection implements Runnable, IRCEventListener
 		ModeEvent me = (ModeEvent)e;
 		String rawEventData = e.getRawEventData();
 		System.out.println("In MODE_EVENT");
-		//		System.out.println("me.getRawEventData() : " + me.getRawEventData());
+		System.out.println("rawEventData : " + rawEventData);
 		String setter = me.setBy();
 		
 		if( me.getModeType() == ModeType.USER )
@@ -506,7 +516,8 @@ public class Connection implements Runnable, IRCEventListener
 				    }
 				else
 				    toBeDisplayed = setter + " sets mode " + action + modeChar + " " +  channelName;
-				tabGroup.setText(channelName, toBeDisplayed);
+				if(!setter.equals(""))
+				    tabGroup.setText(channelName, toBeDisplayed);
 			    }
 		    }
 	    }
@@ -739,13 +750,13 @@ public class Connection implements Runnable, IRCEventListener
 	try
 	    {
 		profile = new Profile(user_name, nicks[0], nicks[1], nicks[2]);
-		manager = new ConnectionManager(profile);
+		//		manager = new ConnectionManager(profile);
 		Map.Entry<String, String> servPortPair = getNextServPort();
 		String server = servPortPair.getKey();
 		String port = servPortPair.getValue();
 		try
 		    {
-			session = manager.requestConnection(server, Integer.parseInt(port));
+			session = manager.requestConnection(server, Integer.parseInt(port), profile);
 			System.out.println("In connect, after requestConnection().");
 			session.addIRCEventListener(this);
 			session.setRejoinOnKick(false);
@@ -932,4 +943,10 @@ public class Connection implements Runnable, IRCEventListener
     {
 	session.close(message);
     }
+
+    /*    public Session getSession(String networkName)
+    {
+	
+    }
+    */
 }
