@@ -45,7 +45,7 @@ public class ChannelTab extends JPanel
 	
     private String channelName;
     private String nickName;
-    private JList nicksList;
+    private JList<String> nicksList;
     private JTextField textField;
     private JTextField topicTextField;
     private CellRenderer cellRenderer;

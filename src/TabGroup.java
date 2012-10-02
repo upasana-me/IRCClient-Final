@@ -1042,7 +1042,7 @@ public class TabGroup
 		    }
 		else
 		    {
-			for( int i = 1; i < tokens.length(); i++ )
+			for( int i = 1; i < tokens.length; i++ )
 			    {
 				connection.who(tokens[i]);
 			    }
@@ -1056,7 +1056,7 @@ public class TabGroup
 		    }
 		else
 		    {
-			for( int i = 1; i < tokens.length(); i++ )
+			for( int i = 1; i < tokens.length; i++ )
 			    {
 				connection.whois(tokens[i]);
 			    }
@@ -1070,9 +1070,9 @@ public class TabGroup
 		    }
 		else
 		    {
-			for( int i = 1; i < tokens.length(); i++ )
+			for( int i = 1; i < tokens.length; i++ )
 			    {
-				connection.whowas(tokens[i]);
+				connection.whoWas(tokens[i]);
 			    }
 		    }
 	    }

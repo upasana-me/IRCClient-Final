@@ -109,7 +109,7 @@ public class WhoisEventImpl implements WhoisEvent
 	 */
 	public void setSecondsIdle(int secondsIdle)
 	{
-		this.secondsIdle = secondsIdle();
+		this.secondsIdle = secondsIdle;
 	}
 
 	/* (non-Javadoc)

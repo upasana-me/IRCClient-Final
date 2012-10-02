@@ -428,7 +428,46 @@ public class Connection implements Runnable, IRCEventListener
 		String serverName = we.getServerName();
 		String channelName = we.getChannel();
 		String hereOrGone = (we.isAway() ? "Gone" : "Here");
-		String text = "User " + nick + ", ( " + userName + "@" + hostName + ") \"" + realName + "\" (" + hereOrGone + "), member of " + channel + ", is connected to " + serverName + ", " + we.getHopCount();
+		String text = "User " + nick + ", (" + userName + "@" + hostName + ") \"" + realName + "\" (" + hereOrGone + "), member of " + channelName + ", is connected to " + serverName + ", " + we.getHopCount() + " hop(s).\n" + nick + " :End of WHO results.";
+		tabGroup.setText(network_name, text);
+	    }
+	else if( e.getType() == Type.WHOIS_EVENT )
+	    {
+		WhoisEvent wie = (WhoisEvent)e;
+		String nick = wie.getNick();
+		String userName = wie.getUser();
+		String hostName = wie.getHost();
+		String realName = wie.getRealName();
+		String text = "[" + nick + "] (" + userName + "@" + hostName + "): " + realName;
+		tabGroup.setText(network_name, text);
+		
+		String server = wie.whoisServer();
+		String serverInfo = wie.whoisServerInfo();
+		text = "[" + nick + "] attached to " + server + " :"  + serverInfo;
+
+		long secondsIdle = wie.secondsIdle();
+		System.out.println("secondsIdle = " + secondsIdle);
+		long hours = secondsIdle / 3600;
+		long temp1 = secondsIdle % 3600;
+		long minutes = temp1/60;
+		long seconds = temp1 % 60;
+		Date signOnTime = wie.signOnTime();
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
+		String signOnTimeStr = df.format(signOnTime);
+		text = "[" + nick + "] idle " + hours + ":" + minutes + ":" + seconds + ", signon: " + signOnTimeStr;
+		tabGroup.setText(network_name, text);
+
+		String whoisChannels = "";
+		Vector<String> channels = new Vector<String>(wie.getChannelNames());
+		for( int i = 0; i < channels.size(); i++ )
+		    {
+			whoisChannels += channels.elementAt(i);
+			whoisChannels += " ";
+		    }
+
+		text = "[" + nick + "] is member of " + whoisChannels;
+		tabGroup.setText(network_name, text);
+		text = "[" + nick + "] End of WHOIS list";
 		tabGroup.setText(network_name, text);
 	    }
 	else if( e.getType() == Type.MODE_EVENT )
@@ -1018,7 +1057,7 @@ public class Connection implements Runnable, IRCEventListener
 
     public void whoWas(String nick)
     {
-	session.whowas(nick);
+	session.whoWas(nick);
     }
 
    /*    public Session getSession(String networkName)

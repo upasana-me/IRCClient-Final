@@ -17,14 +17,17 @@ public class WhoisParser implements CommandParser
 		{
 			case 311:
 			{
+			    for( int i = 0; i < 6; i++ )
+				System.out.println(token.arg(i));
+			    
 				
 				// "<nick> <user> <host> * :<real name>"
 				we = new WhoisEventImpl
-				(		
-					token.arg(0),
-					token.arg(4),
+				(
 					token.arg(1),
+					token.arg(5),
 					token.arg(2),
+					token.arg(3),
 					token.data(), 
 					event.getSession()
 				); 
