@@ -274,6 +274,11 @@ public class Connection implements Runnable, IRCEventListener
 	    {
 		JoinCompleteEvent jce = (JoinCompleteEvent)e;
 		Channel channel = jce.getChannel();
+		String topic = channel.getTopic();		
+		if(topic.equals(""))
+		    {
+			previousTopicTime.put(channel.getName(),"NOTOPIC");
+		    }
 		
 		String channel_name = channel.getName();
 		
@@ -412,6 +417,19 @@ public class Connection implements Runnable, IRCEventListener
 	else if( e.getType() == Type.EXCEPTION )
 	    {
 		System.out.println("Exception");		
+	    }
+	else if( e.getType() == Type.WHO_EVENT )
+	    {
+		WhoEvent we = (WhoEvent)e;
+		String nick = we.getNick();
+		String hostName = we.getHostName();
+		String realName = we.getRealName();
+		String userName = we.getUserName();
+		String serverName = we.getServerName();
+		String channelName = we.getChannel();
+		String hereOrGone = (we.isAway() ? "Gone" : "Here");
+		String text = "User " + nick + ", ( " + userName + "@" + hostName + ") \"" + realName + "\" (" + hereOrGone + "), member of " + channel + ", is connected to " + serverName + ", " + we.getHopCount();
+		tabGroup.setText(network_name, text);
 	    }
 	else if( e.getType() == Type.MODE_EVENT )
 	    {
@@ -873,6 +891,11 @@ public class Connection implements Runnable, IRCEventListener
 	return null;
     }
 
+    public void invite(String channelName, String nick)
+    {
+	session.invite(nick, session.getChannel(channelName));
+    }
+
     private String extractNumericOrString(String[] tokens)
     {
 	if( tokens.length >= 2 )
@@ -944,7 +967,61 @@ public class Connection implements Runnable, IRCEventListener
 	session.close(message);
     }
 
-    /*    public Session getSession(String networkName)
+    public void op(String channelName, String nick)
+    {
+	Channel channel = session.getChannel(channelName);
+	channel.op(nick);
+    }
+
+    public void deop(String channelName, String nick)
+    {
+	Channel channel = session.getChannel(channelName);
+	channel.deop(nick);
+    }
+
+    public void quote(String message)
+    {
+	session.sayRaw(message);
+    }
+
+    public void voice(String channelName, String nick)
+    {
+	Channel channel = session.getChannel(channelName);
+	channel.voice(nick);
+    }
+
+    public void setTopic(String channelName, String topic)
+    {
+	Channel channel = session.getChannel(channelName);
+	channel.setTopic(topic);
+    }
+
+    public void mode( String channelName, String modeString, String nick )
+    {
+	
+    }
+
+    public void notice(String target, String message)
+    {
+	session.notice(target, message);
+    }
+
+    public void who(String nick)
+    {
+	session.who(nick);
+    }
+
+    public void whois(String nick)
+    {
+	session.whois(nick);
+    }
+
+    public void whoWas(String nick)
+    {
+	session.whowas(nick);
+    }
+
+   /*    public Session getSession(String networkName)
     {
 	
     }

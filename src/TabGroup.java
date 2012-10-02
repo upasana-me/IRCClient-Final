@@ -36,36 +36,37 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-
-
 public class TabGroup
 {
     private JFrame mw;
 
     private String networkName;
+    private String nickName;
     private Connection connection;
 
-    private TreeMap<String, JTextArea> tmta;
-    private TreeMap<String, JTextField> tmtf;
+    //    private TreeMap<String, JTextArea> tmta;
+    //    private TreeMap<String, JTextField> tmtf;
+    private TreeMap<String, ChannelTab> tmChannelTab;
+    private TreeMap<String, PrivateMessageTab> tmPrivateMessageTab;
     //    private Hashtable<String, JTextArea> h_chan_ta;
     //    private Hashtable<String, JTextField> h_chan_tf;
-    private TreeMap<String, JTextField> tm_topic_tf;
-    private TreeMap<String, JList<String>> tm_members_list;
-    private TreeMap<String, CellRenderer> tm_cell_renderers;
+    //    private TreeMap<String, JTextField> tm_topic_tf;
+    //    private TreeMap<String, JList<String>> tm_members_list;
+    //    private TreeMap<String, CellRenderer> tm_cell_renderers;
     //    private TreeMap<String, Vector<String>> tm_network_2_pms;
-    private TreeMap<String, Vector<String>> tm_chan_members;
-    private TreeMap<String, TreeSet<String>> tm_actual_members;
-    private TreeMap<String, JLabel> tm_list_labels;
+    //    private TreeMap<String, Vector<String>> tm_chan_members;
+    //    private TreeMap<String, TreeSet<String>> tm_actual_members;
+    //    private TreeMap<String, JLabel> tm_list_labels;
     //    private TreeMap<String, Vector<JButton>> tm_net_2_buttons;
     //    private TreeMap<String, Connection> tm_netname_2_conn;
-    private TreeMap<String, JTextField> tm_nick_2_hostname_tf;
+    //    private TreeMap<String, JTextField> tm_nick_2_hostname_tf;
     //    private TreeMap<String, String> tm_usage_messages;
     //    private TreeMap<String, Vector<String>> tmExistedNetwork2Channels;
-    private TreeMap<String, String> tmTopicSet;
+    //    private TreeMap<String, String> tmTopicSet;
 
     private Vector<String> channels;
     private Vector<String> pms; 
-    private Vector<JButton> ht_nick_buttons;
+    //    private Vector<JButton> ht_nick_buttons;
     private Vector<String> existedChannels;
 
     private JTextArea server_ta;
@@ -78,29 +79,36 @@ public class TabGroup
     private JTabbedPane parentPane;
     private int tabNumber;
 
-    public TabGroup(String networkName, Connection connection)
+    public TabGroup(String networkName, Connection connection )
     {
 	this.networkName = networkName;
 	this.connection = connection;
 	tabNumber = 0;
 
-	tmta = new TreeMap<String, JTextArea>();
-	tmtf = new TreeMap<String, JTextField>();
-	tm_topic_tf = new TreeMap<String, JTextField>();
-	tm_members_list = new TreeMap<String, JList<String>>();
-	tm_chan_members = new TreeMap<String, Vector<String>>();
-	tm_actual_members = new TreeMap<String, TreeSet<String>>();
-	tm_cell_renderers = new TreeMap<String, CellRenderer>();
-	tm_list_labels = new TreeMap<String, JLabel>();
-	tm_nick_2_hostname_tf = new TreeMap<String, JTextField>();
+	//	tmta = new TreeMap<String, JTextArea>();
+	//	tmtf = new TreeMap<String, JTextField>();
+	//	tm_topic_tf = new TreeMap<String, JTextField>();
+	//	tm_members_list = new TreeMap<String, JList<String>>();
+	//	tm_chan_members = new TreeMap<String, Vector<String>>();
+	//	tm_actual_members = new TreeMap<String, TreeSet<String>>();
+	//	tm_cell_renderers = new TreeMap<String, CellRenderer>();
+	//	tm_list_labels = new TreeMap<String, JLabel>();
+	//	tm_nick_2_hostname_tf = new TreeMap<String, JTextField>();
 	//	tm_usage_messages = new TreeMap<String, String>();
 	//	tmExistedNetwork2Channels = new TreeMap<String, Vector<String>>();
-	tmTopicSet = new TreeMap<String, String>();
-	ht_nick_buttons = new Vector<JButton>();
+	//	tmTopicSet = new TreeMap<String, String>();
+	tmChannelTab = new TreeMap<String, ChannelTab>();
+	tmPrivateMessageTab = new TreeMap<String, PrivateMessageTab>();
+	//	ht_nick_buttons = new Vector<JButton>();
 
 	channels = new Vector<String>();
 	pms = new Vector<String>();
 	existedChannels = new Vector<String>();
+    }
+
+    public String getNickName()
+    {
+	return nickName;
     }
 
     public void setMainWindow(JFrame f)
@@ -128,11 +136,28 @@ public class TabGroup
 
     public void setParentPane(JTabbedPane pp)
     {
-	parentPane = pp;
+	this.parentPane = pp;
+    }
+
+    public JTabbedPane getJTabbedPane()
+    {
+	return tabbedPane;
+    }
+
+    public JTabbedPane getParentPane()
+    {
+	return parentPane;
+    }
+
+    public String getNickButtonText()
+    {
+	return nickName;
     }
 
     public void initialise( String nick )
     {
+	this.nickName = nick;
+
 	JPanel p = new JPanel( new BorderLayout() );
 	JPanel p1 = new JPanel( new BorderLayout() );
 	JPanel p2 = new JPanel( new BorderLayout() );
@@ -155,7 +180,7 @@ public class TabGroup
 	server_ta = new JTextArea();
 	server_ta.setMargin(new Insets(0,50,0,10));
 	server_ta.setLineWrap(true);
-	tmta.put( networkName, server_ta );
+	//	tmta.put( networkName, server_ta );
 	JScrollPane sp = new JScrollPane( server_ta );
 	
 	server_ta.setEditable( false );
@@ -178,7 +203,7 @@ public class TabGroup
 		}
 	    });
 	server_tf.setActionCommand( Constants.server_tf_ac );
-	tmtf.put( networkName, server_tf );
+	//	tmtf.put( networkName, server_tf );
 
 	nick_button = new JButton(nick);
 	//	nick_button.setText( nick );
@@ -198,7 +223,7 @@ public class TabGroup
 			{}
 		}
 	    });
-	ht_nick_buttons.add( nick_button );
+	//	ht_nick_buttons.add( nick_button );
 	//	tm_net_2_buttons.put(tabname, ht_nick_buttons);
 
 	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
@@ -233,154 +258,10 @@ public class TabGroup
       	//	System.out.println("Initialised");
     }
 
-    public void create_chan_tab( final String channel_name )
+    public void create_chan_tab(String channelName)
     {
-	String channelName = channel_name;
 	channels.add(channelName);
-
-	/*
-	if( tm_network_2_channels.size() == 0 )
-	    {
-		Vector<String> channels = new Vector<String>();
-		channels.add(channel_name);
-		tm_network_2_channels.put(networkName, channels);
-	    }
-	else 
-	    {
-		Vector<String> channels = tm_network_2_channels.get(networkName);
-		channels.add(channelName);
-		tm_network_2_channels.put(networkName, channels);
-	    }
-	*/
-	
-	JPanel p = new JPanel( new BorderLayout() );
-	JPanel p0 = new JPanel( new BorderLayout() );
-	JPanel p1 = new JPanel( new BorderLayout() );
-	JPanel p2 = new JPanel( new BorderLayout() );
-	JPanel p3 = new JPanel( new BorderLayout() );
-	JPanel p4 = new JPanel( new BorderLayout() );
-	JPanel p5 = new JPanel( new BorderLayout() );
-	JPanel p6 = new JPanel( new BorderLayout() );
-	
-	//need modification
-	JPanel p7 = new ButtonTabComponent(tabbedPane, channel_name, this );
-
-	Vector<String> vector = new Vector<String>();
-	TreeSet<String> treeset = new TreeSet<String>();
-	JLabel chan_info = new JLabel();
-	CellRenderer cr = new CellRenderer();
-
-	JList<String> chan_list = new JList<String>(vector);
-	chan_list.setCellRenderer(cr);
-	tm_members_list.put( channel_name, chan_list );
-	tm_chan_members.put( channel_name, vector );
-	tm_actual_members.put( channel_name, treeset );
-	tm_cell_renderers.put(channel_name, cr);
-	tm_list_labels.put(channel_name, chan_info);
-	
-	JScrollPane sp0 = new JScrollPane( chan_list );
-	
-	p5.setBorder( BorderFactory.createLineBorder( Color.black, 1 ) );
-	p5.add( chan_info, BorderLayout.CENTER );
-
-	p0.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
-	p0.add( p5, BorderLayout.NORTH );
-	p0.add( sp0, BorderLayout.CENTER  );
-
-	JTextField chan_topic_tf = new JTextField();
-	tm_topic_tf.put( channel_name, chan_topic_tf );
-	chan_topic_tf.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
-	
-	p6.add( chan_topic_tf, BorderLayout.CENTER );
-
-	final JTextArea chan_ta = new JTextArea();
-	chan_ta.setMargin(new Insets(0,50,0,10));
-	chan_ta.setLineWrap(true);
-	tmta.put( channel_name, chan_ta );
-	JScrollPane sp = new JScrollPane( chan_ta );
-	String chan_join_text = Constants.chan_join_text + channel_name + "\n";
-	setText( channel_name, chan_join_text );
-	
-	chan_ta.setEditable( false );
-
-	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
-	p1.add( sp, BorderLayout.CENTER  );
-
-	final JTextField chan_tf = new JTextField();
-	tmtf.put( channel_name, chan_tf );
-	chan_tf.addActionListener( new ActionListener() 
-	    {
-		public void actionPerformed(ActionEvent ae)
-		{
-		    String s = chan_tf.getText();
-		    chan_tf.setText("");
-		    s = s.trim();
-		    if( s.startsWith("/") )
-			{
-			    parseCommand(channel_name, s);
-			}
-		    else
-			{
-			    if( !s.equals(""))
-				{
-				    connection.sendChannelMessage(channel_name, s);
-				    //			    tm_netname_2_conn.get(network_name).sendChannelMessage(channel_name, s);
-				    setText(channel_name, "<" + nick_button.getText() + "> : " + s);
-				}
-			}
-		}
-	    });
-	chan_tf.requestFocus();
-
-	JButton nick_but = new JButton( nick_button.getText() );
-	nick_but.addActionListener( new ActionListener()
-	    {
-		public void actionPerformed(ActionEvent ae)
-		{
-		    //		    System.out.println("In actionPerformed of nick_but");
-		    try
-			{
-			    //	    System.out.println("In try block");
-			    changeNick();
-			}
-		    catch(NullPointerException npe)
-			{}
-		    catch(HeadlessException he)
-			{}
-		}
-	    });
-	ht_nick_buttons.add( nick_but );
-
-	p2.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
- 	p2.add( nick_but, BorderLayout.WEST );
-
-	p3.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
-	p3.add( chan_tf );
-
-	p.setBorder( BorderFactory.createLineBorder( Color.black, 2 ) );
-
-	p4.add( p2, BorderLayout.LINE_START );
-	p4.add( p3 );
-
-	p.add( p6, BorderLayout.NORTH );
-	p.add( p0, BorderLayout.EAST );
-	p.add( p1, BorderLayout.CENTER );
-	p.add( p4, BorderLayout.SOUTH );
-
-	tabbedPane.add( channel_name, p );
-	//need modification
-	tabbedPane.setTabComponentAt( tabbedPane.getTabCount() -1, p7);
-	//	tabNumber++;
-	/*
-	if( p.isRequestFocusEnabled() )
-	    System.err.println("Error in requestFocusInWindow()");
-	p.requestFocus();
-	*/
-	//	    System.err.println("Error in requestFocusInWindow()");
-
-	tabbedPane.setSelectedComponent( p );
-	//	System.out.println("Initialised");
-	
+	tmChannelTab.put(channelName, new ChannelTab(channelName, this));
     }
 
     /**
@@ -394,8 +275,22 @@ public class TabGroup
      * @param message
      * message sent by the other person
      */
-    public void create_privmsg_tab( final String nick_name, String hostname, String message )
+    public void create_privmsg_tab(String senderNickName, String hostname, String message )
     {
+	pms.add(senderNickName);
+	PrivateMessageTab privateMessageTab = new PrivateMessageTab(senderNickName, this);
+	tmPrivateMessageTab.put(senderNickName, privateMessageTab );
+	privateMessageTab.setText(message);
+	privateMessageTab.setHostName(hostname);
+    }
+
+    public Connection getConnection()
+    {
+	return connection;
+    }
+
+
+    /*
 	String senderNick = nick_name;
 	pms.add(nick_name);
 	
@@ -414,6 +309,7 @@ public class TabGroup
 	    }
 	*/
 	
+    /*
 	JPanel p = new JPanel( new BorderLayout() );
 	JPanel p0 = new JPanel( new BorderLayout() );
 	JPanel p1 = new JPanel( new BorderLayout() );
@@ -431,7 +327,7 @@ public class TabGroup
 	p0.add( p5, BorderLayout.NORTH );
 	p0.add( sp0, BorderLayout.CENTER  );
 	*/
-
+    /*
 	JTextField hostname_tf = new JTextField();
 	hostname_tf.setText(hostname);
 	hostname_tf.setEditable(false);
@@ -521,9 +417,9 @@ public class TabGroup
 	//	    System.err.println("Error in requestFocusInWindow()");
 	//	tp.addTab( nick_name, p );
 
-	tabbedPane.setSelectedComponent( p );
+    //	tabbedPane.setSelectedComponent( p );
 	//	System.out.println("Initialised");
-    }
+    //    }
 
     /**
      * Method for setting text on JTextArea 
@@ -536,21 +432,42 @@ public class TabGroup
     {
 	//	System.out.println("tabname : " + tabname );
 	//	System.out.println("text : " + text );
-	JTextArea ta = tmta.get( tabname );
-	//	System.out.println( ta.toString() );
-	//	System.out.println("text = " + text );
+
 	if( text.equals("\n") || text.equals("") || text.equals(" ") || text.equals(null) || text == null )
 	    return;
-	ta.append( text + "\n" );
-	ta.setCaretPosition(ta.getDocument().getLength());
+
+	if( tabname.equals(networkName))
+	    server_ta.append(text + "\n");
+	else if( channels.contains(tabname) )
+	    {
+		ChannelTab channelTab = tmChannelTab.get( tabname );
+		channelTab.setText(text);
+	    }
+	else 
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabname);
+		privateMessageTab.setText(text);
+	    }
+	    
+	//	System.out.println( ta.toString() );
+	//	System.out.println("text = " + text );
     }
 
     public void setNickButtonText( String nick )
     {
-	for( int i = 0; i < ht_nick_buttons.size(); i++ )
+	this.nickName = nick;
+	try
 	    {
-		JButton jb = ht_nick_buttons.elementAt( i );
-		jb.setText( nick );
+		Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+		for( int i = 0; i < channelTabs.size(); i++ )
+		    channelTabs.elementAt(i).setNickButtonText(nick);
+		Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
+		for( int i = 0; i < privateMessageTabs.size(); i++ )
+		    privateMessageTabs.elementAt(i).setNickButtonText(nick);	
+	    }
+	catch(NullPointerException npe)
+	    {
+		npe.printStackTrace();
 	    }
     }
 
@@ -602,28 +519,15 @@ public class TabGroup
 	if( channels.contains(channelName))
 	    {
 		System.out.println("channles contains " + channelName);
-		tmta.remove(channelName);
-		tmtf.remove(channelName);
 		channels.remove(channelName);
-		tm_topic_tf.remove(channelName);
-		tm_members_list.remove(channelName);
-		tm_cell_renderers.remove(channelName);
-
-		//	Vector<String> channels = tm_network_2_channels.get(networkName);
-		//	tm_network_2_channels.put(networkName, channels);
-
-		tm_chan_members.remove(channelName);
-		tm_actual_members.remove(channelName);
-		tm_list_labels.remove(channelName);
-
+		tmChannelTab.remove(channelName);
 		int indexOfChannel = tabbedPane.indexOfTab(channelName);
 		tabbedPane.removeTabAt(indexOfChannel);
-
+		
 		//	Vector<JButton> buttons = tm_net_2_buttons.get(networkName);
 		//	buttons.removeElementAt(indexOfChannel - 1);
 		//	tm_net_2_buttons.put(channelName, buttons);
 	
-		ht_nick_buttons.removeElementAt(indexOfChannel-1);
 		connection.part(channelName, null);
 		System.out.println("At the end of if block");
 	    }
@@ -631,13 +535,14 @@ public class TabGroup
 	    {
 		System.out.println("channles doesn't contain contains " + channelName);
 		pms.remove(channelName);
-		tm_nick_2_hostname_tf.remove(channelName);
-		tmta.remove(channelName);
-		tmtf.remove(channelName);
+		tmPrivateMessageTab.remove(channelName);
+		//		tm_nick_2_hostname_tf.remove(channelName);
+		//		tmta.remove(channelName);
+		//		tmtf.remove(channelName);
 
 		int indexOfChannel = tabbedPane.indexOfTab(channelName);
 		tabbedPane.removeTabAt(indexOfChannel);
-		ht_nick_buttons.removeElementAt(indexOfChannel-1);
+		//		ht_nick_buttons.removeElementAt(indexOfChannel-1);
 	    }
 	
     }
@@ -674,7 +579,7 @@ public class TabGroup
 	//	setText(networkName, "Disconnected.");
     }
 
-    public void setTopic( String channel_name, String topic )
+    public void setTopic( String channelName, String topic )
     {
 	try
 	    {
@@ -686,11 +591,11 @@ public class TabGroup
 		System.out.println("channel_name : " + channel_name );
 		System.out.println( "Object = " + ht_topic_tf.containsKey( channel_name ) );
 		*/
-		JTextField topic_tf = tm_topic_tf.get( channel_name );
 		//		System.out.println();
 		//		System.out.println( topic_tf.toString() );
-		topic_tf.setText( topic );
-		
+
+		ChannelTab channelTab = tmChannelTab.get(channelName);
+		channelTab.setTopic(topic);		
 	    }
 	catch( NullPointerException npe )
 	    {
@@ -703,10 +608,15 @@ public class TabGroup
      * @param treemap
      * contains members' list for the channel
      */
-    public void set_chan_members( String channel_name, TreeMap<String, Vector<String>> treemap )
+    public void set_chan_members( String channelName, TreeMap<String, Vector<String>> treemap )
     {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setChanMembers(treemap);
+	
+    }
 	//	Iterator<String> iter = treeset.iterator();
 
+	/*
 	Vector<String> ops = treemap.get("o"); // key "o" is for operators
 	Vector<String> voiced = treemap.get("v"); // key "v" is for voiced members
 	Vector<String> others = treemap.get("r"); // key "r" is for rest of the members
@@ -782,21 +692,24 @@ public class TabGroup
 
     public void reInitialiseChannel(String channelName)
     {
+	/*
 	JList<String> list = tm_members_list.get(channelName);
 	CellRenderer cr = new CellRenderer();
 	list.setCellRenderer(cr);
 	tm_cell_renderers.put(channelName, cr);
 	tm_chan_members.put(channelName, new Vector<String>());
+*/
 	//	Vector<String> channels = tm_network_2_channels.get(networkName);
 	channels.add(channelName);
 	//	tm_network_2_channels.put(networkName, channels);
 	//	tmExistedNetwork2Channels.get(networkName).remove(channelName);
-	setText(channelName, "Now talking on " + channelName);
+	tmChannelTab.get(channelName).setText("Now talking on " + channelName);
     }
 
     public void clearChanMembersList(String channelName)
     {
 	System.out.println("In clearChannelMembersList");
+	/*
 	JList<String> list = tm_members_list.get(channelName);
 	list.setListData(new Vector<String>());
 	tm_cell_renderers.remove(channelName);
@@ -804,8 +717,11 @@ public class TabGroup
 	listLabel.setText("  ");
 	tm_list_labels.put(channelName, listLabel);
 	tm_chan_members.remove(channelName);
+*/
 	channels.remove(channelName);
-	tm_topic_tf.get(channelName).setText("");
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.clearChanMembersList();
+	//	tm_topic_tf.get(channelName).setText("");
 	existedChannels.add(channelName);
 	System.out.println("At the end of clearChannelMembersList");
     }
@@ -825,13 +741,12 @@ public class TabGroup
 	return networkName;
     }
 
-    private void changeNick()
+    public void changeNick()
     {
 	System.out.println("changeNick");
 	try
 	    {
-		String presentNick = nick_button.getText();
-		String newNick = (String)JOptionPane.showInputDialog(mw, Constants.promptNick, Constants.promptNick, JOptionPane.QUESTION_MESSAGE, null, null, presentNick);
+		String newNick = (String)JOptionPane.showInputDialog(mw, Constants.promptNick, Constants.promptNick, JOptionPane.QUESTION_MESSAGE, null, null, nickName);
 		if( newNick != "" && newNick != null)
 		    {
 			connection.changeNick(newNick);
@@ -849,6 +764,7 @@ public class TabGroup
 	/*
 	Set<Map.Entry<String, JTextArea>> netname_ta = tmta.entrySet();
 	Iterator<Map.Entry<String, JTextArea>> iterator = netname_ta.iterator();
+
 	
 	while( iterator.hasNext() )
 	    {
@@ -862,9 +778,13 @@ public class TabGroup
     public void modifyChannelList(String oldNick, String newNick)
     {
 	//	Vector<String> channels = tm_network_2_channels.get(networkName);
+	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
 	
-	for(int i = 0; i < channels.size(); i++ )
+	for(int i = 0; i < channelTabs.size(); i++ )
 	    {
+		channelTabs.elementAt(i).modifyChannelList(oldNick, newNick);
+
+		/*
 		Vector<String> chanMembers = tm_chan_members.get(channels.elementAt(i));
 		if(chanMembers.contains(oldNick))
 		    {
@@ -882,6 +802,7 @@ public class TabGroup
 			list.setListData(for_list);
 			tm_members_list.put(channels.elementAt(i), list);
 		    }
+		*/
 	    }	
     }
 
@@ -892,6 +813,14 @@ public class TabGroup
 	//	Vector<String> channels = tm_network_2_channels.get(networkName);
 	
 	//	System.out.println("In setAway.");
+	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+	
+	for(int i = 0; i < channelTabs.size(); i++ )
+	    {
+		channelTabs.elementAt(i).setAway(nick);
+	    }
+
+	/*
 	for(int i = 0; i < channels.size(); i++ )
 	    {
 		Vector<String> chanMembers = tm_chan_members.get(channels.elementAt(i));
@@ -912,10 +841,12 @@ public class TabGroup
 			tm_members_list.put(channels.elementAt(i), list);
 		    }
 	    }	
+	*/
     }
 
-    private void parseCommand(String channelName, String command)
+    public void parseCommand(String channelName, String command)
     {
+	System.out.println("In parseCommand");
 	command = command.substring(1);
 	String tokens[] = command.split(" ");
 	tokens[0] = tokens[0].toUpperCase();
@@ -923,22 +854,45 @@ public class TabGroup
 
 	if( tokens[0].equals("AWAY"))
 	    {
-		String awayMessage = command.substring(5);
+		String awayMessage = "";
+		if( command.length() > 5)
+		    awayMessage = command.substring(5);
 		connection.setAway(awayMessage);
 	    }
 	else if( tokens[0].equals("BAN"))
-	    {}
+	    {
+	    }
 	else if( tokens[0].equals("CTCP"))
 	    {}
 	else if( tokens[0].equals("DCC"))
 	    {}
 	else if( tokens[0].equals("DEOP"))
 	    {
+		if( tokens.length < 2 )
+		    {}
+		else
+		    {
+			for( int i = 1; i < tokens.length; i++ )
+			    {
+				connection.deop(channelName, tokens[i]);
+			    }
+		    }		
 	    }
 	else if( tokens[0].equals("HELP"))
 	    {}
 	else if( tokens[0].equals("INVITE"))
-	    {}
+	    {
+		if( tokens.length < 2 )
+		    {
+			//usage message display
+		    }
+		else
+		    {
+			//			System.out.println(tokens[1]);
+			connection.invite(channelName, tokens[1]);
+			setText(channelName, "You've invited " + tokens[1] + " to " + channelName);
+		    }		
+	    }
 	else if( tokens[0].equals("JOIN") )
 	    {
 		if( tokens.length >= 2 )
@@ -983,50 +937,67 @@ public class TabGroup
 	    }
 	else if(tokens[0].equals("MSG") )
 	    {
+		String nick = tokens[1];
+		String message = command.substring(tokens[0].length() + tokens[1].length() + 2 );
+		connection.sendPrivateMessage(nick, message);
+		setText(channelName, ">" + nick + "< : " + message);
 	    }
 	else if( tokens[0].equals("NICK"))
-	    {}
+	    {
+		//		System.out.println(tokens.length);
+		if( tokens.length < 2 )
+		    {
+			//usage message display
+		    }
+		else
+		    {
+			//			System.out.println(tokens[1]);
+			connection.changeNick(tokens[1]);
+		    }
+	    }
 	else if( tokens[0].equals("NOTICE"))
-	    {}
+	    {
+		if( tokens.length < 2 )
+		    {}
+		else
+		    {
+			String target = tokens[1];
+			String message = command.substring(tokens[0].length() + tokens[1].length() + 2);
+			connection.notice(target, message);
+		    }
+	    }
 	else if( tokens[0].equals("NOTIFY"))
 	    {}
 	else if( tokens[0].equals("OP"))
-	    {}
+	    {
+		if( tokens.length < 2 )
+		    {}
+		else
+		    {
+			for( int i = 1; i < tokens.length; i++ )
+			    {
+				connection.op(channelName, tokens[i]);
+			    }
+		    }
+	    }
 	else if( tokens[0].equals("PART"))
 	    {
 		String partChannel = channelName;
 		String partMessage = "";
-		//		String partUsageMessage = tm_usage_messages.get("PART");
-		//		Vector<String> pms = tm_network_2_pms.get(netname);
-		/*
-		for( int i = 0; i < pms.size(); i++ )
-		    {
-			System.out.println("pms.elementAt( " + i + " ) = " + pms.elementAt(i));
-		    }
-		*/
 		if( tokens.length >= 2 )
 		    {
 			partChannel = tokens[1];
-			//			System.out.println("tm_topic_tf containsKey returns true.");
 			if( tokens.length > 2 )
 			    {
 				partMessage = command.substring("/PART ".length() + tokens[1].length());
 			    }
 			connection.part( partChannel, partMessage );
-			/*
-			System.out.println("partChannel : " + partChannel);
-			System.out.println("partMessage : " + partMessage);
-			*/
 		    }
 		else if( pms != null && !pms.equals(null) && pms.contains(channelName))
 		    {
-			//			System.out.println("Tab is a pm");
-			//			setText(netname, partUsageMessage);
-			//			setText(channelName, partUsageMessage);
 		    }
 		else if( networkName.equals(channelName) )
 		    {
-			//			setText(netname, partUsageMessage);			
 		    }
 		else
 		    {
@@ -1036,19 +1007,74 @@ public class TabGroup
 	    }
 	else if( tokens[0].equals("QUIT"))
 	    {
-		
+		String message = "";
+		if( tokens.length >= 2 )
+		    message = command.substring(tokens[0].length() + 1 );
+		connection.quit(message);
 	    }
 	else if( tokens[0].equals("QUOTE"))
 	    {
-		
+		String message = command.substring(tokens[0].length() + 1);
+		connection.quote(message);
 	    }
 	else if( tokens[0].equals("SERVER"))
-	    {}
+	    {
+		
+	    }
 	else if( tokens[0].equals("TOPIC"))
-	    {}
+	    {
+		String topic = command.substring(tokens[0].length() + 1);
+		connection.setTopic(channelName, topic);
+	    }
 	else if( tokens[0].equals("UNBAN"))
-	    {}
+	    {
+	    }
 	else if( tokens[0].equals("VOICE"))
-	    {}
+	    {
+		String nick = tokens[1];
+		connection.voice(channelName, nick);
+	    }
+	else if( tokens[0].equals("WHO"))
+	    {
+		if( tokens.length < 2 )
+		    {
+			setText(networkName, "who :Syntax error");
+		    }
+		else
+		    {
+			for( int i = 1; i < tokens.length(); i++ )
+			    {
+				connection.who(tokens[i]);
+			    }
+		    }
+	    }
+	else if( tokens[0].equals("WHOIS"))
+	    {
+		if( tokens.length < 2 )
+		    {
+			setText(networkName, "whois :Syntax error");
+		    }
+		else
+		    {
+			for( int i = 1; i < tokens.length(); i++ )
+			    {
+				connection.whois(tokens[i]);
+			    }
+		    }
+	    }
+	else if( tokens[0].equals("WHOWAS"))
+	    {
+		if( tokens.length < 2 )
+		    {
+			setText(networkName, "whowas :Syntax error");
+		    }
+		else
+		    {
+			for( int i = 1; i < tokens.length(); i++ )
+			    {
+				connection.whowas(tokens[i]);
+			    }
+		    }
+	    }
     }
 }
