@@ -173,6 +173,7 @@ public abstract class DefaultIRCEventListener implements IRCEventListener
 
     protected void handleWhowasEvent(WhowasEvent event)
     {
+	System.out.println("In handleWhowasEvent");
         log.finest(event.getRawEventData());
     }
 

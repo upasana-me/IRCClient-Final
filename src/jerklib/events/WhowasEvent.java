@@ -35,4 +35,8 @@ public interface WhowasEvent extends IRCEvent
      * @return realname
      */
     String getRealName();
+
+    String getServerAndTime();
+    
+    void setServerAndTime(String serverAndTime);
 }

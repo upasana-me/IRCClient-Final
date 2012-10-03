@@ -17,10 +17,6 @@ public class WhoisParser implements CommandParser
 		{
 			case 311:
 			{
-			    for( int i = 0; i < 6; i++ )
-				System.out.println(token.arg(i));
-			    
-				
 				// "<nick> <user> <host> * :<real name>"
 				we = new WhoisEventImpl
 				(

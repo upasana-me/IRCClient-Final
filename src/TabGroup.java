@@ -437,7 +437,7 @@ public class TabGroup
 	    return;
 
 	if( tabname.equals(networkName))
-	    server_ta.append(text + "\n");
+	    setServerText(text);
 	else if( channels.contains(tabname) )
 	    {
 		ChannelTab channelTab = tmChannelTab.get( tabname );
@@ -451,6 +451,12 @@ public class TabGroup
 	    
 	//	System.out.println( ta.toString() );
 	//	System.out.println("text = " + text );
+    }
+
+    private void setServerText(String text)
+    {
+	server_ta.append(text + "\n");
+	server_ta.setCaretPosition(server_ta.getDocument().getLength());
     }
 
     public void setNickButtonText( String nick )

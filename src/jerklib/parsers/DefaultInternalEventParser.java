@@ -69,8 +69,9 @@ public class DefaultInternalEventParser implements InternalEventParser
 		parsers.put("301" , awayParser);
 		parsers.put("305" , awayParser);
 		parsers.put("306" , awayParser);
-		
-		parsers.put("314", new WhoWasParser());
+
+		WhoWasParser whoWasParser = new WhoWasParser();
+		parsers.put("314", whoWasParser);
 		
 		WhoisParser whoisParser = new WhoisParser();
 		parsers.put("311", whoisParser);
@@ -113,6 +114,7 @@ public class DefaultInternalEventParser implements InternalEventParser
 		parsers.put("INVITE", new InviteParser());
 		parsers.put("NICK", new NickParser());
 		parsers.put("MODE", new ModeParser());
+		parsers.put("KICK", new KickParser());
 
 		
 		//numeric errors

@@ -11,8 +11,9 @@ import jerklib.events.WhowasEvent;
 public class WhowasEventImpl implements WhowasEvent
 {
 	private final Type type = Type.WHOWAS_EVENT;
-	private final String hostName, userName, nick, realName, rawEventData;
+    private final String hostName, userName, nick, realName, rawEventData;
 	private final Session session;
+    private String serverAndTime;
 
 	public WhowasEventImpl
 	(
@@ -88,4 +89,13 @@ public class WhowasEventImpl implements WhowasEvent
 		return type;
 	}
 
+    public void setServerAndTime(String serverAndTime)
+    {
+	this.serverAndTime = serverAndTime;
+    }
+
+    public String getServerAndTime()
+    {
+	return serverAndTime;
+    }
 }

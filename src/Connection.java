@@ -68,13 +68,18 @@ public class Connection implements Runnable, IRCEventListener
 
     private TabGroup tabGroup;
 
+    private boolean waitingForNextWhoWas;
+
     private enum EventType 
     {
 	CHANNEL_NICKS,
 	END_OF_NAMES_LIST,
         NO_SUCH_NICK_OR_CHANNEL,
-	KICK_EVENT,
-	STARTING_INFO
+	STARTING_INFO,
+        WHOWAS,	    
+        END_WHOWAS,
+        END_WHOIS,
+        END_WHO
     }
 
     static 
@@ -94,6 +99,7 @@ public class Connection implements Runnable, IRCEventListener
 	previousTopicTime = new TreeMap<String, String>();
 	servPortES = serversPorts.entrySet();
 	serverPortIter = servPortES.iterator();
+	waitingForNextWhoWas = false;
 	//	tabGroup2Session = new IdentityHashMap<TabGroup, Session>();
 	//	sessions = new Vector<Session>();
 
@@ -189,20 +195,12 @@ public class Connection implements Runnable, IRCEventListener
 	    {
 		System.out.println("Motd Event : ");
 		MotdEvent me = (MotdEvent)e;
-		//		String host_name = me.getHostName();
-		//		String motd_line = me.getMotdLine();
-		//		System.out.println("host name : " + host_name);
-		//		System.out.println("motd line : " + motd_line);
 		String motd = me.getRawEventData();
 		System.out.println("motd  : " + motd);
 		String s = extract_motd(motd);
  
-		//		String s = extract_serv_info(motd);
 		System.out.println("s  : " + s);
 		tabGroup.setText(network_name, s);
-
-		//		mw.setText(network_name, "host name : " + host_name );
-		//		mw.setText(network_name, "motd line : " + motd_line );
 	    }
 	else if( e.getType() == Type.CONNECT_COMPLETE )
 	    {
@@ -341,12 +339,6 @@ public class Connection implements Runnable, IRCEventListener
 		String userName = nce.getUserName();
 		String oldNick = nce.getOldNick();
 
-		/*		
-		System.out.println("userName : " + userName);
-		System.out.println("real_name : " + real_name);
-		System.out.println("user_name : " + user_name);
-		*/
-
 		if( oldNick.equals(nick_name) )
 		    {
 			nick_name = newNick;
@@ -386,13 +378,6 @@ public class Connection implements Runnable, IRCEventListener
 		String toBeDisplayed = "You have been invited to " + channelName + " by " + nick + " (" + hostName + ")";
 		tabGroup.setTextOnSelectedTab(toBeDisplayed);
 	    }
-	/*
-	else if( initial_text )
-	    {
-		String s = extract_serv_info(e.getRawEventData());
-		tabGroup.setText( network_name, s);
-	    }
-	*/
 	else if( e.getType() == Type.ERROR )
 	    {
 		ErrorEvent ee = (ErrorEvent) e;
@@ -418,6 +403,27 @@ public class Connection implements Runnable, IRCEventListener
 	    {
 		System.out.println("Exception");		
 	    }
+	else if( e.getType() == Type.KICK_EVENT )
+	    {
+		KickEvent ke = (KickEvent)e;
+		String kickedNick = ke.getWho();
+		String channelName = ke.getChannel().getName();
+		String byWho = ke.byWho();
+		String reason = ke.getMessage();
+		if( kickedNick.equals(nick_name) )
+		    {
+			tabGroup.setText( channelName, "You have been kicked from " + channelName + " by " + byWho + " (" + reason + ")");
+			tabGroup.clearChanMembersList(channelName);
+			System.out.println("In Conenction after clearChannelMembersList");
+		    }
+		else
+		    {
+			tabGroup.setText( channelName, byWho + " has kicked " + kickedNick + " from " + channelName + " (" + reason + ")");
+			
+			TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
+			tabGroup.set_chan_members(channelName, status_2_members);
+		    }		       		
+	    }
 	else if( e.getType() == Type.WHO_EVENT )
 	    {
 		WhoEvent we = (WhoEvent)e;
@@ -428,7 +434,14 @@ public class Connection implements Runnable, IRCEventListener
 		String serverName = we.getServerName();
 		String channelName = we.getChannel();
 		String hereOrGone = (we.isAway() ? "Gone" : "Here");
-		String text = "User " + nick + ", (" + userName + "@" + hostName + ") \"" + realName + "\" (" + hereOrGone + "), member of " + channelName + ", is connected to " + serverName + ", " + we.getHopCount() + " hop(s).\n" + nick + " :End of WHO results.";
+		String text = "User " + nick + ", (" 
+		    + userName + "@" + 
+		    hostName + ") \"" + 
+		    realName + "\" (" + 
+		    hereOrGone + "), member of " +
+		    channelName + ", is connected to " +
+		    serverName + ", " + 
+		    we.getHopCount() + " hop(s).";
 		tabGroup.setText(network_name, text);
 	    }
 	else if( e.getType() == Type.WHOIS_EVENT )
@@ -467,8 +480,30 @@ public class Connection implements Runnable, IRCEventListener
 
 		text = "[" + nick + "] is member of " + whoisChannels;
 		tabGroup.setText(network_name, text);
-		text = "[" + nick + "] End of WHOIS list";
+
+		String rawData = wie.getRawEventData();
+		//		String suffix = extractSuffix(rawData);
+		String newLinesToks[] = rawData.split("\n");
+		String tokens[] = newLinesToks[newLinesToks.length - 1].split(" ");
+		text = "[" + nick + "] ";
+		if( tokens[1].equals("318") )
+		    for( int i = 4; i < tokens.length; i++ )
+			{
+			    text += tokens[i];
+			    text += " ";
+			}
 		tabGroup.setText(network_name, text);
+	    }
+	else if( e.getType() == Type.WHOWAS_EVENT )
+	    {
+		WhowasEvent wwe = (WhowasEvent)e;
+		String nick = wwe.getNick();
+		String hostName = wwe.getHostName();
+		String realName = wwe.getRealName();
+		String userName = wwe.getUserName();
+		String text = "[" + nick + "] (" + userName + "@" + hostName + "): " + realName;
+		tabGroup.setText(network_name, text);
+		waitingForNextWhoWas = true;
 	    }
 	else if( e.getType() == Type.MODE_EVENT )
 	    {
@@ -589,46 +624,46 @@ public class Connection implements Runnable, IRCEventListener
 		String prefix = extractNumericOrString(tokens);
 		EventType eventType = getEventType(prefix);
 		
+		boolean endWhoIsWas = ( ( eventType == EventType.END_WHO ) || 
+					( eventType == EventType.END_WHOIS ) ||
+					( eventType == EventType.END_WHOWAS ) );
+
 		if( eventType == EventType.CHANNEL_NICKS || eventType == EventType.END_OF_NAMES_LIST )
 		    {}
 		else if( eventType == EventType.NO_SUCH_NICK_OR_CHANNEL )
 		    {
 			//extract group 3
 		    }
-		else if( eventType == EventType.KICK_EVENT )
-		    {
-			String kickedNick = getKickedNick(tokens);
-			String channelName = getKickChannel(tokens);
-			String byWho = getKickedByWho(tokens);
-			String reason = getKickReason(tokens);
-			if( kickedNick.equals(nick_name) )
-			    {
-				/*
-				System.out.println("KICK_EVENT");
-				System.out.println("channelName : " + channelName);
-				System.out.println("kickedNick : " + kickedNick);
-				System.out.println("byWho : " + byWho);
-				System.out.println("reason : " + reason);
-				*/
-
-				tabGroup.setText( channelName, "You have been kicked from " + channelName + " by " + byWho + " (" + reason + ")");
-				tabGroup.clearChanMembersList(channelName);
-				System.out.println("In Conenction after clearChannelMembersList");
-			    }
-			else
-			    {
-				tabGroup.setText( channelName, byWho + " has kicked " + kickedNick + " from " + channelName + " (" + reason + ")");
-
-				TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
-				tabGroup.set_chan_members(channelName, status_2_members);
-			    }
-			
-		    }
 		else if( eventType == EventType.STARTING_INFO )
 		    {
 			String startingInfo = extractStartInfo(rawData);
 			System.out.println("startingInfo = " + startingInfo );
 			tabGroup.setText(network_name, startingInfo );
+		    }
+		else if( eventType == EventType.WHOWAS )
+		    {
+			waitingForNextWhoWas = false;
+			String nick = tokens[3];
+			String remainingText = "";
+			for(int i = 4; i < tokens.length; i++ )
+			    {
+				remainingText += tokens[i];
+				remainingText += " ";
+			    }
+			tabGroup.setText(network_name, "[" + nick + "] " + remainingText);
+		    }
+		else if( endWhoIsWas )
+		    {
+			String nick = tokens[3];
+			String remainingText = "";
+			for(int i = 4; i < tokens.length; i++ )
+			    {
+				remainingText += tokens[i];
+				remainingText += " ";
+			    }
+			System.out.println("nick : " + nick );
+			System.out.println("remainingText : " + remainingText);
+			tabGroup.setText(network_name, "[" + nick + "] " + remainingText);			
 		    }
 		/*
 		if( s.equals("") )
@@ -681,11 +716,18 @@ public class Connection implements Runnable, IRCEventListener
 	    return EventType.END_OF_NAMES_LIST ;
 	else if(str.equals("401"))
 	    return EventType.NO_SUCH_NICK_OR_CHANNEL;
-	else if(str.equals("KICK"))
-	    return EventType.KICK_EVENT;
+	//	else if(str.equals("KICK"))
+	    //	    return EventType.KICK_EVENT;
 	else if(str.equals("001") || str.equals("002") || str.equals("003") || str.equals("004") || str.equals("005") )
 	    return EventType.STARTING_INFO;
-	
+	else if(str.equals("312") && waitingForNextWhoWas )
+	    return EventType.WHOWAS;
+	else if(str.equals("315"))
+	    return EventType.END_WHO;
+	else if(str.equals("318"))
+	    return EventType.END_WHOIS;
+	else if(str.equals("369"))
+	    return EventType.END_WHOWAS;
 	return null;
     } 
 
