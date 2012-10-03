@@ -1102,6 +1102,15 @@ public class Connection implements Runnable, IRCEventListener
 	session.whoWas(nick);
     }
 
+    public void sendActionMessage(String channelName, String action)
+    {
+	Channel channel = session.getChannel(channelName);
+	if( channel != null )
+	    session.sayChannel(channel, "\001ACTION " + action + "\001");
+	else
+	    session.sayPrivate(channelName, "\001ACTION " + action + "\001");
+    }
+
    /*    public Session getSession(String networkName)
     {
 	

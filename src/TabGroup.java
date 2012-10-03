@@ -858,7 +858,15 @@ public class TabGroup
 	tokens[0] = tokens[0].toUpperCase();
 	//	Connection conn = tm_netname_2_conn.get(netname);
 
-	if( tokens[0].equals("AWAY"))
+	if( tokens[0].equals("ACTION") )
+	    {
+		String action = "";
+		if( command.length() > 7 )
+		    action = command.substring(7);
+		connection.sendActionMessage(channelName, action);
+		setText(channelName, getNickName() + " " + action);
+	    }
+	else if( tokens[0].equals("AWAY"))
 	    {
 		String awayMessage = "";
 		if( command.length() > 5)
@@ -937,6 +945,14 @@ public class TabGroup
 		    {
 			//			setText(channelName, tm_usage_messages.get("PART"));
 		    }
+	    }
+	else if( tokens[0].equals("ME"))
+	    {
+		String action = "";
+		if( command.length() > 3 )
+		    action = command.substring(3);
+		connection.sendActionMessage(channelName, action);		
+		setText(channelName, getNickName() + " " + action);
 	    }
 	else if( tokens[0].equals("MODE"))
 	    {
