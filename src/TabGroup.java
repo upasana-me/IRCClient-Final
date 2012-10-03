@@ -861,23 +861,39 @@ public class TabGroup
 	if( tokens[0].equals("ACTION") )
 	    {
 		String action = "";
-		if( command.length() > 7 )
-		    action = command.substring(7);
+		if( tokens.length > 1 )
+		    action = command.substring(tokens[0].length() + 1);
 		connection.sendActionMessage(channelName, action);
 		setText(channelName, getNickName() + " " + action);
 	    }
 	else if( tokens[0].equals("AWAY"))
 	    {
 		String awayMessage = "";
-		if( command.length() > 5)
+		if( tokens.length > 1 )
 		    awayMessage = command.substring(5);
 		connection.setAway(awayMessage);
 	    }
 	else if( tokens[0].equals("BAN"))
 	    {
+		if( tokens.length >= 2 )
+		    {
+			String ban = tokens[1];
+			connection.setMode(channelName,"+b " + ban);
+		    }
+		else
+		    {
+			//usage string
+		    }
 	    }
 	else if( tokens[0].equals("CTCP"))
-	    {}
+	    {
+		if( tokens.length >= 3 )
+		    {
+			String target = tokens[1];
+			String message = command.substring( tokens[0].length() + tokens[1].length() + 2 );
+			connection.ctcp(target, message);
+		    }
+	    }
 	else if( tokens[0].equals("DCC"))
 	    {}
 	else if( tokens[0].equals("DEOP"))
@@ -950,12 +966,22 @@ public class TabGroup
 	    {
 		String action = "";
 		if( command.length() > 3 )
-		    action = command.substring(3);
+		    action = command.substring(tokens[0].length() + 1);
 		connection.sendActionMessage(channelName, action);		
 		setText(channelName, getNickName() + " " + action);
 	    }
 	else if( tokens[0].equals("MODE"))
 	    {
+		if( tokens.length > 1 )
+		    {
+			String channel = tokens[1];
+			String modeString = command.substring(tokens[0].length() + tokens[1].length() + 2);
+			connection.setMode(channelName, modeString);
+		    }
+		else
+		    {
+			//usage string
+		    }
 	    }
 	else if(tokens[0].equals("MSG") )
 	    {
@@ -1017,9 +1043,11 @@ public class TabGroup
 		    }
 		else if( pms != null && !pms.equals(null) && pms.contains(channelName))
 		    {
+			//usage message
 		    }
 		else if( networkName.equals(channelName) )
 		    {
+			//usage message
 		    }
 		else
 		    {
@@ -1050,6 +1078,19 @@ public class TabGroup
 	    }
 	else if( tokens[0].equals("UNBAN"))
 	    {
+		if( tokens.length > 1 )
+		    {
+			String unban = command.substring(tokens[0].length() + 1);
+			String prefix = "-";
+			for(int i = 1; i < tokens.length; i++ )
+			    prefix += "b";
+			prefix += " ";
+			connection.setMode( channelName, prefix + unban );
+		    }
+		else
+		    {
+			//usage string
+		    }
 	    }
 	else if( tokens[0].equals("VOICE"))
 	    {

@@ -1111,6 +1111,19 @@ public class Connection implements Runnable, IRCEventListener
 	    session.sayPrivate(channelName, "\001ACTION " + action + "\001");
     }
 
+    public void setMode(String channelName, String modeString)
+    {
+	Channel channel = session.getChannel(channelName);
+	channel.mode(modeString);
+    }
+
+    public void ctcp(String target, String message)
+    {
+	session.ctcp(target, message);
+    }
+
+    
+
    /*    public Session getSession(String networkName)
     {
 	
