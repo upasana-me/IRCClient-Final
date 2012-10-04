@@ -51,7 +51,7 @@ public class TabGroup
     private Vector<String> pms; 
     private Vector<String> existedChannels;
 
-    private JTextArea server_ta;
+    private TextPaneExtended server_ta;
     private JTextField server_tf;
     private JTextField serv_topic_tf;
 
@@ -146,9 +146,9 @@ public class TabGroup
 	//	p5.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 	p5.add( serv_topic_tf, BorderLayout.CENTER );
 
-	server_ta = new JTextArea();
+	server_ta = new TextPaneExtended();
 	server_ta.setMargin(new Insets(0,50,0,10));
-	server_ta.setLineWrap(true);
+	//	server_ta.setLineWrap(true);
 	//	tmta.put( networkName, server_ta );
 	JScrollPane sp = new JScrollPane( server_ta );
 	
@@ -274,8 +274,9 @@ public class TabGroup
 
     private void setServerText(String text)
     {
-	server_ta.append(text + "\n");
-	server_ta.setCaretPosition(server_ta.getDocument().getLength());
+	setServerInfo(text);
+	//	server_ta.append(text + "\n");
+	//	server_ta.setCaretPosition(server_ta.getDocument().getLength());
     }
 
     public void setNickButtonText( String nick )

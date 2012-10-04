@@ -1,5 +1,5 @@
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -73,7 +73,7 @@ public class ChannelTab extends JPanel
 	nicksList = new JList<String>();
 	chanInfo = new JLabel();
 	cellRenderer = new CellRenderer();
-	textPane = new JTextArea();
+	textPane = new JTextPane();
 	textPaneScroller = new JScrollPane(textPane);
 	nicksListScroller = new JScrollPane(nicksList);
 	topicTextField = new JTextField();
@@ -112,6 +112,7 @@ public class ChannelTab extends JPanel
 	textArea.append( chan_join_text );
 	
 	textPane.setEditable( false );
+	textPane.setContentType("text/html");
 
 	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 	p1.add( textPaneScroller, BorderLayout.CENTER  );
@@ -177,8 +178,11 @@ public class ChannelTab extends JPanel
 
     public void setText(String text)
     {
-	textArea.append(text + "\n");
-	textPane.setCaretPosition(textArea.getDocument().getLength());
+	String prevText = textPane.getText();
+	prevText += text;
+	prevText += "\n";
+	textPane.setText(prevText);
+	textPane.setCaretPosition(textPane.getDocument().getLength());
     }
 
     public void setNickButtonText(String nick)
