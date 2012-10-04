@@ -356,15 +356,16 @@ public class Connection implements Runnable, IRCEventListener
 		String userName = nce.getUserName();
 		String oldNick = nce.getOldNick();
 
+		//		System.out.println("After setting nicks for " + channel_name);
 		if( oldNick.equals(nick_name) )
 		    {
 			nick_name = newNick;
 			tabGroup.appendToAllTa(Constants.selfNickChangeText + newNick );
 			tabGroup.setNickButtonText(newNick );
-			tabGroup.modifyChannelList(oldNick, newNick);
+			selfNickChange();
 		    }
 		else
-		    {
+		    {			
 			nickChange(oldNick, newNick);
 		    }
 	    }
@@ -786,11 +787,22 @@ public class Connection implements Runnable, IRCEventListener
 		    {
 			String channelName = channels.elementAt(i).getName();
 			tabGroup.setText(channels.elementAt(i).getName(), oldNick + Constants.nickChangeText + newNick );
-			tabGroup.modifyChannelList(oldNick, newNick );
+			TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channels.elementAt(i), channelName);
+			tabGroup.set_chan_members(channelName, status_2_members);
 		    }
 	    }
     }
 
+    private void selfNickChange()
+    {
+	Vector<Channel> channels = new Vector<Channel>(session.getChannels());
+	for(int i = 0; i < channels.size(); i++ )
+	    {
+		String channelName = channels.elementAt(i).getName();
+		TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channels.elementAt(i), channelName);
+		tabGroup.set_chan_members(channelName, status_2_members);
+	    }
+    }
 
     private TreeMap<String, Vector<String>> setStatus2Members(Channel channel, String channelName)
     {

@@ -52,7 +52,7 @@ public class ChannelTab extends JPanel
     private JLabel chanInfo;
     private JScrollPane textAreaScroller;
     private JScrollPane nicksListScroller;
-    private JTextArea textArea;
+    private JTextPane textPane;
     private JButton nickButton;
     private JTabbedPane tabbedPane;
 
@@ -73,8 +73,8 @@ public class ChannelTab extends JPanel
 	nicksList = new JList<String>();
 	chanInfo = new JLabel();
 	cellRenderer = new CellRenderer();
-	textArea = new JTextArea();
-	textAreaScroller = new JScrollPane(textArea);
+	textPane = new JTextArea();
+	textPaneScroller = new JScrollPane(textPane);
 	nicksListScroller = new JScrollPane(nicksList);
 	topicTextField = new JTextField();
 	textField = new JTextField();
@@ -105,16 +105,16 @@ public class ChannelTab extends JPanel
 	
 	p6.add( topicTextField, BorderLayout.CENTER );
 
-	textArea.setMargin(new Insets(0,50,0,10));
-	textArea.setLineWrap(true);
+	textPane.setMargin(new Insets(0,50,0,10));
+	textPane.setLineWrap(true);
 
 	String chan_join_text = Constants.chan_join_text + channelName + "\n";
 	textArea.append( chan_join_text );
 	
-	textArea.setEditable( false );
+	textPane.setEditable( false );
 
 	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
-	p1.add( textAreaScroller, BorderLayout.CENTER  );
+	p1.add( textPaneScroller, BorderLayout.CENTER  );
 
 	textField.addActionListener( new ActionListener() 
 	    {
@@ -178,7 +178,7 @@ public class ChannelTab extends JPanel
     public void setText(String text)
     {
 	textArea.append(text + "\n");
-	textArea.setCaretPosition(textArea.getDocument().getLength());
+	textPane.setCaretPosition(textArea.getDocument().getLength());
     }
 
     public void setNickButtonText(String nick)
