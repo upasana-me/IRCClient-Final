@@ -161,6 +161,11 @@ public class Connection implements Runnable, IRCEventListener
 	else if( e.getType() == Type.NOTICE )
 	    {
 		NoticeEvent ne = (NoticeEvent)e;
+		String noticeMessage = ne.getNoticeMessage();
+		String byWho = ne.byWho();
+		String toWho = ne.toWho();
+		Channel channel = ne.getChannel();
+		/*
 		try
 		    {
 			String channelName = ne.getChannel().getName();		    
@@ -168,9 +173,21 @@ public class Connection implements Runnable, IRCEventListener
 		    }
 		catch(NullPointerException npe)
 		    {}
+		*/
 
-		if( ne.toWho().equals("*"))
-		    tabGroup.setText(network_name, ne.getNoticeMessage());		
+		//		parseNoticeMessage(noticeMessage);
+
+		if( toWho.equals("*"))
+		    tabGroup.setText(network_name, noticeMessage );		
+		else if( channel != null )
+		    {
+			String channelName = channel.getName();
+			tabGroup.setText(channelName, "[" + byWho + "] => " + noticeMessage);
+		    }
+		else 
+		    {
+			tabGroup.setText(tabGroup.getSelectedTab(), "[" + byWho + "] => " + noticeMessage);
+		    }
 	    }
 	else if( e.getType() == Type.QUIT )
 	    {
@@ -613,6 +630,34 @@ public class Connection implements Runnable, IRCEventListener
 			    }
 		    }
 	    }
+	else if( e.getType() == Type.CTCP_EVENT )
+	    {
+		CtcpEvent ce = (CtcpEvent)e;
+		Channel channel = ce.getChannel();
+		String ctcpString = ce.getCtcpString();
+		String nick = ce.getNick();
+		String ctcpMessage = ce.getMessage();
+
+		if( ctcpString.startsWith("ACTION"))
+		    {
+			//			ctcpMessage = ctcpMessage.substring("ACTION".length() + 2 );
+			//			ctcpMessage = ctcpMessage.substring(0, ctcpMessage.length() - 1 );
+
+			ctcpString = ctcpString.substring("ACTION".length() + 1);
+			String text = nick + " " + ctcpString;
+			String channelName = channel.getName();
+			tabGroup.setText(channelName, text);
+		    }
+		else
+		    {
+			String text = "Received a CTCP " + ctcpString + " from " + nick;
+			tabGroup.setText(tabGroup.getSelectedTab(), text);
+			
+		    }
+
+		System.out.println(ce.getRawEventData());
+		System.out.println(ce.getCtcpString());
+	    }
 	else 
 	    {
 		System.out.println("In last else.");
@@ -717,7 +762,7 @@ public class Connection implements Runnable, IRCEventListener
 	else if(str.equals("401"))
 	    return EventType.NO_SUCH_NICK_OR_CHANNEL;
 	//	else if(str.equals("KICK"))
-	    //	    return EventType.KICK_EVENT;
+	    //	    return EventType.KICK_EVEN;
 	else if(str.equals("001") || str.equals("002") || str.equals("003") || str.equals("004") || str.equals("005") )
 	    return EventType.STARTING_INFO;
 	else if(str.equals("312") && waitingForNextWhoWas )
