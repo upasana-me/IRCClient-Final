@@ -202,8 +202,14 @@ public class TextPaneExtended extends JTextPane
 	appendHTML();
     }
 
-    public void setWhoText(String nick, String userName, String hostName, String realName, 
-			   String hereOrGone, String channelName, String serverName, int hopCount)
+    public void setWhoText(String nick, 
+			   String userName, 
+			   String hostName, 
+			   String realName, 
+			   String hereOrGone, 
+			   String channelName, 
+			   String serverName, 
+			   int hopCount)
     {
 	text = middleHTML + 
 	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
@@ -227,7 +233,42 @@ public class TextPaneExtended extends JTextPane
 	    "</td></tr>";
 	appendHTML();
     }
-  
+ 
+    public void setWhoisText(String nick, 
+			     String userName, 
+			     String hostName, 
+			     String realName, 
+			     String server, 
+			     String serverInfo, 
+			     String idleTime, 
+			     String signOnTimeStr, 
+			     String whoisChannels,
+			     String endOfList)
+    {
+	text = middleHTML + 
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
+	    "<td style=\"align:left;color:#000000\">" + 
+	    "[" + nick + "] (" + userName + "@" + hostName + "): " + realName +
+	    "</td></tr>" +
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
+	    "<td style=\"align:left;color:#000000\">" + 
+	    "[" + nick + "] attached to " + server + " :"  + serverInfo +
+	    "</td></tr>" +
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
+	    "<td style=\"align:left;color:#000000\">" + 
+	    "[" + nick + "] idle " + idleTime + ", signon: " + signOnTimeStr +
+	    "</td></tr>" +
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
+	    "<td style=\"align:left;color:#000000\">" + 
+	    "[" + nick + "] is member of " + whoisChannels +
+	    "</td></tr>" +
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
+	    "<td style=\"align:left;color:#000000\">" + 	    
+	    "[" + nick + "] " + endOfList +
+	    "</td></tr>";
+	appendHTML();
+    }
+ 
     public void setServNotice(String notice)
     {
 	text = middleHTML + "<tr><b><td style=\"align:right;color:#FF0066;\"><label>*</label></td></b><td style=\"color:black;align:left\">" + notice + "</td></tr>";

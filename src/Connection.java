@@ -487,7 +487,6 @@ public class Connection implements Runnable, IRCEventListener
 		String hostName = wie.getHost();
 		String realName = wie.getRealName();
 		String text = "[" + nick + "] (" + userName + "@" + hostName + "): " + realName;
-		tabGroup.setText(network_name, text);
 		
 		String server = wie.whoisServer();
 		String serverInfo = wie.whoisServerInfo();
@@ -502,7 +501,8 @@ public class Connection implements Runnable, IRCEventListener
 		Date signOnTime = wie.signOnTime();
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
 		String signOnTimeStr = df.format(signOnTime);
-		text = "[" + nick + "] idle " + hours + ":" + minutes + ":" + seconds + ", signon: " + signOnTimeStr;
+		String idleTime =  hours + ":" + minutes + ":" + seconds;
+		text = "[" + nick + "] idle " + idleTime + ", signon: " + signOnTimeStr;
 		tabGroup.setText(network_name, text);
 
 		String whoisChannels = "";
@@ -528,6 +528,9 @@ public class Connection implements Runnable, IRCEventListener
 			    text += " ";
 			}
 		tabGroup.setText(network_name, text);
+
+		tabGroup.setWhoisText(nick, userName, hostName, realName, server, serverInfo, 
+
 	    }
 	else if( e.getType() == Type.WHOWAS_EVENT )
 	    {
