@@ -17,7 +17,7 @@ import java.awt.event.ActionEvent;
 
 public class PrivateMessageTab extends JPanel
 {
-    private JTextArea textArea;
+    private TextPaneExtended textPane;
     private JScrollPane scrollPane;
     private JTextField textField;
     private JTextField hostNameTextField;
@@ -48,8 +48,8 @@ public class PrivateMessageTab extends JPanel
 	this.nickName = tabGroup.getNickName();
 	this.connection = tabGroup.getConnection();
 
-	textArea = new JTextArea();
-	scrollPane = new JScrollPane(textArea);
+	textPane = new TextPaneExtended();
+	scrollPane = new JScrollPane(textPane);
 	textField = new JTextField();
 	hostNameTextField = new JTextField();
 	nickButton = new JButton(nickName);
@@ -93,9 +93,9 @@ public class PrivateMessageTab extends JPanel
 	p6.add( hostNameTextField, BorderLayout.CENTER );
 
 	//	chan_ta.setMargin(new Insets(0,50,0,10));
-	textArea.setLineWrap(true);
+	//	textArea.setLineWrap(true);
 	//	String chan_join_text = Constants.chan_join_text + channel_name + "\n";
-	textArea.setEditable( false );
+	textPane.setEditable( false );
 
 	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 	p1.add( scrollPane, BorderLayout.CENTER  );
@@ -114,7 +114,7 @@ public class PrivateMessageTab extends JPanel
 			{
 			    connection.sendPrivateMessage(senderNickName, s);
 			    //			    tm_netname_2_conn.get(network_name).sendPrivateMessage(nick_name, s);
-			    textArea.append("<" + nickName + "> : " + s + "\n");
+			    textPane.setMessage(nickName, s);
 			}
 		}
 	    });
@@ -172,13 +172,18 @@ public class PrivateMessageTab extends JPanel
 	hostNameTextField.setText(hostName);
     }
 
-    public void setText(String text)
+    public void setMessage(String nick, String text)
     {
-	textArea.append(text + "\n");
+	textPane.setRegularMessage(nick, text);
     }
     
     public void setNickButtonText(String nick)
     {
 	nickButton.setText(nick);
+    }
+
+    public void setInvitationText(String channelName, String nick, String hostName)
+    {
+	textPane.setInvitationText(channelName, nick, hostName);
     }
 }

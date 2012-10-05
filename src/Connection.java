@@ -147,8 +147,8 @@ public class Connection implements Runnable, IRCEventListener
 		String inUseNick = ne.getInUseNick();
 		cur_nick++;
 		nick_name = nicks[cur_nick];
-		tabGroup.setText(network_name, inUseNick + " is already in use.");
-		tabGroup.setText(network_name, "Retrying with " + nick_name);
+		tabGroup.setServerInfo(inUseNick + " is already in use.");
+		tabGroup.setServerInfo("Retrying with " + nick_name);
 		tabGroup.setNickButtonText(nick_name);
 	    }
 	else if( e.getType() == Type.AWAY_EVENT )
@@ -178,15 +178,16 @@ public class Connection implements Runnable, IRCEventListener
 		//		parseNoticeMessage(noticeMessage);
 
 		if( toWho.equals("*"))
-		    tabGroup.setText(network_name, noticeMessage );		
+		    tabGroup.setServNotice( noticeMessage );		
 		else if( channel != null )
 		    {
 			String channelName = channel.getName();
-			tabGroup.setText(channelName, "[" + byWho + "] => " + noticeMessage);
+			tabGroup.setChannelNotice(channelName, byWho, noticeMessage);
 		    }
 		else 
 		    {
-			tabGroup.setText(tabGroup.getSelectedTab(), "[" + byWho + "] => " + noticeMessage);
+			tabGroup.setNotice(byWho, noticeMessage);
+			//			tabGroup.setText(tabGroup.getSelectedTab(), "[" + byWho + "] => " + noticeMessage);
 		    }
 	    }
 	else if( e.getType() == Type.QUIT )
@@ -217,6 +218,7 @@ public class Connection implements Runnable, IRCEventListener
 		String s = extract_motd(motd);
  
 		System.out.println("s  : " + s);
+		//		String motdHTML = getHTMLForMOTD(motd);
 		tabGroup.setText(network_name, s);
 	    }
 	else if( e.getType() == Type.CONNECT_COMPLETE )
@@ -245,11 +247,11 @@ public class Connection implements Runnable, IRCEventListener
 		String nick = je.getNick();
 		String hostName = je.getHostName();
 		String userName = je.getUserName();
-		tabGroup.setText( channelName, nick + " (" + userName + "@" + hostName + ") has joined " + channelName );
+		tabGroup.setJoinText(channelName, nick, userName, hostName );
+		//		tabGroup.setText( channelName, nick + " (" + userName + "@" + hostName + ") has joined " + channelName );
 
 		TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
-		tabGroup.set_chan_members(channelName, status_2_members);
-		
+		tabGroup.set_chan_members(channelName, status_2_members);		
 	    }
 	else if( e.getType() == Type.PART )
 	    {
@@ -268,7 +270,9 @@ public class Connection implements Runnable, IRCEventListener
 		    }
 		else
 		    {
-			tabGroup.setText(channelName, partedNick + " (" + userName + "@" + hostName + ") has left " + channelName + " (" + partMessage + ")");
+			tabGroup.setPartText(channelName, partedNick, userName, hostName, partMessage);
+
+			//			tabGroup.setText(channelName, partedNick + " (" + userName + "@" + hostName + ") has left " + channelName + " (" + partMessage + ")");
 
 			TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
 			tabGroup.set_chan_members(channelName, status_2_members);
@@ -302,6 +306,8 @@ public class Connection implements Runnable, IRCEventListener
 		       if( !channels.containsKey(channel_name))
 			   channels.put(channel_name," ");
 		       tabGroup.create_chan_tab(channel_name);
+		       tabGroup.setChanJoinText(channel_name, Constants.chan_join_text + channel_name);
+
  		   }
 		else
 		    {
@@ -326,8 +332,8 @@ public class Connection implements Runnable, IRCEventListener
 			Date topicDate = channel.getTopicSetTime();
 			DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
 			previousTopicTime.put(channelName, dateFormat.format(topicDate));
-			tabGroup.setText( channelName, Constants.topicStr + channelName + " is : " + topic );
-			tabGroup.setText( channelName, Constants.topicStr + channelName + " set by " + topicSetter + " at " + dateFormat.format(topicDate) );
+			tabGroup.setTopicText( channelName, topic ); //Constants.topicStr + channelName + " is : " + topic );
+			tabGroup.setTopicSetTimeText( channelName, topicSetter, dateFormat.format(topicDate) );
 		    }
 	    }
 	else if( e.getType() == Type.CHANNEL_LIST_EVENT )
@@ -347,7 +353,12 @@ public class Connection implements Runnable, IRCEventListener
 		String nick = me.getNick();
 		Channel channel = me.getChannel();
 		String channelName = channel.getName();
-		tabGroup.setText(channelName, "<" + nick + "> : " + message);
+		boolean containsNick = ifMessageContainsNick(message);
+		if( containsNick )
+		    tabGroup.setHighlightedMessage(channelName, nick, message);
+		else
+		    tabGroup.setRegularMessage(channelName, nick, message );
+		//		tabGroup.setText(channelName, nick, message);
 	    }
 	else if( e.getType() == Type.NICK_CHANGE )
 	    {
@@ -360,7 +371,8 @@ public class Connection implements Runnable, IRCEventListener
 		if( oldNick.equals(nick_name) )
 		    {
 			nick_name = newNick;
-			tabGroup.appendToAllTa(Constants.selfNickChangeText + newNick );
+			tabGroup.setSelfNickChangeText(newNick);
+			//			tabGroup.appendToAllTa(Constants.selfNickChangeText + newNick );
 			tabGroup.setNickButtonText(newNick );
 			selfNickChange();
 		    }
@@ -379,11 +391,11 @@ public class Connection implements Runnable, IRCEventListener
 		if( !tabGroup.getPmExists(nick) )
 		    {
 			nicks_pms.add(nick);
-			tabGroup.create_privmsg_tab(nick, hostname, "<" + nick + "> : " + message );
+			tabGroup.create_privmsg_tab(nick, hostname, message );
 		    }
 		else
 		    {
-			tabGroup.setText( nick, "<" + nick + "> : " + message );
+			tabGroup.setRegularMessage( nick, nick, message );
 		    }
 	    }
 	else if( e.getType() == Type.INVITE_EVENT )
@@ -393,8 +405,9 @@ public class Connection implements Runnable, IRCEventListener
 		String hostName = ie.getHostName();
 		String nick = ie.getNick();
 		String userName = ie.getUserName();
-		String toBeDisplayed = "You have been invited to " + channelName + " by " + nick + " (" + hostName + ")";
-		tabGroup.setTextOnSelectedTab(toBeDisplayed);
+		//		String toBeDisplayed = "You have been invited to " + channelName + " by " + nick + " (" + hostName + ")";
+		//		tabGroup.setTextOnSelectedTab(toBeDisplayed);
+		tabGroup.setInvitationText(channelName, nick, hostName);
 	    }
 	else if( e.getType() == Type.ERROR )
 	    {
@@ -786,7 +799,7 @@ public class Connection implements Runnable, IRCEventListener
 		if( nicks.contains(newNick))
 		    {
 			String channelName = channels.elementAt(i).getName();
-			tabGroup.setText(channels.elementAt(i).getName(), oldNick + Constants.nickChangeText + newNick );
+			tabGroup.setNickChangeText(channels.elementAt(i).getName(), oldNick, newNick );
 			TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channels.elementAt(i), channelName);
 			tabGroup.set_chan_members(channelName, status_2_members);
 		    }
@@ -842,6 +855,40 @@ public class Connection implements Runnable, IRCEventListener
 					
 	chanName_2_chanMembers.put(channelName, status_2_members);
 	return status_2_members;
+    }
+
+    private boolean ifMessageContainsNick(String message)
+    {
+	Pattern pattern = Pattern.compile(".*\\s" + nick_name + "\\W.*", Pattern.CASE_INSENSITIVE); //nick is anywhere in the message
+	Pattern pattern2 = Pattern.compile("^" + nick_name + "\\W.*", Pattern.CASE_INSENSITIVE); // nick is only at the beginning of the message
+	Pattern pattern3 = Pattern.compile(".*\\s" + nick_name + "$", Pattern.CASE_INSENSITIVE); // nick is at the end of the message
+	Pattern pattern4 = Pattern.compile(nick_name, Pattern.CASE_INSENSITIVE); // message contains only nick
+	Matcher matcher = pattern.matcher(message);
+	Matcher matcher2 = pattern2.matcher(message);
+	Matcher matcher3 = pattern3.matcher(message);
+	Matcher matcher4 = pattern4.matcher(message);
+	boolean b = matcher.matches();
+	boolean b2 = matcher2.matches();
+	boolean b3 = matcher3.matches();
+	boolean b4 = matcher4.matches();
+	System.out.println("message : " + message );
+	//	Pattern pattern = Pattern.compile(".*\\s" + nick_name + "\\W.*", Pattern.CASE_INSENSITIVE);
+	//	Matcher matcher = pattern.matcher(message);
+	//	boolean b = matcher.matches();
+	System.out.println("Contains nick " + ( b || b2 || b3 || b4) );
+	return ( b || b2 || b3 || b4);
+	//	String s = "";
+	
+	//	while(matcher.find())
+	//	    {
+		//		s = matcher.group(3);
+		/*
+	System.out.println(matcher.group(0));
+		System.out.println(matcher.group(1));
+		System.out.println(matcher.group(2));
+		System.out.println(matcher.group(3));
+		*/					  //	    }
+	//	    }
     }
 
 

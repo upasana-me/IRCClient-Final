@@ -50,9 +50,9 @@ public class ChannelTab extends JPanel
     private JTextField topicTextField;
     private CellRenderer cellRenderer;
     private JLabel chanInfo;
-    private JScrollPane textAreaScroller;
+    private JScrollPane textPaneScroller;
     private JScrollPane nicksListScroller;
-    private JTextPane textPane;
+    private TextPaneExtended textPane;
     private JButton nickButton;
     private JTabbedPane tabbedPane;
 
@@ -73,7 +73,7 @@ public class ChannelTab extends JPanel
 	nicksList = new JList<String>();
 	chanInfo = new JLabel();
 	cellRenderer = new CellRenderer();
-	textPane = new JTextPane();
+	textPane = new TextPaneExtended();
 	textPaneScroller = new JScrollPane(textPane);
 	nicksListScroller = new JScrollPane(nicksList);
 	topicTextField = new JTextField();
@@ -106,10 +106,9 @@ public class ChannelTab extends JPanel
 	p6.add( topicTextField, BorderLayout.CENTER );
 
 	textPane.setMargin(new Insets(0,50,0,10));
-	textPane.setLineWrap(true);
+	//	textPane.setLineWrap(true);
 
-	String chan_join_text = Constants.chan_join_text + channelName + "\n";
-	textArea.append( chan_join_text );
+	//	textArea.append( chan_join_text );
 	
 	textPane.setEditable( false );
 	textPane.setContentType("text/html");
@@ -133,7 +132,7 @@ public class ChannelTab extends JPanel
 			    if( !s.equals(""))
 				{
 				    connection.sendChannelMessage(channelName, s);
-				    setText("<" + nickName + "> : " + s);
+				    textPane.setMessage(nickName, s);
 				}
 			}
 		}
@@ -176,6 +175,58 @@ public class ChannelTab extends JPanel
 	tabbedPane.setSelectedComponent( this );
     }
 
+    public void setNotice(String nick, String message)
+    {
+	textPane.setNotice(nick, message);
+    }
+
+    public void setJoinText(String nick, String userName, String hostName)
+    {
+	textPane.setJoinText(channelName, nick, userName, hostName);
+    }
+
+    public void setPartText(String nick, String userName, String hostName, String partMessage)
+    {
+	textPane.setPartText(channelName, nick, userName, hostName, partMessage);
+    }
+
+    public void setTopicText(String topic)
+    {
+	textPane.setTopicText(channelName, topic);
+    }
+
+    public void setTopicSetTimeText(String topicSetter, String topicTime)
+    {
+	textPane.setTopicSetTimeText(channelName, topicSetter, topicTime);
+    }
+
+    public void setHighlightedMessage(String nick, String message)
+    {
+	textPane.setHighlightedMessage( nick, message );
+    }
+
+    public void setRegularMessage(String nick, String message)
+    {
+	textPane.setRegularMessage(nick, message);
+    }
+
+    public void setSelfNickChangeText(String newNick)
+    {
+	System.out.println("In ChannelTab, setSelfNickChangeText.");
+	textPane.setSelfNickChangeText(newNick);
+    }
+
+    public void setNickChangeText(String oldNick, String newNick)
+    {
+	if( nicks.contains(oldNick) )
+	    textPane.setNickChangeText(oldNick, newNick );
+    }
+
+    public void setInvitationText(String channelName, String nick, String hostName)
+    {
+	textPane.setInvitationText(channelName, nick, hostName);
+    }
+
     public void setText(String text)
     {
 	String prevText = textPane.getText();
@@ -193,6 +244,11 @@ public class ChannelTab extends JPanel
     public void setTopic(String topic)
     {
 	topicTextField.setText(topic);
+    }
+
+    public void setChanJoinText(String text)
+    {
+	textPane.setChanJoinText(text);
     }
 
     public void setChanMembers( TreeMap<String, Vector<String>> treemap )

@@ -237,7 +237,7 @@ public class TabGroup
 	pms.add(senderNickName);
 	PrivateMessageTab privateMessageTab = new PrivateMessageTab(senderNickName, this);
 	tmPrivateMessageTab.put(senderNickName, privateMessageTab );
-	privateMessageTab.setText(message);
+	privateMessageTab.setMessage(senderNickName, message);
 	privateMessageTab.setHostName(hostname);
     }
 
@@ -259,7 +259,7 @@ public class TabGroup
 	    return;
 
 	if( tabname.equals(networkName))
-	    setServerText(text);
+	    setServerInfo(text);
 	else if( channels.contains(tabname) )
 	    {
 		ChannelTab channelTab = tmChannelTab.get( tabname );
@@ -268,17 +268,130 @@ public class TabGroup
 	else 
 	    {
 		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabname);
-		privateMessageTab.setText(text);
+	//		privateMessageTab.setMessage(text);
 	    }
     }
 
-    private void setServerText(String text)
+    public void setServerInfo(String text)
     {
-	setServerInfo(text);
+	server_ta.setServerInfo(text);
 	//	server_ta.append(text + "\n");
 	//	server_ta.setCaretPosition(server_ta.getDocument().getLength());
     }
 
+    public void setChanJoinText(String channelName, String text)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setChanJoinText(text);
+    }
+
+    public void setServNotice(String notice)
+    {
+	server_ta.setServNotice(notice);	
+    }
+
+    public void setChannelNotice(String channelName, String byWho, String message)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setNotice(byWho, message);		
+    }
+    public void setNotice(String nick, String notice)
+    {
+	String selectedTab = getSelectedTab();
+	if(tmChannelTab.containsKey(selectedTab))
+	    {
+	       ChannelTab channelTab = tmChannelTab.get(selectedTab);
+	       channelTab.setNotice(nick, notice);	
+	    }
+	else if( tmPrivateMessageTab.containsKey(selectedTab))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(selectedTab);
+	    }
+	else
+	    server_ta.setNotice(nick, notice);
+    }
+
+    public void setJoinText(String channelName, String nick, String userName, String hostName)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setJoinText(nick, userName, hostName);
+    }
+
+    public void setPartText(String channelName, String nick, String userName, String hostName, String partMessage)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setPartText(nick, userName, hostName, partMessage);
+    }
+    
+    public void setTopicText(String channelName, String topic)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setTopicText(topic);
+    }
+
+    public void setTopicSetTimeText(String channelName, String topicSetter, String topicTime )
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setTopicSetTimeText(topicSetter, topicTime);
+    }
+
+    public void setHighlightedMessage(String channelName, String nick, String message)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setHighlightedMessage(nick, message);	
+    }
+
+    public void setRegularMessage(String tabName, String nick, String message)
+    {
+	if( tmChannelTab.containsKey(tabName) )
+	    {
+		ChannelTab channelTab = tmChannelTab.get(tabName);
+		channelTab.setRegularMessage(nick, message);	
+	    }
+	else if( tmPrivateMessageTab.containsKey(tabName) )
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabName);
+		privateMessageTab.setMessage(nick, message);		
+	    }
+	    
+    }
+
+    public void setSelfNickChangeText(String newNick)
+    {
+	server_ta.setServerInfo(Constants.selfNickChangeText + newNick);
+	System.out.println("In setSelfNickChangeText.");
+	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+	for( int i = 0; i < channelTabs.size(); i++ )
+	    {
+		channelTabs.elementAt(i).setSelfNickChangeText(newNick);
+	    }
+    }
+
+    public void setNickChangeText(String channelName, String oldNick, String newNick)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setNickChangeText(oldNick, newNick );	
+    }
+
+    public void setInvitationText(String channelName, String nick, String hostName)
+    {
+	String selectedTab = getSelectedTab();
+	if(tmChannelTab.containsKey(selectedTab))
+	    {
+		ChannelTab channelTab = tmChannelTab.get(selectedTab);
+		channelTab.setInvitationText(channelName, nick, hostName);
+	    }
+	else if( tmPrivateMessageTab.containsKey(selectedTab))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(selectedTab);
+		privateMessageTab.setInvitationText(channelName, nick, hostName);
+	    }
+	else
+	    {
+		server_ta.setInvitationText(channelName, nick, hostName);
+	    }
+    }
+    
     public void setNickButtonText( String nick )
     {
 	this.nickName = nick;
@@ -440,7 +553,7 @@ public class TabGroup
 
     public void appendToAllTa(String text)
     {
-	setServerText( text );
+	setServerInfo( text );
 
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
 	for( int i = 0; i < channelTabs.size(); i++ )
@@ -451,7 +564,7 @@ public class TabGroup
 	Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
 	for( int i = 0; i < privateMessageTabs.size(); i++ )
 	    {
-		privateMessageTabs.elementAt(i).setText(text);
+		//		privateMessageTabs.elementAt(i).setText(text);
 	    }	
     }
 
