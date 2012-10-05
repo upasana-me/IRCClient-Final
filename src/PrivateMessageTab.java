@@ -186,4 +186,14 @@ public class PrivateMessageTab extends JPanel
     {
 	textPane.setInvitationText(channelName, nick, hostName);
     }
+
+    public void setMsgText(String nick, String message)
+    {
+	textPane.setMsgText(nick, message);
+    }
+
+    public void setText(String info)
+    {
+	textPane.setPmInfo(info);
+    }
 }

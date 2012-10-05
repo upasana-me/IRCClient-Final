@@ -209,8 +209,8 @@ public class TabGroup
 	p.add( p1, BorderLayout.CENTER );
 	p.add( p4, BorderLayout.SOUTH );
 
-	
 	tabbedPane.add( networkName, p );
+	tabbedPane.setSelectedComponent(p);
 	tabbedPane.setTabComponentAt( tabbedPane.getTabCount() - 1, p6);
 	System.out.println("Added panel on JTabbedPane.");
     }
@@ -268,7 +268,7 @@ public class TabGroup
 	else 
 	    {
 		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabname);
-	//		privateMessageTab.setMessage(text);
+		privateMessageTab.setText(text);
 	    }
     }
 
@@ -404,13 +404,59 @@ public class TabGroup
 	channelTab.setKickText(channelName, nick, byWho, reason);	
     }
 
-    public void setWhoText(String nick, String userName, String hostName, String realName, 
-			   String hereOrGone, String channelName, String serverName, int hopCount)
+    public void setWhoText(String nick,
+			   String userName, 
+			   String hostName, 
+			   String realName, 
+			   String hereOrGone,
+			   String channelName, 
+			   String serverName, 
+			   int hopCount)
     {
 	server_ta.setWhoText(nick, userName, hostName, realName, hereOrGone, 
 			     channelName, serverName, hopCount);
     }
+
+    public void setWhoisText(String nick, 
+			     String userName,
+			     String hostName, 
+			     String realName, 
+			     String server, 
+			     String serverInfo,
+			     String idleTime,
+			     String signOnTimeStr,
+			     String whoisChannels, 
+			     String endOfList)
+    {
+	server_ta.setWhoisText(nick, userName, hostName, realName, server, serverInfo, idleTime, signOnTimeStr, whoisChannels, endOfList);
+    }
   
+    public void setWhoWasText(String nick, String userName, String hostName, String realName)
+    {
+	server_ta.setWhoWasText(nick, userName, hostName, realName);
+    }
+
+    public void setWhoWasRemainingText(String nick, String remainingText)
+    {
+	server_ta.setWhoWasRemainingText(nick, remainingText);
+    }
+
+    public void setMsgText(String tabName, String nick, String message)
+    {
+	if(tmChannelTab.containsKey(tabName))
+	    {
+		ChannelTab channelTab = tmChannelTab.get(tabName);
+		channelTab.setMsgText(nick, message);
+	    }
+	else if(tmPrivateMessageTab.containsKey(tabName))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabName);
+		privateMessageTab.setMsgText(nick, message);
+	    }
+	else
+	    server_ta.setMsgText(nick, message);
+    }
+
     public void setNickButtonText( String nick )
     {
 	this.nickName = nick;
@@ -747,7 +793,7 @@ public class TabGroup
 		String nick = tokens[1];
 		String message = command.substring(tokens[0].length() + tokens[1].length() + 2 );
 		connection.sendPrivateMessage(nick, message);
-		setText(channelName, ">" + nick + "< : " + message);
+		setMsgText(channelName, nick, message);
 	    }
 	else if( tokens[0].equals("NICK"))
 	    {

@@ -165,17 +165,6 @@ public class Connection implements Runnable, IRCEventListener
 		String byWho = ne.byWho();
 		String toWho = ne.toWho();
 		Channel channel = ne.getChannel();
-		/*
-		try
-		    {
-			String channelName = ne.getChannel().getName();		    
-			// to be done later on
-		    }
-		catch(NullPointerException npe)
-		    {}
-		*/
-
-		//		parseNoticeMessage(noticeMessage);
 
 		if( toWho.equals("*"))
 		    tabGroup.setServNotice( noticeMessage );		
@@ -187,7 +176,6 @@ public class Connection implements Runnable, IRCEventListener
 		else 
 		    {
 			tabGroup.setNotice(byWho, noticeMessage);
-			//			tabGroup.setText(tabGroup.getSelectedTab(), "[" + byWho + "] => " + noticeMessage);
 		    }
 	    }
 	else if( e.getType() == Type.QUIT )
@@ -211,14 +199,13 @@ public class Connection implements Runnable, IRCEventListener
 	    }
 	else if( e.getType() == Type.MOTD )
 	    {
-		System.out.println("Motd Event : ");
+		//		System.out.println("Motd Event : ");
 		MotdEvent me = (MotdEvent)e;
 		String motd = me.getRawEventData();
-		System.out.println("motd  : " + motd);
+		//		System.out.println("motd  : " + motd);
 		String s = extract_motd(motd);
  
-		System.out.println("s  : " + s);
-		//		String motdHTML = getHTMLForMOTD(motd);
+		//		System.out.println("s  : " + s);
 		tabGroup.setText(network_name, s);
 	    }
 	else if( e.getType() == Type.CONNECT_COMPLETE )
@@ -238,7 +225,6 @@ public class Connection implements Runnable, IRCEventListener
 		    }
 		catch(InterruptedException ie)
 		    {}
-
 	    }
 	else if( e.getType() == Type.JOIN )
 	    {
@@ -255,7 +241,7 @@ public class Connection implements Runnable, IRCEventListener
 	    }
 	else if( e.getType() == Type.PART )
 	    {
-		System.out.println("In PART event");
+		//		System.out.println("In PART event");
 		PartEvent pe = (PartEvent)e;
 		String channelName = pe.getChannelName();
 		String hostName = pe.getHostName();
@@ -267,6 +253,7 @@ public class Connection implements Runnable, IRCEventListener
 		    {
 			if(!tabGroup.tabAlreadyRemoved(channelName))
 			    tabGroup.removeTab(channelName);
+			previousTopicTime.remove(channelName);
 		    }
 		else
 		    {
@@ -283,11 +270,11 @@ public class Connection implements Runnable, IRCEventListener
 		NickListEvent nle = (NickListEvent)e;
 		Channel channel = nle.getChannel();
 		String channel_name = channel.getName();
-		System.out.println("NICK_LIST EVENT for " + channel_name);
+		//		System.out.println("NICK_LIST EVENT for " + channel_name);
 
 		TreeMap<String, Vector<String>> status_2_members = setStatus2Members(channel, channel_name);
 		tabGroup.set_chan_members(channel_name, status_2_members);
-		System.out.println("After setting nicks for " + channel_name);
+		//		System.out.println("After setting nicks for " + channel_name);
 	    }
 	else if( e.getType() == Type.JOIN_COMPLETE )
 	    {
@@ -432,7 +419,7 @@ public class Connection implements Runnable, IRCEventListener
 	    }
 	else if( e.getType() == Type.EXCEPTION )
 	    {
-		System.out.println("Exception");		
+		//		System.out.println("Exception");		
 	    }
 	else if( e.getType() == Type.KICK_EVENT )
 	    {
@@ -446,7 +433,7 @@ public class Connection implements Runnable, IRCEventListener
 			//			tabGroup.setText( channelName, "You have been kicked from " + channelName + " by " + byWho + " (" + reason + ")");
 			tabGroup.setSelfKickText( channelName, byWho, reason );
 			tabGroup.clearChanMembersList(channelName);
-			System.out.println("In Conenction after clearChannelMembersList");
+			//			System.out.println("In Conenction after clearChannelMembersList");
 		    }
 		else
 		    {
@@ -467,16 +454,6 @@ public class Connection implements Runnable, IRCEventListener
 		String channelName = we.getChannel();
 		String hereOrGone = (we.isAway() ? "Gone" : "Here");
 		int hopCount = we.getHopCount();
-		/*
-		String text = "User " + nick + ", (" 
-		    + userName + "@" + 
-		    hostName + ") \"" + 
-		    realName + "\" (" + 
-		    hereOrGone + "), member of " +
-		    channelName + ", is connected to " +
-		    serverName + ", " + 
-		    we.getHopCount() + " hop(s).";
-		*/
 		tabGroup.setWhoText(nick, userName, hostName, realName, hereOrGone, channelName, serverName, hopCount);
 	    }
 	else if( e.getType() == Type.WHOIS_EVENT )
@@ -486,14 +463,10 @@ public class Connection implements Runnable, IRCEventListener
 		String userName = wie.getUser();
 		String hostName = wie.getHost();
 		String realName = wie.getRealName();
-		String text = "[" + nick + "] (" + userName + "@" + hostName + "): " + realName;
-		
 		String server = wie.whoisServer();
 		String serverInfo = wie.whoisServerInfo();
-		text = "[" + nick + "] attached to " + server + " :"  + serverInfo;
 
 		long secondsIdle = wie.secondsIdle();
-		System.out.println("secondsIdle = " + secondsIdle);
 		long hours = secondsIdle / 3600;
 		long temp1 = secondsIdle % 3600;
 		long minutes = temp1/60;
@@ -502,8 +475,6 @@ public class Connection implements Runnable, IRCEventListener
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.MEDIUM);
 		String signOnTimeStr = df.format(signOnTime);
 		String idleTime =  hours + ":" + minutes + ":" + seconds;
-		text = "[" + nick + "] idle " + idleTime + ", signon: " + signOnTimeStr;
-		tabGroup.setText(network_name, text);
 
 		String whoisChannels = "";
 		Vector<String> channels = new Vector<String>(wie.getChannelNames());
@@ -513,25 +484,18 @@ public class Connection implements Runnable, IRCEventListener
 			whoisChannels += " ";
 		    }
 
-		text = "[" + nick + "] is member of " + whoisChannels;
-		tabGroup.setText(network_name, text);
-
 		String rawData = wie.getRawEventData();
-		//		String suffix = extractSuffix(rawData);
 		String newLinesToks[] = rawData.split("\n");
 		String tokens[] = newLinesToks[newLinesToks.length - 1].split(" ");
-		text = "[" + nick + "] ";
+		String endOfList = "";
 		if( tokens[1].equals("318") )
 		    for( int i = 4; i < tokens.length; i++ )
 			{
-			    text += tokens[i];
-			    text += " ";
+			    endOfList += tokens[i];
+			    endOfList += " ";
 			}
-		tabGroup.setText(network_name, text);
-
-		tabGroup.setWhoisText(nick, userName, hostName, realName, server, serverInfo, 
-
-	    }
+		tabGroup.setWhoisText(nick, userName, hostName, realName, server, serverInfo, idleTime, signOnTimeStr, whoisChannels, endOfList);
+	    }    
 	else if( e.getType() == Type.WHOWAS_EVENT )
 	    {
 		WhowasEvent wwe = (WhowasEvent)e;
@@ -539,16 +503,13 @@ public class Connection implements Runnable, IRCEventListener
 		String hostName = wwe.getHostName();
 		String realName = wwe.getRealName();
 		String userName = wwe.getUserName();
-		String text = "[" + nick + "] (" + userName + "@" + hostName + "): " + realName;
-		tabGroup.setText(network_name, text);
+		tabGroup.setWhoWasText(nick, userName, hostName, realName);
 		waitingForNextWhoWas = true;
 	    }
 	else if( e.getType() == Type.MODE_EVENT )
 	    {
 		ModeEvent me = (ModeEvent)e;
 		String rawEventData = e.getRawEventData();
-		System.out.println("In MODE_EVENT");
-		System.out.println("rawEventData : " + rawEventData);
 		String setter = me.setBy();
 		
 		if( me.getModeType() == ModeType.USER )
@@ -556,7 +517,6 @@ public class Connection implements Runnable, IRCEventListener
 			Vector<ModeAdjustment> modeAdjustments = new Vector<ModeAdjustment>(me.getModeAdjustments());
 			for( int i = 0; i < modeAdjustments.size(); i++ )
 			    {
-				//				System.out.println("Mode USER Event");
 				ModeAdjustment ma = modeAdjustments.elementAt(i);
 				String argument = ma.getArgument();
 				String action = "-";
@@ -575,12 +535,6 @@ public class Connection implements Runnable, IRCEventListener
 				    toBeDisplayed = "User mode for " + user + " is now " + action;
 				else
 				    toBeDisplayed = "User mode for " + user + " is now " + action + "(" + argument + ")";
-				/*
-				System.out.println("argument : " + argument );
-				System.out.println("action : " + action );
-				System.out.println("setter : " + setter );
-				System.out.println("ma.toString() : " + ma.toString() );
-				*/
 				tabGroup.setText(network_name, toBeDisplayed);
 			    }
 		    }
@@ -675,9 +629,6 @@ public class Connection implements Runnable, IRCEventListener
 			tabGroup.setText(tabGroup.getSelectedTab(), text);
 			
 		    }
-
-		System.out.println(ce.getRawEventData());
-		System.out.println(ce.getCtcpString());
 	    }
 	else 
 	    {
@@ -716,7 +667,7 @@ public class Connection implements Runnable, IRCEventListener
 				remainingText += tokens[i];
 				remainingText += " ";
 			    }
-			tabGroup.setText(network_name, "[" + nick + "] " + remainingText);
+			tabGroup.setWhoWasRemainingText(nick, remainingText);
 		    }
 		else if( endWhoIsWas )
 		    {
@@ -729,7 +680,7 @@ public class Connection implements Runnable, IRCEventListener
 			    }
 			System.out.println("nick : " + nick );
 			System.out.println("remainingText : " + remainingText);
-			tabGroup.setText(network_name, "[" + nick + "] " + remainingText);			
+			tabGroup.setWhoWasRemainingText(nick, remainingText);			
 		    }
 		/*
 		if( s.equals("") )

@@ -27,14 +27,26 @@ public class TextPaneExtended extends JTextPane
 
     public void setServerInfo(String serverInfo)
     {
-	text = middleHTML + "<tr><b><td style=\"color:blue\";align=\"right\"><label>*</label></td></b><td style=\"color:black;align:left\">" + serverInfo + "</td></tr>";
+	text = middleHTML + "<tr><td style=\"color:blue;text-align:right;\"><b>*</b></td><td style=\"color:black;text-align:left;\">" + serverInfo + "</td></tr>";
+	appendHTML();
+    }
+
+    public void setChanInfo(String info)
+    {
+	text = middleHTML + "<tr><td style=\"color:black;text-align:right;\"><b>*</b></td><td style=\"color:black;text-align:left;\">" + info + "</td></tr>";
+	appendHTML();
+    }
+
+    public void setPmInfo(String info)
+    {
+	text = middleHTML + "<tr><td style=\"color:black;text-align:right;\"><b>*</b></td><td style=\"color:black;text-align:left;\">" + info + "</td></tr>";
 	appendHTML();
     }
 
     public void setChanJoinText(String joinText)
     {
-	text = middleHTML + "<tr><b><td style=\"align:right\"><label></label></td></b>" +
-	    "<td style=\"color:green;align:left;\">" +
+	text = middleHTML + "<tr><td style=\"text-align:right;color:green;\"><b>*</b></td>" +
+	    "<td style=\"color:green;text-align:left;\">" +
 	    joinText + 
 	    "</td></tr>";
 	appendHTML();
@@ -43,7 +55,7 @@ public class TextPaneExtended extends JTextPane
     public void setJoinText(String channelName, String nick, String userName, String hostName)
     {
 	text = middleHTML + 
-	    "<tr><b><td style=\"align:right\"><label></label></td></b><td style=\"color:green;align:left;\">" + 
+	    "<tr><td style=\"text-align:right;color:green;\"><b>*</b></td><td style=\"color:green;text-align:left;\">" + 
 	    nick + 
 	    " (" + 
 	    userName +
@@ -58,7 +70,7 @@ public class TextPaneExtended extends JTextPane
     public void setPartText(String channelName, String nick, String userName, String hostName, String partReason)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right\"><label></label></td></b><td style=\"color:#990000;align:left;\">" + 
+	    "<tr><td style=\"text-align:right;color:#990000\"><b>*</b></td><td style=\"color:#990000;text-align:left;\">" + 
 	    nick +
 	    " (" +
 	    userName +
@@ -76,7 +88,7 @@ public class TextPaneExtended extends JTextPane
     public void setTopicText(String channelName, String topic)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right\"><label></label></td></b><td style=\"color:#6600FF;align:left;\">" + 
+	    "<tr><td style=\"text-align:right;color:#6600FF;\"><b>*</b></td><td style=\"color:#6600FF;text-align:left;\">" + 
 	    Constants.topicStr +
 	    channelName +
 	    " is : " +
@@ -88,7 +100,7 @@ public class TextPaneExtended extends JTextPane
     public void setTopicSetTimeText(String channelName, String topicSetter, String topicTime)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right\"><label></label></td></b><td style=\"color:#6600FF;align:left;\">" + 
+	    "<tr><td style=\"text-align:right;color:#6600FF;\"><b>*</b></td><td style=\"color:#6600FF;text-align:left;\">" + 
 	    Constants.topicStr +
 	    channelName +
 	    " set by " +
@@ -102,9 +114,9 @@ public class TextPaneExtended extends JTextPane
     public void setHighlightedMessage(String nick, String message)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#FF0066;\"><label>" + 
+	    "<tr><td style=\"text-align:right;color:#FF0066;\"><b>" + 
 	    nick + 
-	    "</label></td></b><td style=\"align:left;color:#FF0066;\">" + 
+	    "</b></td><td style=\"text-align:left;color:#FF0066;\">" + 
 	    message +
 	    "</td></tr>";
 	appendHTML();
@@ -113,9 +125,9 @@ public class TextPaneExtended extends JTextPane
     public void setRegularMessage(String nick, String message)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label>" + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>" + 
 	    nick + 
-	    "</label></td></b><td style=\"align:left;color:#000000;\">" + 
+	    "</b></td><td style=\"text-align:left;color:#000000;\">" + 
 	    message +
 	    "</td></tr>";
 	appendHTML();
@@ -124,9 +136,9 @@ public class TextPaneExtended extends JTextPane
     public void setMessage(String nick, String message)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#8B0000;\"><label>" + 
+	    "<tr><td style=\"text-align:right;color:#8B0000;\"><b>" + 
 	    nick + 
-	    "</label></td></b><td style=\"align:left;color:#8B0000;\">" + 
+	    "</b></td><td style=\"text-align:left;color:#8B0000;\">" + 
 	    message +
 	    "</td></tr>";
 	appendHTML();	    
@@ -136,8 +148,8 @@ public class TextPaneExtended extends JTextPane
     {
 	System.out.println("In TextPaneExtended, setSelfNickChangeText.");
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label></label></td></b>" +
-	    "<td style=\"align:left;color:#000000;\">" + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000;\">" + 
 	    Constants.selfNickChangeText + newNick +
 	    "</td></tr>";
 	appendHTML();
@@ -146,8 +158,8 @@ public class TextPaneExtended extends JTextPane
     public void setNickChangeText(String oldNick, String newNick)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label></label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
 	    oldNick + Constants.nickChangeText + newNick +
 	    "</td></tr>";
 	appendHTML();
@@ -156,8 +168,8 @@ public class TextPaneExtended extends JTextPane
     public void setInvitationText(String channelName, String nick, String hostName)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label></label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
 	    "You have been invited to " + 
 	    channelName +
 	    " by " +
@@ -172,8 +184,8 @@ public class TextPaneExtended extends JTextPane
     public void setSelfKickText(String channelName, String byWho, String reason)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label></label></td></b>" +
-	    "<td style=\"align:left;color:#00008B\">" + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#00008B\">" + 
 	    "You have been kicked from " + 
 	    channelName +
 	    " by " +
@@ -188,8 +200,8 @@ public class TextPaneExtended extends JTextPane
     public void setKickText(String channelName, String nick, String byWho, String reason)
     {
 	text = middleHTML +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label></label></td></b>" +
-	    "<td style=\"align:left;color:#00008B\">" + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#00008B\">" + 
 	    byWho + 
 	    " has kicked " +
 	    nick +
@@ -212,8 +224,8 @@ public class TextPaneExtended extends JTextPane
 			   int hopCount)
     {
 	text = middleHTML + 
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
 	    "User " + 
 	    nick + 
 	    ", (" +
@@ -246,38 +258,69 @@ public class TextPaneExtended extends JTextPane
 			     String endOfList)
     {
 	text = middleHTML + 
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
 	    "[" + nick + "] (" + userName + "@" + hostName + "): " + realName +
 	    "</td></tr>" +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
 	    "[" + nick + "] attached to " + server + " :"  + serverInfo +
 	    "</td></tr>" +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
 	    "[" + nick + "] idle " + idleTime + ", signon: " + signOnTimeStr +
 	    "</td></tr>" +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
 	    "[" + nick + "] is member of " + whoisChannels +
 	    "</td></tr>" +
-	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
-	    "<td style=\"align:left;color:#000000\">" + 	    
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 	    
 	    "[" + nick + "] " + endOfList +
 	    "</td></tr>";
 	appendHTML();
     }
  
+    public void setWhoWasText(String nick, String userName, String hostName, String realName)
+    {
+	text = middleHTML + 
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
+	    "[" + nick + "] (" + userName + "@" + hostName + "): " + realName +
+	    "</td></tr>";
+	appendHTML();
+    }
+
+    public void setWhoWasRemainingText(String nick, String remainingText)
+    {
+	text = middleHTML + 
+	    "<tr><td style=\"text-align:right;color:blue;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000\">" + 
+	    "[" + nick + "] " + remainingText +
+	    "</td></tr>";
+	appendHTML();	
+    }
+
+    public void setMsgText(String nick, String message)
+    {
+	text = middleHTML +
+	    "<tr><td style=\"text-align:right;color:#000000;\">&rsaquo;<b>" + 
+	    nick + 
+	    "</b>&lsaquo;</td><td style=\"text-align:left;color:#000000;\">" + 
+	    message +
+	    "</td></tr>";
+	appendHTML();	
+    }
+
     public void setServNotice(String notice)
     {
-	text = middleHTML + "<tr><b><td style=\"align:right;color:#FF0066;\"><label>*</label></td></b><td style=\"color:black;align:left\">" + notice + "</td></tr>";
+	text = middleHTML + "<tr><td style=\"text-align:right;color:#FF0066;\"><b>*</b></td><td style=\"color:black;text-align:left\">" + notice + "</td></tr>";
 	appendHTML();
     }
 
     public void setNotice(String nick, String noticeText)
     {
-	text = middleHTML + "<tr><b><td style=\"color:#800080\";align=\"right\"><label>" + nick + "</label></td></b><td style=\"color:black;align:left\">" + noticeText + "</td></tr>";
+	text = middleHTML + "<tr> <td style=\"color:#800080\";text-align=\"right\"><b>" + nick + "</b></td><td style=\"color:black;text-align:left\">" + noticeText + "</td></tr>";
 	appendHTML();
     }
 

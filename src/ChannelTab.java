@@ -171,6 +171,7 @@ public class ChannelTab extends JPanel
 	this.add( p4, BorderLayout.SOUTH );
 
 	tabbedPane.add(channelName, this);
+	tabbedPane.setSelectedComponent(this);
 	tabbedPane.setTabComponentAt(tabbedPane.getTabCount() - 1, p7);
 	tabbedPane.setSelectedComponent( this );
     }
@@ -239,15 +240,12 @@ public class ChannelTab extends JPanel
 
     public void setText(String text)
     {
-	String prevText = textPane.getText();
-	prevText += text;
-	prevText += "\n";
-	textPane.setText(prevText);
-	textPane.setCaretPosition(textPane.getDocument().getLength());
+	textPane.setChanInfo(text);
     }
 
     public void setNickButtonText(String nick)
     {
+	this.nickName = nick;
 	nickButton.setText(nick);
     }
 
@@ -259,6 +257,11 @@ public class ChannelTab extends JPanel
     public void setChanJoinText(String text)
     {
 	textPane.setChanJoinText(text);
+    }
+
+    public void setMsgText(String nick, String message)
+    {
+	textPane.setMsgText(nick, message);
     }
 
     public void setChanMembers( TreeMap<String, Vector<String>> treemap )
