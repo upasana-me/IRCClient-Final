@@ -169,6 +169,65 @@ public class TextPaneExtended extends JTextPane
 	appendHTML();
     }
 
+    public void setSelfKickText(String channelName, String byWho, String reason)
+    {
+	text = middleHTML +
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label></label></td></b>" +
+	    "<td style=\"align:left;color:#00008B\">" + 
+	    "You have been kicked from " + 
+	    channelName +
+	    " by " +
+	    byWho + 
+	    " (" +
+	    reason + 
+	    ")" +
+	    "</td></tr>";
+	appendHTML();
+    }
+
+    public void setKickText(String channelName, String nick, String byWho, String reason)
+    {
+	text = middleHTML +
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label></label></td></b>" +
+	    "<td style=\"align:left;color:#00008B\">" + 
+	    byWho + 
+	    " has kicked " +
+	    nick +
+	    " from " +
+	    channelName +
+	    " (" +
+	    reason + 
+	    ")" +
+	    "</td></tr>";
+	appendHTML();
+    }
+
+    public void setWhoText(String nick, String userName, String hostName, String realName, 
+			   String hereOrGone, String channelName, String serverName, int hopCount)
+    {
+	text = middleHTML + 
+	    "<tr><b><td style=\"align:right;color:#000000;\"><label>*</label></td></b>" +
+	    "<td style=\"align:left;color:#000000\">" + 
+	    "User " + 
+	    nick + 
+	    ", (" +
+	    userName + 
+	    "@" + 
+	    hostName + 
+	    ") \"" + 
+	    realName + 
+	    "\" (" + 
+	    hereOrGone + 
+	    "), member of " +
+	    channelName + 
+	    ", is connected to " +
+	    serverName + 
+	    ", " + 
+	    hopCount + " hop(s)." +
+	    "</td></tr>";
+	appendHTML();
+    }
+  
     public void setServNotice(String notice)
     {
 	text = middleHTML + "<tr><b><td style=\"align:right;color:#FF0066;\"><label>*</label></td></b><td style=\"color:black;align:left\">" + notice + "</td></tr>";

@@ -227,6 +227,16 @@ public class ChannelTab extends JPanel
 	textPane.setInvitationText(channelName, nick, hostName);
     }
 
+    public void setSelfKickText(String channelName, String byWho, String reason)
+    {
+	textPane.setSelfKickText(channelName, byWho, reason);
+    }
+
+    public void setKickText(String channelName, String nick, String byWho, String reason)
+    {
+	textPane.setKickText(channelName, nick, byWho, reason);
+    }
+
     public void setText(String text)
     {
 	String prevText = textPane.getText();

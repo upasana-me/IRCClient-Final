@@ -392,6 +392,25 @@ public class TabGroup
 	    }
     }
     
+    public void setSelfKickText(String channelName, String byWho, String reason)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setSelfKickText(channelName, byWho, reason);
+    }
+
+    public void setKickText(String channelName, String nick, String byWho, String reason)
+    {
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setKickText(channelName, nick, byWho, reason);	
+    }
+
+    public void setWhoText(String nick, String userName, String hostName, String realName, 
+			   String hereOrGone, String channelName, String serverName, int hopCount)
+    {
+	server_ta.setWhoText(nick, userName, hostName, realName, hereOrGone, 
+			     channelName, serverName, hopCount);
+    }
+  
     public void setNickButtonText( String nick )
     {
 	this.nickName = nick;

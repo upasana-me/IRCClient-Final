@@ -443,13 +443,14 @@ public class Connection implements Runnable, IRCEventListener
 		String reason = ke.getMessage();
 		if( kickedNick.equals(nick_name) )
 		    {
-			tabGroup.setText( channelName, "You have been kicked from " + channelName + " by " + byWho + " (" + reason + ")");
+			//			tabGroup.setText( channelName, "You have been kicked from " + channelName + " by " + byWho + " (" + reason + ")");
+			tabGroup.setSelfKickText( channelName, byWho, reason );
 			tabGroup.clearChanMembersList(channelName);
 			System.out.println("In Conenction after clearChannelMembersList");
 		    }
 		else
 		    {
-			tabGroup.setText( channelName, byWho + " has kicked " + kickedNick + " from " + channelName + " (" + reason + ")");
+			tabGroup.setKickText( channelName, kickedNick, byWho, reason );
 			
 			TreeMap<String, Vector<String>> status_2_members = setStatus2Members(session.getChannel(channelName), channelName);
 			tabGroup.set_chan_members(channelName, status_2_members);
@@ -465,6 +466,8 @@ public class Connection implements Runnable, IRCEventListener
 		String serverName = we.getServerName();
 		String channelName = we.getChannel();
 		String hereOrGone = (we.isAway() ? "Gone" : "Here");
+		int hopCount = we.getHopCount();
+		/*
 		String text = "User " + nick + ", (" 
 		    + userName + "@" + 
 		    hostName + ") \"" + 
@@ -473,7 +476,8 @@ public class Connection implements Runnable, IRCEventListener
 		    channelName + ", is connected to " +
 		    serverName + ", " + 
 		    we.getHopCount() + " hop(s).";
-		tabGroup.setText(network_name, text);
+		*/
+		tabGroup.setWhoText(nick, userName, hostName, realName, hereOrGone, channelName, serverName, hopCount);
 	    }
 	else if( e.getType() == Type.WHOIS_EVENT )
 	    {
