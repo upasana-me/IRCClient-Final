@@ -10,6 +10,8 @@ import jerklib.events.dcc.DccEventFactory;
 import jerklib.events.impl.CtcpEventImpl;
 import jerklib.events.impl.MessageEventImpl;
 
+import java.util.Vector;
+
 public class PrivMsgParser implements CommandParser
 {
 	/*
@@ -42,6 +44,13 @@ public class PrivMsgParser implements CommandParser
 			String ctcpString = msg.substring(1, msg.length() - 1);
 			if (ctcpString.startsWith("DCC "))
 			{
+			    /*
+		    ctcpString = token.getTokenAt(4);
+			    Vector<String> list = new Vector<String>(token.args());
+			    for( int i = 0; i < list.size(); i++ )
+				System.out.println(list.elementAt(i));
+			    System.out.println("ctcpString : " + token.data());
+			    */
 				me = DccEventFactory.dcc(me, ctcpString);
 			}
 			else

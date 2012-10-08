@@ -264,6 +264,11 @@ public class ChannelTab extends JPanel
 	textPane.setMsgText(nick, message);
     }
 
+    public void setDccChatInvitation(String nick, String ip, int port)
+    {
+	textPane.setDccChatInvitation(nick, ip, port);
+    }
+
     public void setChanMembers( TreeMap<String, Vector<String>> treemap )
     {
 	Vector<String> ops = treemap.get("o"); // key "o" is for operators
@@ -358,5 +363,4 @@ public class ChannelTab extends JPanel
 		nicksList.setListData(nicks);
 	    }
     }
-
 }

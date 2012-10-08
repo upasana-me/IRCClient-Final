@@ -10,7 +10,7 @@ public class NumericErrorParser implements CommandParser
 	{
 		return new NumericEventImpl
 		(
-				token.arg(0), 
+		 token.joinTokens(3), 
 				token.data(), 
 				token.numeric(), 
 				event.getSession()

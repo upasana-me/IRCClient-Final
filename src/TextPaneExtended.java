@@ -11,7 +11,7 @@ public class TextPaneExtended extends JTextPane
     public TextPaneExtended()
     {
 	this.setContentType("text/html");
-	startHTML = "<html><body><table cellspacing=\"0\"><colgroup><col></col><col></col></colgroup>";
+	startHTML = "<html><body><table cellspacing=\"0\" >";
 	endHTML = "</table></body></html>";
 	middleHTML = "";
 	this.setText(startHTML + endHTML);
@@ -28,6 +28,12 @@ public class TextPaneExtended extends JTextPane
     public void setServerInfo(String serverInfo)
     {
 	text = middleHTML + "<tr><td style=\"color:blue;text-align:right;\"><b>*</b></td><td style=\"color:black;text-align:left;\">" + serverInfo + "</td></tr>";
+	appendHTML();
+    }
+
+    public void setErrorMessage(String errorMsg)
+    {
+	text = middleHTML + "<tr><td style=\"color:red;text-align:right;\"><b>*</b></td><td style=\"color:red;text-align:left;\">" + errorMsg + "</td></tr>";
 	appendHTML();
     }
 
@@ -304,12 +310,30 @@ public class TextPaneExtended extends JTextPane
     public void setMsgText(String nick, String message)
     {
 	text = middleHTML +
-	    "<tr><td style=\"text-align:right;color:#000000;\">&rsaquo;<b>" + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>&#62;" + 
 	    nick + 
-	    "</b>&lsaquo;</td><td style=\"text-align:left;color:#000000;\">" + 
+	    "&#60;</b>" +
+	    "</td>" +
+	    "<td style=\"text-align:left;color:#000000;\">" + 
 	    message +
 	    "</td></tr>";
 	appendHTML();	
+    }
+
+    public void setDccChatInvitation(String nick, String ip, int port)
+    {
+	text = middleHTML + 
+	    "<tr><td style=\"text-align:right;color:#000000;\"><b>*</b></td>" +
+	    "<td style=\"text-align:left;color:#000000;\">" + 
+	    "Received a DCC CHAT offer from " +
+	    nick +
+	    " (" + 
+	    ip +
+	    ":" +
+	    port +
+	    ") " +
+	    "</td></tr>";
+	appendHTML();
     }
 
     public void setServNotice(String notice)

@@ -216,7 +216,7 @@ public class EventToken
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns raw event data
 	 * 
@@ -250,4 +250,30 @@ public class EventToken
 	{
 		return data;
 	}
+
+    public String joinTokens(int start)
+    {
+	String joinedTokens = "";
+	if( start >= 0 )
+	    {
+		String tokens[] = data.split(" ");
+		for( int i = start; i < tokens.length; i++ )
+		    {
+			joinedTokens += tokens[i];
+			joinedTokens += " ";
+		    }
+		return joinedTokens;
+	    }
+	else
+	    return null;
+    }
+
+    public String getTokenAt(int i)
+    {
+	String[] tokens = data.split(" ");
+	if( i < tokens.length )
+	    return tokens[i];
+	else
+	    return null;
+    }
 }

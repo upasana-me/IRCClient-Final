@@ -9,6 +9,9 @@ import jerklib.events.*;
 import jerklib.events.IRCEvent.Type;
 import jerklib.events.ErrorEvent.ErrorType;
 
+import jerklib.events.dcc.DccEvent;
+import jerklib.events.dcc.DccChatEvent;
+
 import jerklib.events.modes.*;
 
 import jerklib.events.modes.ModeEvent.ModeType;
@@ -31,7 +34,7 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.HashMap;
 
-import java.net.Socket;
+import java.net.InetAddress;
 
 public class Connection implements Runnable, IRCEventListener
 {
@@ -55,7 +58,7 @@ public class Connection implements Runnable, IRCEventListener
 
     private Vector<String> nicks_pms;
 
-    private Socket[] sockets;
+    //    private Socket[] sockets;
 
     private int no_of_sockets;
     private int free_socket;
@@ -69,6 +72,7 @@ public class Connection implements Runnable, IRCEventListener
     private TabGroup tabGroup;
 
     private boolean waitingForNextWhoWas;
+    private boolean connected;
 
     private enum EventType 
     {
@@ -145,11 +149,18 @@ public class Connection implements Runnable, IRCEventListener
 	    {
 		NickInUseEvent ne = (NickInUseEvent)e;
 		String inUseNick = ne.getInUseNick();
-		cur_nick++;
-		nick_name = nicks[cur_nick];
-		tabGroup.setServerInfo(inUseNick + " is already in use.");
-		tabGroup.setServerInfo("Retrying with " + nick_name);
-		tabGroup.setNickButtonText(nick_name);
+		if( !connected )
+		    {
+			cur_nick++;
+			nick_name = nicks[cur_nick];
+			tabGroup.setServerInfo(inUseNick + " is already in use.");
+			tabGroup.setServerInfo("Retrying with " + nick_name);
+			tabGroup.setNickButtonText(nick_name);
+		    }
+		else
+		    {
+			tabGroup.setServerInfo(inUseNick + " is already in use.");			
+		    }
 	    }
 	else if( e.getType() == Type.AWAY_EVENT )
 	    {
@@ -176,6 +187,45 @@ public class Connection implements Runnable, IRCEventListener
 		else 
 		    {
 			tabGroup.setNotice(byWho, noticeMessage);
+		    }
+	    }
+	else if (e.getType() == Type.DCC_EVENT)
+	    {
+		DccEvent de = (DccEvent)e;
+		System.out.println("DccEvent : " + de.getCtcpString());
+		if( de.getDccType() == DccEvent.DccType.CHAT )
+		    {
+			System.out.println("Dcc Chat Event");
+			DccChatEvent dce = (DccChatEvent)de;
+			InetAddress ip = dce.getIp();
+			String ipStr = ip.getHostAddress();
+			int port = dce.getPort();
+			String nick = dce.getNick();
+			
+			System.out.println("ipStr : " + ipStr);
+			System.out.println("port : " + port);
+			System.out.println("nick : " + nick);
+			tabGroup.setDccChatInvitation(nick, ipStr, port);
+		    }
+		else if( de.getDccType() == DccEvent.DccType.ACCEPT )
+		    {
+			System.out.println("Dcc ACCEPT Event");
+		    }
+		else if( de.getDccType() == DccEvent.DccType.SEND )
+		    {
+			System.out.println("Dcc SEND Event");
+		    }
+		else if( de.getDccType() == DccEvent.DccType.RESUME )
+		    {
+			System.out.println("Dcc RESUME Event");			
+		    }
+		else if( de.getDccType() == DccEvent.DccType.UNKNOWN )
+		    {
+			System.out.println("Dcc UNKNOWN Event");			
+		    }
+		else
+		    {
+			System.out.println("Dcc Else Event");			
 		    }
 	    }
 	else if( e.getType() == Type.QUIT )
@@ -210,6 +260,7 @@ public class Connection implements Runnable, IRCEventListener
 	    }
 	else if( e.getType() == Type.CONNECT_COMPLETE )
 	    {
+		connected = true;
 		channels = enl.get_auto_join_channels(network_name);
 		Set<Map.Entry<String, String>> chan_pswd = channels.entrySet();
 		Iterator<Map.Entry<String,String>> i = chan_pswd.iterator();
@@ -415,6 +466,13 @@ public class Connection implements Runnable, IRCEventListener
 			    }
 			catch(NumberFormatException nfe)
 			    {}
+		    }
+		else if( ee.getErrorType() == ErrorType.NUMERIC_ERROR )
+		    {
+			NumericErrorEvent nee = (NumericErrorEvent)ee;
+			String errorMsg = nee.getErrorMsg();
+			System.out.println("errorMsg : " + errorMsg);
+			tabGroup.setErrorMessage(errorMsg);
 		    }
 	    }
 	else if( e.getType() == Type.EXCEPTION )

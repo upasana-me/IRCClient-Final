@@ -103,7 +103,7 @@ public class ButtonTabOuterComponent extends JPanel
 					mainWindow.removeConnection(panel);
 					if(pane.getTabCount() == 0 )
 					    {
-						//						mainWindow.setTextArea();
+						mainWindow.setTextPane();
 					    }
 				    }
 			    }

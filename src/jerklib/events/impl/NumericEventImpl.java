@@ -10,7 +10,7 @@ import jerklib.events.NumericErrorEvent;
  */
 public class NumericEventImpl implements NumericErrorEvent
 {
-	private final String errMsg, rawEventData;
+    private final String errMsg, rawEventData;
 	private final Session session;
 	private final int numeric;
 

@@ -279,6 +279,11 @@ public class TabGroup
 	//	server_ta.setCaretPosition(server_ta.getDocument().getLength());
     }
 
+    public void setErrorMessage(String errorMessage)
+    {
+	server_ta.setErrorMessage(errorMessage);
+    }
+
     public void setChanJoinText(String channelName, String text)
     {
 	ChannelTab channelTab = tmChannelTab.get(channelName);
@@ -455,6 +460,23 @@ public class TabGroup
 	    }
 	else
 	    server_ta.setMsgText(nick, message);
+    }
+
+    public void setDccChatInvitation(String nick, String ip, int port)
+    {
+	String tabName = getSelectedTab();
+	if(tmChannelTab.containsKey(tabName))
+	    {
+		ChannelTab channelTab = tmChannelTab.get(tabName);
+		channelTab.setDccChatInvitation(nick, ip, port);
+	    }
+	else if(tmPrivateMessageTab.containsKey(tabName))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabName);
+		privateMessageTab.setDccChatInvitation(nick, ip, port);
+	    }
+	else
+	    server_ta.setDccChatInvitation(nick, ip, port);	
     }
 
     public void setNickButtonText( String nick )
@@ -700,7 +722,26 @@ public class TabGroup
 		    }
 	    }
 	else if( tokens[0].equals("DCC"))
-	    {}
+	    {
+		if( tokens.length >= 2 )
+		    {
+			if( tokens[1].equals("ACCEPT"))
+			    {}
+			else if( tokens[1].equals("CHAT"))
+			    {
+				String nick = tokens[2];
+				
+			    }
+			else if( tokens[1].equals("CLOSE"))
+			    {}
+			else if( tokens[1].equals("DECLINE"))
+			    {}
+			else if( tokens[1].equals("LIST"))
+			    {}
+			else if( tokens[1].equals("SEND"))
+			    {}
+		    }
+	    }
 	else if( tokens[0].equals("DEOP"))
 	    {
 		if( tokens.length < 2 )

@@ -104,11 +104,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     //    private JMenuItem 
     private JScrollPane sp;
 
-    private JTextArea server_ta;
+    private TextPaneExtended server_ta;
     private JTextField server_tf;
     private JTextField serv_topic_tf;
 
     private int tabNumber;
+    private boolean noNetwork;
 
     private UserSettings userSettings;
     
@@ -117,6 +118,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	super( Constants.appTitle );
 	//	conn = c;
 	tmNet2JTabbedPane = new TreeMap<String, JTabbedPane>();
+	server_ta = new TextPaneExtended();
+	server_tf = new JTextField();
+	serv_topic_tf = new JTextField();
+	noNetwork = false;
 	/*
 	tabNumber = 0;
 	tmta = new TreeMap<String, JTextArea>();
@@ -155,6 +160,101 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     public void setUserSettings(UserSettings us)
     {
 	userSettings = us;
+    }
+
+    public void setTextPane()
+    {
+	noNetwork = true;
+	JPanel p = new JPanel( new BorderLayout() );
+	JPanel p1 = new JPanel( new BorderLayout() );
+	JPanel p2 = new JPanel( new BorderLayout() );
+	JPanel p3 = new JPanel( new BorderLayout() );
+	JPanel p4 = new JPanel( new BorderLayout() );
+	//need modification
+	//	JPanel p6 = new ButtonTabComponent(tabbedPane, "Client", this);
+
+	BorderLayout bl = new BorderLayout();
+	bl.setHgap( 0 );
+	bl.setVgap( 0 );
+	JPanel p5 = new JPanel( bl );
+
+	serv_topic_tf = new JTextField();
+	serv_topic_tf.setEnabled( false );
+	serv_topic_tf.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
+	//	p5.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
+	p5.add( serv_topic_tf, BorderLayout.CENTER );
+
+	server_ta = new TextPaneExtended();
+	server_ta.setMargin(new Insets(0,50,0,10));
+	//	server_ta.setLineWrap(true);
+
+	//	tmta.put( networkName, server_ta );
+	JScrollPane sp = new JScrollPane( server_ta );
+	
+	server_ta.setEditable( false );
+
+	server_tf = new JTextField();
+	server_tf.addActionListener( new ActionListener() 
+	    {
+		public void actionPerformed(ActionEvent ae)
+		{
+		    String s = server_tf.getText();
+		    server_tf.setText("");
+		    if( s.startsWith("/") )
+			{
+			    System.out.println("parse command.");
+			    //parseCommand(networkName, s);
+			}
+		    else
+			{
+			    server_ta.setServerInfo("Please type an actual IRC command on this tab.");
+			}
+		}
+	    });
+	server_tf.setActionCommand( Constants.server_tf_ac );
+	//	tmtf.put( networkName, server_tf );
+
+	nick_button = new JButton(userSettings.get_nick1());
+	//	nick_button.setText( nick );
+	nick_button.addActionListener( new ActionListener()
+	    {
+		public void actionPerformed(ActionEvent ae)
+		{
+		    try
+			{
+			    //			    changeNick();
+			}
+		    catch(NullPointerException npe)
+			{}
+		    catch(HeadlessException he)
+			{}
+		}
+	    });
+
+	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
+	p1.add( sp, BorderLayout.CENTER  );
+
+	p2.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
+ 	p2.add( nick_button, BorderLayout.WEST );
+
+	p3.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
+	p3.add( server_tf );
+
+	p.setBorder( BorderFactory.createLineBorder( Color.black, 2 ) );
+
+	p4.add( p2, BorderLayout.LINE_START );
+	p4.add( p3 );
+
+	p.add( p5, BorderLayout.NORTH );
+	p.add( p1, BorderLayout.CENTER );
+	p.add( p4, BorderLayout.SOUTH );
+
+	/*
+	tabbedPane.add( networkName, p );
+	tabbedPane.setSelectedComponent(p);
+	tabbedPane.setTabComponentAt( tabbedPane.getTabCount() - 1, p6);
+	*/
+	tp.add("Client", p);
     }
 
     public void init()
@@ -240,6 +340,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 	tmNet2JTabbedPane.put( networkName, tabbedPane );
 	int index = 0;
+	if( noNetwork )
+	    {
+		tp.removeAll();
+		noNetwork = false;
+	    }
 	if( tp.getTabCount() > 0 )
 	    index = tp.getTabCount();
 	tp.add( networkName, tabbedPane );

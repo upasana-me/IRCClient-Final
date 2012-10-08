@@ -192,6 +192,11 @@ public class PrivateMessageTab extends JPanel
 	textPane.setMsgText(nick, message);
     }
 
+    public void setDccChatInvitation(String nick, String ip, int port)
+    {
+	textPane.setDccChatInvitation(nick, ip, port);
+    }
+
     public void setText(String info)
     {
 	textPane.setPmInfo(info);

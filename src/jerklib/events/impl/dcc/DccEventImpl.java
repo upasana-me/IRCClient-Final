@@ -36,7 +36,7 @@ class DccEventImpl implements DccEvent
 	
 	public DccType getDccType()
 	{
-		return DccType.UNKNOWN;
+	    return DccType.valueOf(DccType.class, ctcpString);
 	}
 
 	public String getRawEventData()
