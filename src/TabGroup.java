@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
@@ -723,14 +724,33 @@ public class TabGroup
 	    }
 	else if( tokens[0].equals("DCC"))
 	    {
+		System.out.println("DCC");
 		if( tokens.length >= 2 )
 		    {
 			if( tokens[1].equals("ACCEPT"))
 			    {}
-			else if( tokens[1].equals("CHAT"))
+			else if( tokens[1].equalsIgnoreCase("CHAT"))
 			    {
-				String nick = tokens[2];
-				
+				System.out.println("DCC CHAT");
+				if( tokens.length >= 3 )
+				    {
+					String nick = tokens[2];
+					DccConnection dccConnection = new DccConnection(nickName, nick, mw, this);
+					new Thread(dccConnection).start();
+					try
+					    {
+						Thread.sleep(60);
+					    }
+					catch(InterruptedException ie)
+					    {}
+					int ipAddress = dccConnection.getIpBytes();
+					int port = dccConnection.getPort();
+					String message = "\001DCC CHAT chat " + ipAddress + " " + port + "\001";
+					System.out.println("message : " + message);
+					connection.sendPrivateMessage(nick, message);
+				    }
+				else
+				    {}
 			    }
 			else if( tokens[1].equals("CLOSE"))
 			    {}

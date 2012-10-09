@@ -348,4 +348,14 @@ public class TextPaneExtended extends JTextPane
 	appendHTML();
     }
 
+    public void setSockClosed(String nick, String message)
+    {
+	text = middleHTML + 
+	    "<tr> <td style=\"color:#800080\";text-align=\"right\"><b>*</b></td><td style=\"color:black;text-align:left\">DCC CHAT to " + 
+	    nick + 
+	    " lost (" + 
+	    message + 
+	    "</td></tr>";
+	appendHTML();
+    }
 }

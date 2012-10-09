@@ -11,8 +11,10 @@ public final class Constants {
     public static final String topicStr = "Topic for ";
 
     public static final String servlist_file = "servlist_.conf";
-    public static final String op_sign_file_path = "Images" + File.separator + "op_sign.png";
-    public static final String voice_sign_file_path = "Images" + File.separator + "voice_sign.png";
+    //    public static final String op_sign_file_path = "Images" + File.separator + "op_sign.jpg";
+    public static final String op_sign_file_path = "Images" + File.separator + "op.gif";
+    //    public static final String voice_sign_file_path = "Images" + File.separator + "voice_sign.png";
+    public static final String voice_sign_file_path = "Images" + File.separator + "voiced.gif";
     public static final String none_sign_file_path = "Images" + File.separator + "none_sign.png";
 
     public static final String default_user_name = "user";
