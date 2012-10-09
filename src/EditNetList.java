@@ -55,33 +55,65 @@ public class EditNetList
 
     public void add_server(String network_name, String server)
     {
+	System.out.println("In add_server, network_name : " + network_name + ", server : " + server);
 	Vector<String> servers = new Vector<String>();
 	if( network_2_serv.containsKey(network_name))
 	    {
 		servers = network_2_serv.get(network_name);		
+		if(network_name.equals("Rizon"))
+		    {
+			System.out.println("server " + server);
+		    }
 	    }
-	servers.add(server);
+	else 
+	    servers.add(server);
+
+	if(network_name.equals("Rizon"))
+	    {
+		System.out.println("server " + server);
+	    }
 	network_2_serv.put(network_name, servers);		
     }
 
     public HashMap<String, String> getServersPort(String networkName)
     {
+	System.out.println("In getServersPort, networkName : " + networkName);
 	Vector<String> serversPorts = network_2_serv.get(networkName);
 	HashMap<String, String> serverPort = new HashMap<String, String>();
 
 	for( int i = 0; i < serversPorts.size(); i++ )
 	    {
-		Pattern pattern = Pattern.compile("(.*)(/)(.*)");
+		String tokens[] = serversPorts.elementAt(i).split("/");
+		String server = "";
+		String port = "6667";
+		if( tokens.length == 1 )
+		    {
+			server = tokens[0];
+		    }
+		else
+		    {
+			server = tokens[0];
+			port = tokens[1];
+		    }
+		serverPort.put(server, port);
+		/*
+		Pattern pattern = Pattern.compile("(.*)(/*)(.*)*");
 		Matcher matcher = pattern.matcher(serversPorts.elementAt(i));
+		System.out.println("before matcher.find()");
 		while(matcher.find() )
 		    {
 			String server = matcher.group(1);
+			System.out.println("server : " + server);
 			String port = "6667";
+			System.out.println("port : " + port);
 			String portString = matcher.group(3);
+			System.out.println("portString : " + portString);
 			if( !portString.equals("") && !portString.equals(null))
 			    port = portString;
 			serverPort.put(server, port);
+			System.out.println("Server : " + server + ", port : " + port);
 		    }
+		*/
 	    }
 
 	return serverPort;

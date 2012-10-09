@@ -344,18 +344,18 @@ public class TextPaneExtended extends JTextPane
 
     public void setNotice(String nick, String noticeText)
     {
-	text = middleHTML + "<tr> <td style=\"color:#800080\";text-align=\"right\"><b>" + nick + "</b></td><td style=\"color:black;text-align:left\">" + noticeText + "</td></tr>";
+	text = middleHTML + "<tr> <td style=\"color:#800080;text-align:right\"><b>" + nick + "</b></td><td style=\"color:black;text-align:left\">" + noticeText + "</td></tr>";
 	appendHTML();
     }
 
     public void setSockClosed(String nick, String message)
     {
 	text = middleHTML + 
-	    "<tr> <td style=\"color:#800080\";text-align=\"right\"><b>*</b></td><td style=\"color:black;text-align:left\">DCC CHAT to " + 
+	    "<tr><td style=\"color:#800080;text-align:right;\"><b>*</b></td><td style=\"color:black;text-align:left\">DCC CHAT to " + 
 	    nick + 
 	    " lost (" + 
 	    message + 
-	    "</td></tr>";
+	    ")</td></tr>";
 	appendHTML();
     }
 }

@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import java.util.Date;
 import java.util.Vector;
@@ -681,11 +682,23 @@ public class Connection implements Runnable, IRCEventListener
 			String channelName = channel.getName();
 			tabGroup.setText(channelName, text);
 		    }
-		else
+		else if( ctcpString.startsWith("VERSION"))
 		    {
 			String text = "Received a CTCP " + ctcpString + " from " + nick;
 			tabGroup.setText(tabGroup.getSelectedTab(), text);
-			
+			sendCTCPVersion(nick);
+		    }
+		else if( ctcpString.startsWith("TIME"))
+		    {
+			String text = "Received a CTCP " + ctcpString + " from " + nick;
+			tabGroup.setText(tabGroup.getSelectedTab(), text);
+			sendCTCPTime(nick);			
+		    }
+		else if( ctcpString.startsWith("PING"))
+		    {
+			String text = "Received a CTCP " + ctcpString + " from " + nick;
+			tabGroup.setText(tabGroup.getSelectedTab(), text);
+			//			sendCTCPTime(nick);			
 		    }
 	    }
 	else 
@@ -973,6 +986,7 @@ public class Connection implements Runnable, IRCEventListener
 		Map.Entry<String, String> servPortPair = getNextServPort();
 		String server = servPortPair.getKey();
 		String port = servPortPair.getValue();
+		System.out.println("server : " + server + ", port : " + port);
 		try
 		    {
 			session = manager.requestConnection(server, Integer.parseInt(port), profile);
@@ -1242,7 +1256,24 @@ public class Connection implements Runnable, IRCEventListener
 	session.ctcp(target, message);
     }
 
-    
+    private void sendCTCPVersion(String nick)
+    {
+	String message = "Java IRC Client " + System.getProperty("os.name") + " " + System.getProperty("os.version");
+	session.ctcp(nick, "VERSION", message);
+    }
+
+    private void sendCTCPTime(String nick)
+    {
+	DateFormat dateFormat = new SimpleDateFormat("EEE, MMM d yyyy HH:mm:ss");
+	String message = dateFormat.format(new Date());
+	session.ctcp(nick, "TIME", message);
+    }
+
+    //TODO later
+    private void sendCTCPPing(String nick)
+    {
+	
+    }
 
    /*    public Session getSession(String networkName)
     {

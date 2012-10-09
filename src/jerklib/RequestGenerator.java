@@ -107,9 +107,15 @@ class RequestGenerator
 	 * @param target
 	 * @param request
 	 */
-	public void ctcp(String target, String request)
+    public void ctcp(String target, String request, String msg)
 	{
-		write(new WriteRequest("\001" + request.toUpperCase() + "\001", session, target));
+		write(new WriteRequest("NOTICE " + target + " :" + "\001" + request.toUpperCase() + " " + msg + "\001", session));
+	}
+
+	
+    public void ctcp(String target, String request)
+	{
+		write(new WriteRequest("NOTICE " + target + " :" + "\001" + request.toUpperCase() + "\001", session));
 	}
 
 	

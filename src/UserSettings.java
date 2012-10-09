@@ -278,6 +278,7 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		for( int i = 0; i < new_lines_toks.length; i++ )
 		    {
 			String cur_tok = new_lines_toks[i];
+			System.out.println("cur_tok : " + cur_tok);
 			String[] tokens = cur_tok.split("=");
 			if( cur_tok.startsWith("N") )
 			    {
