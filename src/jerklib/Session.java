@@ -328,7 +328,7 @@ public class Session extends RequestGenerator
 	 */
 	public String getNick()
 	{
-		return getRequestedConnection().getProfile().getActualNick();
+	    return getRequestedConnection().getProfile().getActualNick();
 	}
 
 	/* (non-Javadoc)
@@ -801,4 +801,8 @@ public class Session extends RequestGenerator
 		return false;
 	}
 
+    public void setNick(String newNick)
+    {
+	getRequestedConnection().getProfile().setActualNick(newNick);
+    }
 }

@@ -44,7 +44,9 @@ public class CellRenderer extends JLabel implements ListCellRenderer<Object>
 
     public void removeNickFromAway(String nick)
     {
+	away = status_2_nicks.get("a");
 	away.remove(nick);
+	status_2_nicks.put("a", away);
     }
 
     public void changeNick(String oldNick, String newNick)

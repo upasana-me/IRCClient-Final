@@ -11,6 +11,7 @@ import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JViewport;
 
 import javax.swing.border.Border;
 
@@ -23,6 +24,12 @@ import java.awt.Insets;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 import java.util.Vector;
 import java.util.TreeSet;
@@ -55,6 +62,7 @@ public class ChannelTab extends JPanel
     private TextPaneExtended textPane;
     private JButton nickButton;
     private JTabbedPane tabbedPane;
+    private KeyListener keyListener;
 
     private Vector<String> nicks;
     private TreeSet<String> nicksTreeSet;
@@ -75,6 +83,8 @@ public class ChannelTab extends JPanel
 	cellRenderer = new CellRenderer();
 	textPane = new TextPaneExtended();
 	textPaneScroller = new JScrollPane(textPane);
+	JViewport viewport = textPaneScroller.getViewport();
+	textPaneScroller.setViewport(viewport);
 	nicksListScroller = new JScrollPane(nicksList);
 	topicTextField = new JTextField();
 	textField = new JTextField();
@@ -90,6 +100,35 @@ public class ChannelTab extends JPanel
 	initialise();
     }
 
+    public void setKeyListener(KeyListener kl)
+    {
+	keyListener = kl;
+    }
+
+    public void addKeyListeners()
+    {
+	this.addKeyListener(keyListener);
+	p0.addKeyListener(keyListener);
+	p1.addKeyListener(keyListener);
+	p2.addKeyListener(keyListener);
+	p3.addKeyListener(keyListener);
+	p4.addKeyListener(keyListener);
+	p5.addKeyListener(keyListener);
+	p6.addKeyListener(keyListener);
+	p7.addKeyListener(keyListener);
+	textField.addKeyListener(keyListener);
+	topicTextField.addKeyListener(keyListener);
+	nicksListScroller.addKeyListener(keyListener);
+	textPaneScroller.addKeyListener(keyListener);
+	textPane.addKeyListener(keyListener);
+	nicksList.addKeyListener(keyListener);
+	/*
+	p0.addKeyListener(keyListener);
+	p0.addKeyListener(keyListener);
+	p0.addKeyListener(keyListener);
+	*/
+    }
+
     public void initialise()
     {
 	nicksList.setCellRenderer(cellRenderer);
@@ -102,10 +141,24 @@ public class ChannelTab extends JPanel
 	p0.add( nicksListScroller, BorderLayout.CENTER  );
 
 	topicTextField.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
-	
+	topicTextField.setVisible(UserPrefs.get_showTopicBar());
+	topicTextField.addActionListener(new ActionListener()
+	    {
+		public void actionPerformed(ActionEvent ae)
+		{
+		    String s = topicTextField.getText();
+		    topicTextField.setText("");
+		    s = s.trim();
+		    if( !s.equals(""))
+			{
+			    connection.setTopic(channelName, s);
+			}
+		}		
+	    });
+
 	p6.add( topicTextField, BorderLayout.CENTER );
 
-	textPane.setMargin(new Insets(0,50,0,10));
+	textPane.setMargin(new Insets(0,50,10,10));
 	//	textPane.setLineWrap(true);
 
 	//	textArea.append( chan_join_text );
@@ -137,7 +190,6 @@ public class ChannelTab extends JPanel
 			}
 		}
 	    });
-	textField.requestFocus();
 
 	nickButton.addActionListener( new ActionListener()
 	    {
@@ -174,6 +226,17 @@ public class ChannelTab extends JPanel
 	tabbedPane.setSelectedComponent(this);
 	tabbedPane.setTabComponentAt(tabbedPane.getTabCount() - 1, p7);
 	tabbedPane.setSelectedComponent( this );
+	textField.requestFocusInWindow();
+    }
+
+    public void showTopicTextField(boolean visible)
+    {
+	topicTextField.setVisible(visible);
+    }
+
+    public void setTextFieldFocus()
+    {
+	textField.requestFocusInWindow();
     }
 
     public void setNotice(String nick, String message)
@@ -335,6 +398,12 @@ public class ChannelTab extends JPanel
 	//	System.out.println("At the end of clearChannelMembersList");
     }
 
+    public void signalDisconnected(String text)
+    {
+	clearChanMembersList();
+	setDisconnectedText(text);
+    }
+
     public void modifyChannelList(String oldNick, String newNick)
     {
 	//	Vector<String> channels = tm_network_2_channels.get(networkName);
@@ -350,6 +419,18 @@ public class ChannelTab extends JPanel
 	    }
     }
 
+    public void setSelfAway()
+    {
+	setAway(nickName);
+	textPane.setSelfAwayText("You have been marked as away.");
+    }
+			    
+    public void setSelfUnAway()
+    {
+	setUnAway(nickName);
+	textPane.setSelfAwayText("You have been marked as unaway.");
+    }
+			    
     public void setAway(String nick)
     {
 	if(nicks.contains(nick))
@@ -362,5 +443,24 @@ public class ChannelTab extends JPanel
 		nicksList.setCellRenderer(cellRenderer);
 		nicksList.setListData(nicks);
 	    }
+    }
+
+    public void setUnAway(String nick)
+    {
+	if(nicks.contains(nick))
+	    {
+		cellRenderer.removeNickFromAway(nick);
+		System.out.println("After adding nick to away of cr.");
+		int index_of_nick = nicks.indexOf(nick);
+		nicks.remove(nick);
+		nicks.add(index_of_nick, nick);
+		nicksList.setCellRenderer(cellRenderer);
+		nicksList.setListData(nicks);
+	    }
+    }
+
+    private void setDisconnectedText(String text)
+    {
+	textPane.setDisconnectedText(text);
     }
 }

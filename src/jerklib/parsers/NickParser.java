@@ -10,12 +10,18 @@ public class NickParser implements CommandParser
 	public IRCEvent createEvent(EventToken token, IRCEvent event)
 	{
 		Session session = event.getSession();
+		String oldNick = token.nick();
+		String newNick = token.arg(0);
+		if(oldNick.equals(session.getNick()))
+		   {
+		       session.setNick(newNick);
+		   }
 		return new NickChangeEventImpl
 		(
 				token.data(), 
 				session, 
-				token.nick(), // old
-				token.arg(0), // new nick
+				oldNick, // old
+				newNick, // new nick
 				token.hostName(), // hostname
 				token.userName() // username
 		); 

@@ -37,9 +37,16 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+
 public class TabGroup
 {
     private JFrame mw;
+    private MainWindow mainWindow;
 
     private String networkName;
     private String nickName;
@@ -61,6 +68,16 @@ public class TabGroup
     private JTabbedPane tabbedPane;
     private JTabbedPane parentPane;
     private int tabNumber;
+    
+    private KeyListener keyListener;
+
+    private JPanel p;
+    private JPanel p1;
+    private JPanel p2;
+    private JPanel p3;
+    private JPanel p4;
+    private JPanel p5;
+    private JPanel p6;
 
     public TabGroup(String networkName, Connection connection )
     {
@@ -74,6 +91,7 @@ public class TabGroup
 	channels = new Vector<String>();
 	pms = new Vector<String>();
 	existedChannels = new Vector<String>();
+
     }
 
     public String getNickName()
@@ -81,9 +99,19 @@ public class TabGroup
 	return nickName;
     }
 
-    public void setMainWindow(JFrame f)
+    public void setMainWindow(MainWindow mw)
+    {
+	this.mainWindow = mw;
+    }
+
+    public void setJFrame(JFrame f)
     {
 	this.mw = f;
+    }
+
+    public void setKeyListener(KeyListener kl)
+    {
+	this.keyListener = kl;
     }
 
     public void setTextOnSelectedTab(String text)
@@ -128,27 +156,31 @@ public class TabGroup
     {
 	this.nickName = nick;
 
-	JPanel p = new JPanel( new BorderLayout() );
-	JPanel p1 = new JPanel( new BorderLayout() );
-	JPanel p2 = new JPanel( new BorderLayout() );
-	JPanel p3 = new JPanel( new BorderLayout() );
-	JPanel p4 = new JPanel( new BorderLayout() );
+	p = new JPanel( new BorderLayout() );
+	p1 = new JPanel( new BorderLayout() );
+	p2 = new JPanel( new BorderLayout() );
+	p3 = new JPanel( new BorderLayout() );
+	p4 = new JPanel( new BorderLayout() );
 	//need modification
-	JPanel p6 = new ButtonTabComponent(tabbedPane, networkName, this);
+	p6 = new ButtonTabComponent(tabbedPane, networkName, this);
 
 	BorderLayout bl = new BorderLayout();
 	bl.setHgap( 0 );
 	bl.setVgap( 0 );
-	JPanel p5 = new JPanel( bl );
+	p5 = new JPanel( bl );
+	p5.addKeyListener(keyListener);
 
 	serv_topic_tf = new JTextField();
 	serv_topic_tf.setEnabled( false );
 	serv_topic_tf.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
+	serv_topic_tf.setVisible(UserPrefs.get_showTopicBar());
+	serv_topic_tf.addKeyListener(keyListener);
 	//	p5.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 	p5.add( serv_topic_tf, BorderLayout.CENTER );
 
 	server_ta = new TextPaneExtended();
-	server_ta.setMargin(new Insets(0,50,0,10));
+	server_ta.setMargin(new Insets(0,50,10,10));
+	server_ta.addKeyListener(keyListener);
 	//	server_ta.setLineWrap(true);
 	//	tmta.put( networkName, server_ta );
 	JScrollPane sp = new JScrollPane( server_ta );
@@ -156,6 +188,7 @@ public class TabGroup
 	server_ta.setEditable( false );
 
 	server_tf = new JTextField();
+	server_tf.addKeyListener(keyListener);
 	server_tf.addActionListener( new ActionListener() 
 	    {
 		public void actionPerformed(ActionEvent ae)
@@ -173,6 +206,7 @@ public class TabGroup
 		}
 	    });
 	server_tf.setActionCommand( Constants.server_tf_ac );
+	server_tf.requestFocusInWindow();
 	//	tmtf.put( networkName, server_tf );
 
 	nick_button = new JButton(nick);
@@ -194,32 +228,58 @@ public class TabGroup
 
 	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 	p1.add( sp, BorderLayout.CENTER  );
+	p1.addKeyListener(keyListener);
 
 	p2.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
  	p2.add( nick_button, BorderLayout.WEST );
+	p2.addKeyListener(keyListener);
 
 	p3.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 	p3.add( server_tf );
+	p3.addKeyListener(keyListener);
 
 	p.setBorder( BorderFactory.createLineBorder( Color.black, 2 ) );
+	p.addKeyListener(keyListener);
 
 	p4.add( p2, BorderLayout.LINE_START );
 	p4.add( p3 );
+	p4.addKeyListener(keyListener);
 
 	p.add( p5, BorderLayout.NORTH );
 	p.add( p1, BorderLayout.CENTER );
 	p.add( p4, BorderLayout.SOUTH );
 
+	p.addKeyListener(keyListener);
+	tabbedPane.requestFocusInWindow();
+	p.requestFocusInWindow();
 	tabbedPane.add( networkName, p );
 	tabbedPane.setSelectedComponent(p);
 	tabbedPane.setTabComponentAt( tabbedPane.getTabCount() - 1, p6);
+	tabbedPane.addChangeListener(new ChangeListener()
+	    {
+		public void stateChanged(ChangeEvent ce)
+		{
+		    JTabbedPane jtp = (JTabbedPane)ce.getSource();
+		    int index = jtp.getSelectedIndex();
+		    String selectedTab = jtp.getTitleAt(index);
+		    setTextFieldFocus(selectedTab);
+		    if( connection.isConnected())
+			{
+			    boolean isAway = connection.isAway();
+			    mainWindow.setAway(isAway);
+			}
+		}
+	    });
 	System.out.println("Added panel on JTabbedPane.");
     }
 
     public void create_chan_tab(String channelName)
     {
 	channels.add(channelName);
-	tmChannelTab.put(channelName, new ChannelTab(channelName, this));
+	ChannelTab channelTab = new ChannelTab(channelName, this);
+	channelTab.setKeyListener(keyListener);
+	channelTab.addKeyListeners();
+	tmChannelTab.put(channelName, channelTab);
     }
 
     /**
@@ -238,6 +298,7 @@ public class TabGroup
 	pms.add(senderNickName);
 	PrivateMessageTab privateMessageTab = new PrivateMessageTab(senderNickName, this);
 	tmPrivateMessageTab.put(senderNickName, privateMessageTab );
+	privateMessageTab.addKeyListener(keyListener);
 	privateMessageTab.setMessage(senderNickName, message);
 	privateMessageTab.setHostName(hostname);
     }
@@ -566,6 +627,40 @@ public class TabGroup
 	parentPane.remove(tabbedPane);
     }
 
+    public void showTopicTextField(boolean visible)
+    {
+	try
+	    {
+		serv_topic_tf.setVisible(visible);
+		Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+		for( int i = 0; i < channelTabs.size(); i++ )
+		    channelTabs.elementAt(i).showTopicTextField(visible);
+		Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
+		for( int i = 0; i < privateMessageTabs.size(); i++ )
+		    privateMessageTabs.elementAt(i).showHostNameTextField(visible);	
+	    }
+	catch(NullPointerException npe)
+	    {
+		npe.printStackTrace();
+	    }	
+    }
+
+    public void setTextFieldFocus(String channelName)
+    {
+	if( tmChannelTab.containsKey(channelName))
+	    {
+		ChannelTab channelTab = tmChannelTab.get(channelName);
+		channelTab.setTextFieldFocus();
+	    }
+	else if(tmPrivateMessageTab.containsKey(channelName))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(channelName);
+		privateMessageTab.setTextFieldFocus();
+	    }
+	else
+	    server_tf.requestFocusInWindow();
+    }
+
     public void setTopic( String channelName, String topic )
     {
 	try
@@ -656,6 +751,32 @@ public class TabGroup
 	    }	
     }
 
+    public void setDisconnectedText(String text)
+    {
+	System.out.println("In setDisconnectedText");
+	server_ta.setDisconnectedText(text);
+	existedChannels = channels;
+
+	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+	for( int i = 0; i < channelTabs.size(); i++ )
+	    {
+		System.out.println("In setDisconnectedText, i = " + i);
+		channelTabs.elementAt(i).signalDisconnected(text);
+	    }
+
+	Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
+	for( int i = 0; i < privateMessageTabs.size(); i++ )
+	    {
+		System.out.println("In setDisconnectedText, i = " + i);
+		privateMessageTabs.elementAt(i).setDisconnectedText(text);
+	    }	
+    }
+
+    public boolean channelTabExists(String tabName)
+    {
+	return tmChannelTab.containsKey(tabName);
+    }
+
     public void modifyChannelList(String oldNick, String newNick)
     {
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
@@ -666,16 +787,55 @@ public class TabGroup
 	    }	
     }
 
+    public void setSelfAway()
+    {
+	server_ta.setSelfUnAwayText("You have been marked as away.");
+	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+	for(int i = 0; i < channelTabs.size(); i++ )
+	    {
+		channelTabs.elementAt(i).setSelfAway();
+	    }
+	Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
+	for(int i = 0; i < privateMessageTabs.size(); i++ )
+	    {
+		privateMessageTabs.elementAt(i).setSelfAwayText();
+	    }
+    }
+
+    public void setSelfUnAway()
+    {
+	server_ta.setSelfUnAwayText("You have marked as unaway.");
+	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+	for(int i = 0; i < channelTabs.size(); i++ )
+	    {
+		channelTabs.elementAt(i).setSelfUnAway();
+	    }
+	Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
+	for(int i = 0; i < privateMessageTabs.size(); i++ )
+	    {
+		privateMessageTabs.elementAt(i).setSelfUnAwayText();
+	    }
+    }
 
     public void setAway(String nick)
     {
 	System.out.println("In setAway.");
 	
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
-	
 	for(int i = 0; i < channelTabs.size(); i++ )
 	    {
 		channelTabs.elementAt(i).setAway(nick);
+	    }
+    }
+
+    public void setUnAway(String nick)
+    {
+	System.out.println("In setAway.");
+	
+	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+	for(int i = 0; i < channelTabs.size(); i++ )
+	    {
+		channelTabs.elementAt(i).setUnAway(nick);
 	    }
     }
 
@@ -696,7 +856,7 @@ public class TabGroup
 	    }
 	else if( tokens[0].equals("AWAY"))
 	    {
-		String awayMessage = "";
+		String awayMessage = "AWAY";
 		if( tokens.length > 1 )
 		    awayMessage = command.substring(5);
 		connection.setAway(awayMessage);

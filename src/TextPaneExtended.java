@@ -358,4 +358,34 @@ public class TextPaneExtended extends JTextPane
 	    ")</td></tr>";
 	appendHTML();
     }
+
+    public void setDisconnectedText(String disconnectedText)
+    {
+	System.out.println("In setDisconnectedText");
+	text = middleHTML + 
+	    "<tr><td style=\"color:#FF0000;text-align:right;\"><b>*</b></td><td style=\"color:#FF0000;text-align:left\">" +
+	    disconnectedText + 
+	    "</td></tr>";
+	appendHTML();
+    }
+
+    public void setSelfAwayText(String awayText)
+    {
+	System.out.println("In setDisconnectedText");
+	text = middleHTML + 
+	    "<tr><td style=\"color:#0000CD;text-align:right;\"><b>*</b></td><td style=\"color:#0000CD;text-align:left\">" +
+	    awayText + 
+	    "</td></tr>";
+	appendHTML();
+    }
+
+    public void setSelfUnAwayText(String unAwayText)
+    {
+	System.out.println("In setDisconnectedText");
+	text = middleHTML + 
+	    "<tr><td style=\"color:#4B0092;text-align:right;\"><b>*</b></td><td style=\"color:#4B0092;text-align:left\">" +
+	    unAwayText + 
+	    "</td></tr>";
+	appendHTML();
+    }
 }

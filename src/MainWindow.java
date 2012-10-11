@@ -51,6 +51,7 @@ import java.awt.event.KeyEvent;
 
 import java.awt.event.WindowListener;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
 
 public class MainWindow extends JFrame implements ActionListener, WindowListener, KeyListener
 {
@@ -63,6 +64,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     private TreeMap<String, String> tm_usage_messages;
     private TreeMap<String, JTabbedPane> tmNet2JTabbedPane;
     private IdentityHashMap<JPanel, Connection> ihmPanelToConnection;
+    private IdentityHashMap<String, Connection> ihmNetname2Connection;
+    private IdentityHashMap<String, TabGroup> ihmNet2TabGroup;
 
     private Vector<JButton> ht_nick_buttons;
 
@@ -76,7 +79,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     private JMenu jChat;
     private JMenuItem net_list;
     private JMenuItem new_mi;
-    private JMenuItem close;
+    //    private JMenuItem close;
     private JMenuItem quit;
 
     private JMenu view;
@@ -143,7 +146,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	ht_nick_buttons = new Vector<JButton>();
 	*/
 
+	ihmNetname2Connection = new IdentityHashMap<String, Connection>();
 	ihmPanelToConnection = new IdentityHashMap<JPanel, Connection>();
+	ihmNet2TabGroup = new IdentityHashMap<String, TabGroup>();
 	tm_usage_messages = new TreeMap<String, String>();
 	initialiseUsageMessages();
 	init();
@@ -264,19 +269,19 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 	jChat = new JMenu("JChat");
 	net_list = Utility.createMenuItem( Constants.net_list_mi_text, Constants.net_list_mi_ac, jChat, this );
-	close = Utility.createMenuItem( Constants.close_mi_text, Constants.close_mi_ac, jChat, this );
+	//	close = Utility.createMenuItem( Constants.close_mi_text, Constants.close_mi_ac, jChat, this );
 	quit = Utility.createMenuItem( Constants.quit_mi_text, Constants.quit_mi_ac, jChat, this );
 
 	view = new JMenu("View");
-	show_menu_bar = Utility.createCheckBoxMenuItem( Constants.show_menu_bar_text, Constants.show_menu_bar_ac, view, this );
-	show_topic_bar = Utility.createCheckBoxMenuItem( Constants.show_topic_bar_text, Constants.show_topic_bar_ac, view, this );
+	show_menu_bar = Utility.createCheckBoxMenuItem( Constants.show_menu_bar_text, Constants.show_menu_bar_ac, view, this, UserPrefs.get_showMenuBar() );
+	show_topic_bar = Utility.createCheckBoxMenuItem( Constants.show_topic_bar_text, Constants.show_topic_bar_ac, view, this, UserPrefs.get_showTopicBar() );
 
 	server = new JMenu("Server");
 	disconnect = Utility.createMenuItem( Constants.disconnect_mi_text, Constants.disconnect_mi_ac, server, this );
 	reconnect = Utility.createMenuItem( Constants.reconnect_mi_text, Constants.reconnect_mi_ac, server, this );
 	join_a_channel = Utility.createMenuItem( Constants.join_a_channel_mi_text, Constants.join_a_channel_mi_ac, server, this );
 	list_of_channels = Utility.createMenuItem( Constants.list_of_channels_mi_text, Constants.list_of_channels_mi_ac, server, this );
-	marked_away = Utility.createCheckBoxMenuItem( Constants.marked_away_text, Constants.marked_away_ac, server, this );
+	marked_away = Utility.createCheckBoxMenuItem( Constants.marked_away_text, Constants.marked_away_ac, server, this, false );
 	
 	window = new JMenu("Window");
 	clear_text = Utility.createMenuItem( Constants.clear_text_mi_text, Constants.clear_text_mi_ac, window, this );
@@ -293,11 +298,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	mb.add( window );
 	mb.add( help );
 
-	mb.setVisible( true );
+	//	if( !UserPrefs.get_showMenuBar())
+       	mb.setVisible( UserPrefs.get_showMenuBar() );
+	//	mb.setVisible(true);
 
 	this.setJMenuBar( mb );
 	tp = new JTabbedPane();
 	tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+	tp.requestFocusInWindow();
 	pane = this.getContentPane();
 	//	Dimension size = this.getSize();
 	//	pane.setSize((int)size.getWidth(), (int)size.getHeight());
@@ -308,6 +316,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	pane.setLayout(layout);
 	//	this.setLayout(layout);
 	pane.add( tp );
+	//	manageFocus();
 	//	addTabbedPane(pane);
 	//	nick_button = new JButton();
 	//	ht_nick_buttons.add(nick_button);
@@ -334,10 +343,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	return tp;
     }
 
-    public JTabbedPane getNewJTabbedPane(String networkName, Connection conn)
+    public void setAway(boolean isAway)
+    {
+	marked_away.setState(isAway);
+    }
+
+    public JTabbedPane getNewJTabbedPane(String networkName, Connection conn, TabGroup tg)
     {
 	JTabbedPane tabbedPane = new JTabbedPane();
 	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+	ihmNet2TabGroup.put(networkName, tg);
 	tmNet2JTabbedPane.put( networkName, tabbedPane );
 	int index = 0;
 	if( noNetwork )
@@ -350,7 +365,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	tp.add( networkName, tabbedPane );
 	JPanel panel = new ButtonTabOuterComponent(tp, networkName, this);
 	ihmPanelToConnection.put(panel, conn);
+	ihmNetname2Connection.put(networkName, conn);
 	tp.setTabComponentAt( index, panel);       
+	tp.setSelectedComponent(tabbedPane);
 	return tabbedPane;
     }
 
@@ -374,6 +391,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     public void setTextArea()
     {
 	//	textArea = new JTextArea();
+	
+    }
+
+    public void setFocus()
+    {
 	
     }
 
@@ -1110,10 +1132,89 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     public void actionPerformed( ActionEvent ae )
     {
 	String action = ae.getActionCommand();
+	int selectedNet = tp.getSelectedIndex();
+	String selectedNetTitle = tp.getTitleAt(selectedNet);
+	Connection connection = ihmNetname2Connection.get(selectedNetTitle);
+	TabGroup tabGroup = ihmNet2TabGroup.get(selectedNetTitle);
 
 	if( action.equals( Constants.net_list_mi_ac ) )
 	    {
 		userSettings.visible();
+	    }
+	else if( action.equals(Constants.show_menu_bar_ac))
+	    {
+		boolean showMenuBarChecked = show_menu_bar.getState();
+		UserPrefs.save_showMenuBar(showMenuBarChecked);
+		mb.setVisible(showMenuBarChecked);
+		if( !showMenuBarChecked )
+		    JOptionPane.showMessageDialog(this, "The Menubar is now hidden. You can show it again by pressing F9.");
+	    }
+	else if( action.equals( Constants.show_topic_bar_ac))
+	    {
+		boolean showTopic = show_topic_bar.getState();		
+		Vector<TabGroup> tabGroups = new Vector<TabGroup>(ihmNet2TabGroup.values());
+		for( int i = 0; i < tabGroups.size(); i++ )
+		    {
+			tabGroups.elementAt(i).showTopicTextField(showTopic);
+		    }
+		UserPrefs.save_showTopicBar(showTopic);
+	    }
+	else if( action.equals(Constants.disconnect_mi_ac))
+	    {
+		tabGroup.setDisconnectedText("Disconnected()");
+		connection.quit("");
+		connection.allRemovePreviousTopicTime();
+	    }
+	else if( action.equals( Constants.reconnect_mi_ac))
+	    {
+		if( connection.isConnected() )
+		    {
+			tabGroup.setDisconnectedText("Disconnected()");
+			connection.quit("");
+			connection.allRemovePreviousTopicTime();
+		    }
+		//		new Thread(connection).start();
+		connection.connect();
+		//		TabGroup tabGroup = ihmNet2TabGroup.get(selectedNet);
+	    }
+	else if( action.equals(Constants.quit_mi_ac))
+	    {
+
+		try
+		    {
+			int option = JOptionPane.showConfirmDialog(this, "Do you really want to quit?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if(option == JOptionPane.YES_OPTION)
+			    System.exit(0);
+		    }
+		catch(HeadlessException he)
+		    {}
+	    }
+	else if( action.equals(Constants.join_a_channel_mi_ac))
+	    {
+		try
+		    {
+			String channel = (String)JOptionPane.showInputDialog(this, Constants.joinChannelPrompt , "Join channel", JOptionPane.QUESTION_MESSAGE);
+			if( channel != "" && channel != null)
+			    {
+				String tokens[] = channel.split(" ");
+				if( tokens.length < 2 )
+				    connection.joinChannel(tokens[0]);
+				else
+				    connection.joinChannel(tokens[0], tokens[1]);
+			    }
+		    }
+		catch(HeadlessException he)
+		    {}		
+	    }
+	else if( action.equals( Constants.marked_away_ac ) )
+	    {
+		boolean setAway = marked_away.getState();
+		if( setAway )
+		    {
+			connection.setAway("Away");
+		    }
+		else 
+		    connection.unSetAway();
 	    }
 	else if( action.equals( Constants.nick_button_ac ) )
 	    {
@@ -1382,11 +1483,26 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     {}
 
     public void keyPressed( KeyEvent ke )
-    {}
+    {
+	System.out.println("In keyPressed");
+	int keyCode = ke.getKeyCode();
+	if( keyCode == KeyEvent.VK_F9)
+	    {
+		boolean currentState = UserPrefs.get_showMenuBar();
+		mb.setVisible(!currentState);
+		UserPrefs.save_showMenuBar(!currentState);
+		show_menu_bar.setState(!currentState);
+	    }
+    }
 
     public void keyReleased( KeyEvent ke )
-    {}
+    {
+	System.out.println("In keyReleased");
+
+    }
 
     public void keyTyped( KeyEvent ke )
-    {}
+    {
+	System.out.println("In keyTyped");
+    }
 }

@@ -456,9 +456,11 @@ class UserSettings extends JDialog implements ActionListener, WindowListener, Mo
 		connections[available].initialise( nicks, username, realname, network_list.getSelectedValue() );
 		connections[available].setEditNetList(edit_netlist);
 		TabGroup tabGroup = new TabGroup(networkName,connections[available]);
-		tabGroup.setJTabbedPane(mw.getNewJTabbedPane(networkName, connections[available]));
+		tabGroup.setJTabbedPane(mw.getNewJTabbedPane(networkName, connections[available], tabGroup));
 		tabGroup.setParentPane(mw.getJTabbedPane());
 		tabGroup.setMainWindow(mw);
+		tabGroup.setJFrame(mw);
+		tabGroup.setKeyListener(mw);
 		connections[available].setTabGroup(tabGroup);
 		mw.visible();
 		tabGroup.initialise( nicks[0] );

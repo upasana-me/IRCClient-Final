@@ -105,12 +105,23 @@ public class Connection implements Runnable, IRCEventListener
 	servPortES = serversPorts.entrySet();
 	serverPortIter = servPortES.iterator();
 	waitingForNextWhoWas = false;
+	connected = false;
 	//	tabGroup2Session = new IdentityHashMap<TabGroup, Session>();
 	//	sessions = new Vector<Session>();
 
 	//	free_socket = 0;
 	//	no_of_sockets = 100;
 	//	sockets = new Socket[no_of_sockets];
+    }
+
+    public void allRemovePreviousTopicTime()
+    {
+	previousTopicTime.clear();
+    }
+
+    public void removePreviousTopicTime(String channelName)
+    {
+	previousTopicTime.remove(channelName);
     }
 
     private Map.Entry<String, String> getNextServPort()
@@ -168,7 +179,25 @@ public class Connection implements Runnable, IRCEventListener
 		AwayEvent ae = (AwayEvent)e;
 		String nick = ae.getNick();
 		String awayMessage = ae.getAwayMessage();
-		tabGroup.setAway(nick);
+		boolean isYou = ae.isYou();
+		boolean isAway = ae.isAway();
+		System.out.println("isAway : " + isAway + ", isYou : " + isYou);
+		if( isYou )
+		    {
+			if( isAway )
+			    {
+				tabGroup.setSelfAway();
+			    }
+			else
+			    tabGroup.setSelfUnAway();
+		    }
+		else
+		    {
+			if( isAway )
+			    tabGroup.setAway(nick);
+			else 
+			    tabGroup.setUnAway(nick);
+		    }
 	    }
 	else if( e.getType() == Type.NOTICE )
 	    {
@@ -346,7 +375,6 @@ public class Connection implements Runnable, IRCEventListener
 			   channels.put(channel_name," ");
 		       tabGroup.create_chan_tab(channel_name);
 		       tabGroup.setChanJoinText(channel_name, Constants.chan_join_text + channel_name);
-
  		   }
 		else
 		    {
@@ -475,10 +503,15 @@ public class Connection implements Runnable, IRCEventListener
 			System.out.println("errorMsg : " + errorMsg);
 			tabGroup.setErrorMessage(errorMsg);
 		    }
+		else 
+		    {
+			System.out.println("In ERROR else");
+		    }
+		
 	    }
 	else if( e.getType() == Type.EXCEPTION )
 	    {
-		//		System.out.println("Exception");		
+		System.out.println("Exception");		
 	    }
 	else if( e.getType() == Type.KICK_EVENT )
 	    {
@@ -984,8 +1017,17 @@ public class Connection implements Runnable, IRCEventListener
 		profile = new Profile(user_name, nicks[0], nicks[1], nicks[2]);
 		//		manager = new ConnectionManager(profile);
 		Map.Entry<String, String> servPortPair = getNextServPort();
-		String server = servPortPair.getKey();
-		String port = servPortPair.getValue();
+		String server = "";
+		String port = "";
+		try
+		    {
+			server = servPortPair.getKey();
+			port = servPortPair.getValue();
+		    }
+		catch(NullPointerException npe)
+		    {
+			reinitialiseIterator();
+		    }
 		System.out.println("server : " + server + ", port : " + port);
 		try
 		    {
@@ -1002,6 +1044,13 @@ public class Connection implements Runnable, IRCEventListener
 	    {
 		ie.printStackTrace();
 	    }
+    }
+
+    private void reinitialiseIterator()
+    {
+	servPortES = serversPorts.entrySet();
+	serverPortIter = servPortES.iterator();
+	connect();
     }
 
     private String extract_motd(String motd)
@@ -1140,6 +1189,11 @@ public class Connection implements Runnable, IRCEventListener
 	session.setAway(awayMessage);
     }
 
+    public void unSetAway()
+    {
+	session.unSetAway();
+    }
+
     public void changeNick(String newNick)
     {
 	session.changeNick(newNick);
@@ -1180,6 +1234,13 @@ public class Connection implements Runnable, IRCEventListener
     public void quit(String message)
     {
 	session.close(message);
+	connected = false;
+	allRemovePreviousTopicTime();
+    }
+
+    public boolean isConnected()
+    {
+	return connected;
     }
 
     public void op(String channelName, String nick)
@@ -1209,11 +1270,6 @@ public class Connection implements Runnable, IRCEventListener
     {
 	Channel channel = session.getChannel(channelName);
 	channel.setTopic(topic);
-    }
-
-    public void mode( String channelName, String modeString, String nick )
-    {
-	
     }
 
     public void notice(String target, String message)
@@ -1267,6 +1323,11 @@ public class Connection implements Runnable, IRCEventListener
 	DateFormat dateFormat = new SimpleDateFormat("EEE, MMM d yyyy HH:mm:ss");
 	String message = dateFormat.format(new Date());
 	session.ctcp(nick, "TIME", message);
+    }
+
+    public boolean isAway()
+    {
+	return session.isAway();
     }
 
     //TODO later

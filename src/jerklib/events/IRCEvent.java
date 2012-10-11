@@ -90,6 +90,7 @@ public interface IRCEvent
         JOIN_COMPLETE,
         MODE_EVENT,
         KICK_EVENT,
+	    KILL_EVENT,    
         NICK_LIST_EVENT,
         WHO_EVENT,
         WHOIS_EVENT,

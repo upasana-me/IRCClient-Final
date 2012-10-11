@@ -12,6 +12,8 @@ public class UserPrefs
     private static String user_name;
     private static String real_name;
     private static boolean net_list_skip;
+    private static boolean showMenuBar;
+    private static boolean showTopicBar;
     private static int sel_list_index;
 
     private static Preferences preferences;
@@ -35,7 +37,8 @@ public class UserPrefs
 	real_name = preferences.get(Constants.skRealName, "Real name" );		
 	net_list_skip = preferences.getBoolean(Constants.skNetListSkip, false);
 	sel_list_index = preferences.getInt(Constants.skSelListIndex, 0);
-
+	showMenuBar = preferences.getBoolean(Constants.skHideMenuBar, true);
+	showTopicBar = preferences.getBoolean(Constants.skHideTopicBar, true );
 	//	networkName = preferences.get(Constants.skNetworkName,"127.0.0.1");
 	//	port = preferences.getInt(Constants.skPort, 6667 );
 	
@@ -52,6 +55,8 @@ public class UserPrefs
 	preferences.put(Constants.skRealName, real_name );
 	preferences.putBoolean(Constants.skNetListSkip, net_list_skip);
 	preferences.putInt(Constants.skSelListIndex, sel_list_index);
+	preferences.putBoolean(Constants.skHideMenuBar, showMenuBar );
+	preferences.putBoolean(Constants.skHideTopicBar, showTopicBar );
     }
     
     public static void save_net_list_skip(boolean b)
@@ -96,6 +101,18 @@ public class UserPrefs
 	preferences.put(Constants.skRealName, realname);
     }
 
+    public static void save_showMenuBar(boolean hide)
+    {
+	showMenuBar = hide;
+	preferences.putBoolean(Constants.skHideMenuBar, hide);
+    }
+
+    public static void save_showTopicBar(boolean hide)
+    {
+	showTopicBar = hide;
+	preferences.putBoolean(Constants.skHideTopicBar, hide);
+    }
+
     public static boolean get_net_list_skip()
     {
 	return net_list_skip;
@@ -129,5 +146,15 @@ public class UserPrefs
     public static String get_realname()
     {
 	return real_name;
+    }
+
+    public static boolean get_showMenuBar()
+    {
+	return showMenuBar;
+    }
+
+    public static boolean get_showTopicBar()
+    {
+	return showTopicBar;
     }
 }

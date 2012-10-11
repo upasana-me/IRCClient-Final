@@ -53,11 +53,12 @@ public final class Utility
 	return mi;
     }
 
-    public static JCheckBoxMenuItem createCheckBoxMenuItem( String name, String actionCommand, JMenu menu, ActionListener listener)
+    public static JCheckBoxMenuItem createCheckBoxMenuItem( String name, String actionCommand, JMenu menu, ActionListener listener, boolean state)
     {
 	JCheckBoxMenuItem cbmi = new JCheckBoxMenuItem( name );
 	cbmi.setActionCommand(actionCommand);
 	cbmi.addActionListener( listener );
+	cbmi.setState(state);
 	menu.add( cbmi );
 	return cbmi;
     }

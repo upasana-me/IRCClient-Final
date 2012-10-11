@@ -8,12 +8,16 @@ import javax.swing.JScrollPane;
 
 import javax.swing.border.Border;
 
+import java.awt.Insets;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.HeadlessException;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class PrivateMessageTab extends JPanel
 {
@@ -88,6 +92,7 @@ public class PrivateMessageTab extends JPanel
 
 	//	hostname_tf.setText(hostname);
 	hostNameTextField.setEditable(false);
+	hostNameTextField.setVisible(UserPrefs.get_showTopicBar());
 	hostNameTextField.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 
 	p6.add( hostNameTextField, BorderLayout.CENTER );
@@ -96,6 +101,7 @@ public class PrivateMessageTab extends JPanel
 	//	textArea.setLineWrap(true);
 	//	String chan_join_text = Constants.chan_join_text + channel_name + "\n";
 	textPane.setEditable( false );
+	textPane.setMargin(new Insets(0,50,10,0));
 
 	p1.setBorder( BorderFactory.createLineBorder( Color.black, 7 ) );
 	p1.add( scrollPane, BorderLayout.CENTER  );
@@ -118,6 +124,7 @@ public class PrivateMessageTab extends JPanel
 			}
 		}
 	    });
+	textField.requestFocusInWindow();
 
 	nickButton.addActionListener( new ActionListener()
 	    {
@@ -167,6 +174,16 @@ public class PrivateMessageTab extends JPanel
 	tabbedPane.setSelectedComponent( this );
     }
 
+    public void showHostNameTextField(boolean visible)
+    {
+	hostNameTextField.setVisible(visible);
+    }
+
+    public void setTextFieldFocus()
+    {
+	textField.requestFocusInWindow();
+    }
+
     public void setHostName(String hostName)
     {
 	hostNameTextField.setText(hostName);
@@ -200,5 +217,20 @@ public class PrivateMessageTab extends JPanel
     public void setText(String info)
     {
 	textPane.setPmInfo(info);
+    }
+
+    public void setDisconnectedText(String text)
+    {
+	textPane.setDisconnectedText(text);
+    }
+
+    public void setSelfAwayText()
+    {
+	textPane.setSelfAwayText("You have been marked as away.");
+    }
+
+    public void setSelfUnAwayText()
+    {
+	textPane.setSelfUnAwayText("You have been marked as unaway.");
     }
 }

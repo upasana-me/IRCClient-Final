@@ -63,7 +63,7 @@ public final class Constants {
     public static final String skip_net_list_text = "Skip this network list on start up";
 
     public static final String net_list_mi_text = "Network List";
-    public static final String close_mi_text = "Close";
+    //    public static final String close_mi_text = "Close";
     public static final String quit_mi_text = "Quit";
     
     public static final String show_menu_bar_text = "Show menu bar";
@@ -82,7 +82,7 @@ public final class Constants {
     public static final String about_mi_text = "About";
     
     public static final String net_list_mi_ac = "net_list_mi_ac";
-    public static final String close_mi_ac = "close_mi_ac";
+    //    public static final String close_mi_ac = "close_mi_ac";
     public static final String quit_mi_ac = "quit_mi_ac";
     
     public static final String show_menu_bar_ac = "show_menu_bar_ac";
@@ -138,6 +138,7 @@ public final class Constants {
 
     public static final String user_real_necessary = "Username & realname cannot be left blank";
     public static final String promptNick = "Enter new nickname : ";
+    public static final String joinChannelPrompt = "Enter channel to join:";
 
     public static final String nickChangeText = " is now known as ";
     public static final String selfNickChangeText = "You are now known as ";
@@ -147,6 +148,8 @@ public final class Constants {
     public static final String skNickName = "NickName";
     public static final String skNetListSkip = "net_list_skip";
     public static final String skSelListIndex = "sel_list_index";
+    public static final String skHideMenuBar = "hideMenuBar";
+    public static final String skHideTopicBar = "hideTopicBar";
 
     public static final int nicksCount = 3;
 
