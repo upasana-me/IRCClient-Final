@@ -17,6 +17,12 @@ public class TextPaneExtended extends JTextPane
 	this.setText(startHTML + endHTML);
     }
 
+    public void clearText()
+    {
+	middleHTML = "";
+	this.setText("");
+    }
+
     public void appendHTML()
     {
 	html = startHTML + text + endHTML;

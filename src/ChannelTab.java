@@ -463,4 +463,9 @@ public class ChannelTab extends JPanel
     {
 	textPane.setDisconnectedText(text);
     }
+
+    public void clearTextPane()
+    {
+	textPane.clearText();
+    }
 }

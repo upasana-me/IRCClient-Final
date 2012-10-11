@@ -16,6 +16,8 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import java.awt.event.KeyListener;
+
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
@@ -33,6 +35,7 @@ public class PrivateMessageTab extends JPanel
     private String nickName;
 
     private JTabbedPane tabbedPane;
+    private KeyListener keyListener;
 
     private JPanel p0;
     private JPanel p1;
@@ -68,6 +71,11 @@ public class PrivateMessageTab extends JPanel
 	p7 = new ButtonTabComponent(this.tabbedPane, senderNickName, tabGroup);
 
 	initialise();
+    }
+
+    public void setKeyListener(KeyListener kl)
+    {
+	this.keyListener = kl;
     }
 
     private void initialise()
@@ -174,6 +182,23 @@ public class PrivateMessageTab extends JPanel
 	tabbedPane.setSelectedComponent( this );
     }
 
+    public void addKeyListeners()
+    {
+	this.addKeyListener(keyListener);
+	p0.addKeyListener(keyListener);
+	p1.addKeyListener(keyListener);
+	p2.addKeyListener(keyListener);
+	p3.addKeyListener(keyListener);
+	p4.addKeyListener(keyListener);
+	p5.addKeyListener(keyListener);
+	p6.addKeyListener(keyListener);
+	p7.addKeyListener(keyListener);
+	textField.addKeyListener(keyListener);
+	hostNameTextField.addKeyListener(keyListener);
+	scrollPane.addKeyListener(keyListener);
+	textPane.addKeyListener(keyListener);
+    }
+
     public void showHostNameTextField(boolean visible)
     {
 	hostNameTextField.setVisible(visible);
@@ -232,5 +257,10 @@ public class PrivateMessageTab extends JPanel
     public void setSelfUnAwayText()
     {
 	textPane.setSelfUnAwayText("You have been marked as unaway.");
+    }
+
+    public void clearTextPane()
+    {
+	textPane.clearText();
     }
 }

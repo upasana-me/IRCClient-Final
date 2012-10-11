@@ -261,12 +261,15 @@ public class TabGroup
 		{
 		    JTabbedPane jtp = (JTabbedPane)ce.getSource();
 		    int index = jtp.getSelectedIndex();
-		    String selectedTab = jtp.getTitleAt(index);
-		    setTextFieldFocus(selectedTab);
-		    if( connection.isConnected())
+		    if( index >= 0 )
 			{
-			    boolean isAway = connection.isAway();
-			    mainWindow.setAway(isAway);
+			    String selectedTab = jtp.getTitleAt(index);
+			    setTextFieldFocus(selectedTab);
+			    if( connection.isConnected())
+				{
+				    boolean isAway = connection.isAway();
+				    mainWindow.setAway(isAway);
+				}
 			}
 		}
 	    });
@@ -298,6 +301,7 @@ public class TabGroup
 	pms.add(senderNickName);
 	PrivateMessageTab privateMessageTab = new PrivateMessageTab(senderNickName, this);
 	tmPrivateMessageTab.put(senderNickName, privateMessageTab );
+	privateMessageTab.setKeyListener(keyListener);
 	privateMessageTab.addKeyListener(keyListener);
 	privateMessageTab.setMessage(senderNickName, message);
 	privateMessageTab.setHostName(hostname);
@@ -749,6 +753,23 @@ public class TabGroup
 	    {
 		//		privateMessageTabs.elementAt(i).setText(text);
 	    }	
+    }
+
+    public void clearTextOfSelectedTab()
+    {
+	String selectedTab = getSelectedTab();
+	if( channels.contains(selectedTab)) 
+	    {
+		ChannelTab channelTab = tmChannelTab.get(selectedTab);
+		channelTab.clearTextPane();
+	    }
+	else if( pms.contains(selectedTab)) 
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(selectedTab);
+		privateMessageTab.clearTextPane();
+	    }
+	else
+	    server_ta.clearText();
     }
 
     public void setDisconnectedText(String text)

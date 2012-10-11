@@ -14,6 +14,7 @@ import jerklib.util.IdentServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.ConnectException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -393,7 +394,7 @@ public class ConnectionManager
 
 						if (key.isReadable())
 						{
-							socChanMap.get(key.channel()).getConnection().read();
+						    socChanMap.get(key.channel()).getConnection().read();// < 0 )
 						}
 						if (key.isWritable())
 						{
@@ -421,7 +422,7 @@ public class ConnectionManager
 	 * Attempts to finish a connection
 	 * @param key
 	 */
-	void finishConnection(SelectionKey key)
+    String finishConnection(SelectionKey key)
 	{
 		SocketChannel chan = (SocketChannel) key.channel();
 		Session session = socChanMap.get(chan);
@@ -430,7 +431,7 @@ public class ConnectionManager
 		{
 			try
 			{
-				if (session.getConnection().finishConnect())
+			    if (session.getConnection().finishConnect())
 				{
 					session.halfConnected();
 					session.login();
@@ -440,6 +441,10 @@ public class ConnectionManager
 					session.connecting();
 				}
 			}
+			catch(ConnectException ce)
+			    {
+				return ce.getMessage();
+			    }
 			catch (IOException e)
 			{
 				session.markForRemoval();
@@ -447,6 +452,7 @@ public class ConnectionManager
 				e.printStackTrace();
 			}
 		}
+		return "";
 	}
 
 	/**

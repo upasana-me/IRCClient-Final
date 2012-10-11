@@ -111,7 +111,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     private JTextField server_tf;
     private JTextField serv_topic_tf;
 
-    private int tabNumber;
+    private int previousKeyCode;
     private boolean noNetwork;
 
     private UserSettings userSettings;
@@ -1133,10 +1133,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     {
 	String action = ae.getActionCommand();
 	int selectedNet = tp.getSelectedIndex();
-	String selectedNetTitle = tp.getTitleAt(selectedNet);
-	Connection connection = ihmNetname2Connection.get(selectedNetTitle);
-	TabGroup tabGroup = ihmNet2TabGroup.get(selectedNetTitle);
+	String selectedNetTitle = "";
+	Connection connection = null;
+	TabGroup tabGroup = null;
+	if( selectedNet >= 0 )
+	    {
+		selectedNetTitle = tp.getTitleAt(selectedNet);
+		connection = ihmNetname2Connection.get(selectedNetTitle);
+		tabGroup = ihmNet2TabGroup.get(selectedNetTitle);
+	    }
 
+	
 	if( action.equals( Constants.net_list_mi_ac ) )
 	    {
 		userSettings.visible();
@@ -1145,127 +1152,84 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	    {
 		boolean showMenuBarChecked = show_menu_bar.getState();
 		UserPrefs.save_showMenuBar(showMenuBarChecked);
-		mb.setVisible(showMenuBarChecked);
-		if( !showMenuBarChecked )
-		    JOptionPane.showMessageDialog(this, "The Menubar is now hidden. You can show it again by pressing F9.");
-	    }
-	else if( action.equals( Constants.show_topic_bar_ac))
-	    {
-		boolean showTopic = show_topic_bar.getState();		
-		Vector<TabGroup> tabGroups = new Vector<TabGroup>(ihmNet2TabGroup.values());
-		for( int i = 0; i < tabGroups.size(); i++ )
-		    {
-			tabGroups.elementAt(i).showTopicTextField(showTopic);
+			mb.setVisible(showMenuBarChecked);
+			if( !showMenuBarChecked )
+			    JOptionPane.showMessageDialog(this, "The Menubar is now hidden. You can show it again by pressing F9.");
 		    }
-		UserPrefs.save_showTopicBar(showTopic);
-	    }
-	else if( action.equals(Constants.disconnect_mi_ac))
-	    {
-		tabGroup.setDisconnectedText("Disconnected()");
-		connection.quit("");
-		connection.allRemovePreviousTopicTime();
-	    }
-	else if( action.equals( Constants.reconnect_mi_ac))
-	    {
-		if( connection.isConnected() )
+		else if( action.equals( Constants.show_topic_bar_ac))
+		    {
+			boolean showTopic = show_topic_bar.getState();		
+			Vector<TabGroup> tabGroups = new Vector<TabGroup>(ihmNet2TabGroup.values());
+			for( int i = 0; i < tabGroups.size(); i++ )
+			    {
+				tabGroups.elementAt(i).showTopicTextField(showTopic);
+			    }
+			UserPrefs.save_showTopicBar(showTopic);
+		    }
+		else if( action.equals(Constants.disconnect_mi_ac))
 		    {
 			tabGroup.setDisconnectedText("Disconnected()");
 			connection.quit("");
 			connection.allRemovePreviousTopicTime();
 		    }
-		//		new Thread(connection).start();
-		connection.connect();
-		//		TabGroup tabGroup = ihmNet2TabGroup.get(selectedNet);
-	    }
-	else if( action.equals(Constants.quit_mi_ac))
-	    {
-
-		try
+		else if( action.equals( Constants.reconnect_mi_ac))
 		    {
-			int option = JOptionPane.showConfirmDialog(this, "Do you really want to quit?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-			if(option == JOptionPane.YES_OPTION)
-			    System.exit(0);
-		    }
-		catch(HeadlessException he)
-		    {}
-	    }
-	else if( action.equals(Constants.join_a_channel_mi_ac))
-	    {
-		try
-		    {
-			String channel = (String)JOptionPane.showInputDialog(this, Constants.joinChannelPrompt , "Join channel", JOptionPane.QUESTION_MESSAGE);
-			if( channel != "" && channel != null)
+			if( connection.isConnected() )
 			    {
-				String tokens[] = channel.split(" ");
-				if( tokens.length < 2 )
-				    connection.joinChannel(tokens[0]);
-				else
-				    connection.joinChannel(tokens[0], tokens[1]);
+				tabGroup.setDisconnectedText("Disconnected()");
+				connection.quit("");
+				connection.allRemovePreviousTopicTime();
 			    }
+			//		new Thread(connection).start();
+			connection.connect();
+			//		TabGroup tabGroup = ihmNet2TabGroup.get(selectedNet);
 		    }
-		catch(HeadlessException he)
-		    {}		
-	    }
-	else if( action.equals( Constants.marked_away_ac ) )
-	    {
-		boolean setAway = marked_away.getState();
-		if( setAway )
+		else if( action.equals(Constants.quit_mi_ac))
 		    {
-			connection.setAway("Away");
-		    }
-		else 
-		    connection.unSetAway();
-	    }
-	else if( action.equals( Constants.nick_button_ac ) )
-	    {
-		/*
-		try
-		    {
-			String nick = JOptionPane.showInputDialog( this, "Enter new nickname:");
-			if( nick != null )
-			    conn.change_nick( nick );
-		    }
-		catch( HeadlessException he )
-		    {}
-		*/
-	    }
-	else if( action.equals( Constants.join_a_channel_mi_ac ) )
-	    {
-		/*
-		try
-		    {
-			String channel_name = JOptionPane.showInputDialog( this, "Enter channel to join:");
-			if( channel_name != null )
-			    //			    conn.join_channel( channel_name );
-		    }
-		catch( HeadlessException he )
-		    {}
-		*/
-	    }
-	else
-	    {
-		System.out.println("In else, actionPerformed");
-		/*
-		Enumeration<String> channels = htf.keys();
-		try
-		    {
-			while( channels.hasMoreElements() )
+			try
 			    {
-				String element = channels.nextElement();
-				if( action.equals( element ) )
+				int option = JOptionPane.showConfirmDialog(this, "Do you really want to quit?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if(option == JOptionPane.YES_OPTION)
+				    System.exit(0);
+			    }
+			catch(HeadlessException he)
+			    {}
+		    }
+		else if( action.equals(Constants.join_a_channel_mi_ac))
+		    {
+			try
+			    {
+				String channel = (String)JOptionPane.showInputDialog(this, Constants.joinChannelPrompt , "Join channel", JOptionPane.QUESTION_MESSAGE);
+				if( channel != "" && channel != null)
 				    {
-					JTextField tf = (JTextField)(tmtf.get( element ));
-					String input = tf.getText();
-					//					conn.process_input( input );
-					tf.setText("");
-					break;
+					String tokens[] = channel.split(" ");
+					if( tokens.length < 2 )
+					    connection.joinChannel(tokens[0]);
+					else
+					    connection.joinChannel(tokens[0], tokens[1]);
 				    }
 			    }
+			catch(HeadlessException he)
+			    {}		
 		    }
-		catch( NoSuchElementException nsee )
-		    {}
-		*/
-	    }
+		else if( action.equals( Constants.marked_away_ac ) )
+		    {
+			boolean setAway = marked_away.getState();
+			if( setAway )
+			    {
+				connection.setAway("Away");
+			    }
+			else 
+			    connection.unSetAway();
+		    }
+		else if( action.equals( Constants.clear_text_mi_ac ) )
+		    {
+			tabGroup.clearTextOfSelectedTab();
+		    }
+		else
+		    {
+			System.out.println("In else, actionPerformed");
+		    }
     }
 
     /*
@@ -1484,8 +1448,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
     public void keyPressed( KeyEvent ke )
     {
-	System.out.println("In keyPressed");
+	int selectedNet = tp.getSelectedIndex();
+	if( selectedNet < 0 )
+	    return;
+	String selectedNetTitle = tp.getTitleAt(selectedNet);
+	Connection connection = ihmNetname2Connection.get(selectedNetTitle);
+	TabGroup tabGroup = ihmNet2TabGroup.get(selectedNetTitle);
+
+	//	System.out.println("In keyPressed, previousKeyCode : " + previousKeyCode + " == " + );
 	int keyCode = ke.getKeyCode();
+	//	if(previousKeyCode != 0 )
+	//	    previousKeyCode = keyCode;
 	if( keyCode == KeyEvent.VK_F9)
 	    {
 		boolean currentState = UserPrefs.get_showMenuBar();
@@ -1493,12 +1466,48 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		UserPrefs.save_showMenuBar(!currentState);
 		show_menu_bar.setState(!currentState);
 	    }
+	else if( keyCode == KeyEvent.VK_CONTROL )
+	    {
+		previousKeyCode = keyCode;
+	    }
+	else if( keyCode == KeyEvent.VK_W )
+	    {
+		if( previousKeyCode == KeyEvent.VK_CONTROL )
+		    {
+			try
+			    {
+				int option = JOptionPane.showConfirmDialog(this, "Do you really want to close this network?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if(option == JOptionPane.YES_OPTION)
+				    {
+					tabGroup.quit();
+				    }
+			    }
+			catch(HeadlessException he)
+			    {}
+		    }
+	    }
+	else if( keyCode == KeyEvent.VK_Q )
+	    {
+		if( previousKeyCode == KeyEvent.VK_CONTROL )
+		    {
+			try
+			    {
+				int option = JOptionPane.showConfirmDialog(this, "Do you really want to close the application?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if(option == JOptionPane.YES_OPTION)
+				    {
+					System.exit(0);
+				    }
+			    }
+			catch(HeadlessException he)
+			    {}
+		    }
+	    }
     }
 
     public void keyReleased( KeyEvent ke )
     {
 	System.out.println("In keyReleased");
-
+	previousKeyCode = 0; 
     }
 
     public void keyTyped( KeyEvent ke )

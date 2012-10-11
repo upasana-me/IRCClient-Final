@@ -120,8 +120,8 @@ class Connection
 
 		if (!socChannel.isConnected())
 		{
-			log.severe("Read call while sochan.isConnected() == false");
-			return -1;
+		    log.severe("Read call while sochan.isConnected() == false");
+		    return -1;
 		}
 
 		readBuffer.clear();
