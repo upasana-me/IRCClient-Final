@@ -174,4 +174,22 @@ public final class Utility
 	*/
     }
 
+    /*
+    public static boolean ifMessageContainsNick(String message, String nick_name)
+    {
+	Pattern pattern = Pattern.compile(".*\\s" + nick_name + "\\W.*", Pattern.CASE_INSENSITIVE); //nick is anywhere in the message
+	Pattern pattern2 = Pattern.compile("^" + nick_name + "\\W.*", Pattern.CASE_INSENSITIVE); // nick is only at the beginning of the message
+	Pattern pattern3 = Pattern.compile(".*\\s" + nick_name + "$", Pattern.CASE_INSENSITIVE); // nick is at the end of the message
+	Pattern pattern4 = Pattern.compile(nick_name, Pattern.CASE_INSENSITIVE); // message contains only nick
+	Matcher matcher = pattern.matcher(message);
+	Matcher matcher2 = pattern2.matcher(message);
+	Matcher matcher3 = pattern3.matcher(message);
+	Matcher matcher4 = pattern4.matcher(message);
+	boolean b = matcher.matches();
+	boolean b2 = matcher2.matches();
+	boolean b3 = matcher3.matches();
+	boolean b4 = matcher4.matches();
+	return ( b || b2 || b3 || b4);
+    }
+    */
 }

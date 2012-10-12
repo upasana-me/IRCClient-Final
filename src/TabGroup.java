@@ -1,4 +1,3 @@
-import javax.swing.JTabbedPane;
 
 import java.util.TreeMap;
 import java.util.Vector;
@@ -24,6 +23,7 @@ import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JTabbedPane;
 
 import javax.swing.border.Border;
 
@@ -77,7 +77,7 @@ public class TabGroup
     private JPanel p3;
     private JPanel p4;
     private JPanel p5;
-    private JPanel p6;
+    private ButtonTabComponent p6;
 
     public TabGroup(String networkName, Connection connection )
     {
@@ -91,7 +91,6 @@ public class TabGroup
 	channels = new Vector<String>();
 	pms = new Vector<String>();
 	existedChannels = new Vector<String>();
-
     }
 
     public String getNickName()
@@ -270,6 +269,11 @@ public class TabGroup
 				    boolean isAway = connection.isAway();
 				    mainWindow.setAway(isAway);
 				}
+			    setFocusTabColor(selectedTab);
+			    if( selectedTab.equals(networkName)) 
+				mainWindow.setTitle("IRC CLient : " + nickName + " @ " + networkName );
+			    else 
+				mainWindow.setTitle("IRC CLient : " + nickName + " @ " + networkName + " / " + selectedTab );				
 			}
 		}
 	    });
@@ -278,11 +282,11 @@ public class TabGroup
 
     public void create_chan_tab(String channelName)
     {
-	channels.add(channelName);
 	ChannelTab channelTab = new ChannelTab(channelName, this);
 	channelTab.setKeyListener(keyListener);
 	channelTab.addKeyListeners();
 	tmChannelTab.put(channelName, channelTab);
+	channels.add(channelName);
     }
 
     /**
@@ -298,9 +302,9 @@ public class TabGroup
      */
     public void create_privmsg_tab(String senderNickName, String hostname, String message )
     {
-	pms.add(senderNickName);
 	PrivateMessageTab privateMessageTab = new PrivateMessageTab(senderNickName, this);
 	tmPrivateMessageTab.put(senderNickName, privateMessageTab );
+	pms.add(senderNickName);
 	privateMessageTab.setKeyListener(keyListener);
 	privateMessageTab.addKeyListener(keyListener);
 	privateMessageTab.setMessage(senderNickName, message);
@@ -310,6 +314,95 @@ public class TabGroup
     public Connection getConnection()
     {
 	return connection;
+    }
+
+    public void setMessageTabColor(String tabname)
+    {
+	String selectedTab = getSelectedTab();
+	if( selectedTab.equals(tabname))
+	    return;
+	if( selectedTab.equals( networkName) )
+	    {
+		if( !selectedTab.equals(tabname) )
+		    {
+			p6.setLabelColor(Color.MAGENTA);
+		    }
+	    }
+	else if( channels.contains(tabname) )
+	    {
+		ChannelTab channelTab = tmChannelTab.get(tabname);
+		channelTab.setMessageTabColor();
+	    }
+	else if( pms.contains(tabname))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabname);
+		privateMessageTab.setMessageTabColor();
+	    }
+    }
+
+    public void setInfoTabColor(String tabname)
+    {
+	String selectedTab = getSelectedTab();
+	if( selectedTab.equals(tabname))
+	    return;
+	if( selectedTab.equals( networkName) )
+	    {
+		p6.setLabelColor(new Color(102,0,102));
+	    }
+	else if( channels.contains(tabname) )
+	    {
+		ChannelTab channelTab = tmChannelTab.get(tabname);
+		channelTab.setInfoTabColor();
+	    }
+	else if( pms.contains(tabname))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabname);
+		privateMessageTab.setInfoTabColor();
+	    }
+    }
+
+    public void setFocusTabColor(String tabname)
+    {
+	if( tabname.equals(networkName) )
+	    {
+		p6.setFocusTabColor();
+	    }
+	else if( channels.contains(tabname))
+	    {
+		ChannelTab channelTab = tmChannelTab.get(tabname);
+		channelTab.setFocusTabColor();
+	    }
+	else if( pms.contains(tabname))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabname);
+		privateMessageTab.setFocusTabColor();
+	    }
+    }
+
+    public void setHighlightedTabColor(String tabname)
+    {
+	String selectedTab = getSelectedTab();
+	if( selectedTab.equals(tabname))
+	    {
+		return;
+	    }
+	if( selectedTab.equals( networkName) )
+	    {
+		if( !selectedTab.equals(tabname) )
+		    {
+			p6.setLabelColor(new Color(255, 0, 102));
+		    }
+	    }
+	else if( channels.contains(tabname) )
+	    {
+		ChannelTab channelTab = tmChannelTab.get(tabname);
+		channelTab.setHighlightedTabColor();
+	    }
+	else if( pms.contains(tabname))
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabname);
+		privateMessageTab.setHighlightedTabColor();
+	    }
     }
 
     /**
@@ -323,6 +416,8 @@ public class TabGroup
     {
 	if( text.equals("\n") || text.equals("") || text.equals(" ") || text.equals(null) || text == null )
 	    return;
+
+	setInfoTabColor(tabname);
 
 	if( tabname.equals(networkName))
 	    setServerInfo(text);
@@ -340,6 +435,7 @@ public class TabGroup
 
     public void setServerInfo(String text)
     {
+	setInfoTabColor(networkName);
 	server_ta.setServerInfo(text);
 	//	server_ta.append(text + "\n");
 	//	server_ta.setCaretPosition(server_ta.getDocument().getLength());
@@ -347,28 +443,33 @@ public class TabGroup
 
     public void setErrorMessage(String errorMessage)
     {
+	setInfoTabColor(networkName);
 	server_ta.setErrorMessage(errorMessage);
     }
 
     public void setChanJoinText(String channelName, String text)
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setChanJoinText(text);
     }
 
     public void setServNotice(String notice)
     {
+	setInfoTabColor(networkName);
 	server_ta.setServNotice(notice);	
     }
 
     public void setChannelNotice(String channelName, String byWho, String message)
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setNotice(byWho, message);		
     }
     public void setNotice(String nick, String notice)
     {
 	String selectedTab = getSelectedTab();
+	setInfoTabColor(selectedTab);
 	if(tmChannelTab.containsKey(selectedTab))
 	    {
 	       ChannelTab channelTab = tmChannelTab.get(selectedTab);
@@ -384,36 +485,49 @@ public class TabGroup
 
     public void setJoinText(String channelName, String nick, String userName, String hostName)
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setJoinText(nick, userName, hostName);
     }
 
     public void setPartText(String channelName, String nick, String userName, String hostName, String partMessage)
     {
+	setInfoTabColor(channelName);	
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setPartText(nick, userName, hostName, partMessage);
     }
     
     public void setTopicText(String channelName, String topic)
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setTopicText(topic);
     }
 
     public void setTopicSetTimeText(String channelName, String topicSetter, String topicTime )
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setTopicSetTimeText(topicSetter, topicTime);
     }
 
     public void setHighlightedMessage(String channelName, String nick, String message)
     {
+	setHighlightedTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setHighlightedMessage(nick, message);	
     }
 
+    public void setHighlightedText(String channelName, String nick, String message)
+    {
+	setHighlightedTabColor(channelName);
+	ChannelTab channelTab = tmChannelTab.get(channelName);
+	channelTab.setHighlightedMessage("*", message);	
+    }
+
     public void setRegularMessage(String tabName, String nick, String message)
     {
+	setMessageTabColor(tabName);
 	if( tmChannelTab.containsKey(tabName) )
 	    {
 		ChannelTab channelTab = tmChannelTab.get(tabName);
@@ -429,17 +543,21 @@ public class TabGroup
 
     public void setSelfNickChangeText(String newNick)
     {
+	setInfoTabColor(networkName);
 	server_ta.setServerInfo(Constants.selfNickChangeText + newNick);
 	System.out.println("In setSelfNickChangeText.");
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
+	
 	for( int i = 0; i < channelTabs.size(); i++ )
 	    {
+		setInfoTabColor(channels.elementAt(i));
 		channelTabs.elementAt(i).setSelfNickChangeText(newNick);
 	    }
     }
 
     public void setNickChangeText(String channelName, String oldNick, String newNick)
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setNickChangeText(oldNick, newNick );	
     }
@@ -447,6 +565,7 @@ public class TabGroup
     public void setInvitationText(String channelName, String nick, String hostName)
     {
 	String selectedTab = getSelectedTab();
+	setInfoTabColor(selectedTab);
 	if(tmChannelTab.containsKey(selectedTab))
 	    {
 		ChannelTab channelTab = tmChannelTab.get(selectedTab);
@@ -465,12 +584,14 @@ public class TabGroup
     
     public void setSelfKickText(String channelName, String byWho, String reason)
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setSelfKickText(channelName, byWho, reason);
     }
 
     public void setKickText(String channelName, String nick, String byWho, String reason)
     {
+	setInfoTabColor(channelName);
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setKickText(channelName, nick, byWho, reason);	
     }
@@ -484,6 +605,7 @@ public class TabGroup
 			   String serverName, 
 			   int hopCount)
     {
+	setInfoTabColor(networkName);
 	server_ta.setWhoText(nick, userName, hostName, realName, hereOrGone, 
 			     channelName, serverName, hopCount);
     }
@@ -499,16 +621,19 @@ public class TabGroup
 			     String whoisChannels, 
 			     String endOfList)
     {
+	setInfoTabColor(networkName);
 	server_ta.setWhoisText(nick, userName, hostName, realName, server, serverInfo, idleTime, signOnTimeStr, whoisChannels, endOfList);
     }
   
     public void setWhoWasText(String nick, String userName, String hostName, String realName)
     {
+	setInfoTabColor(networkName);
 	server_ta.setWhoWasText(nick, userName, hostName, realName);
     }
 
     public void setWhoWasRemainingText(String nick, String remainingText)
     {
+	setInfoTabColor(networkName);
 	server_ta.setWhoWasRemainingText(nick, remainingText);
     }
 
@@ -531,6 +656,7 @@ public class TabGroup
     public void setDccChatInvitation(String nick, String ip, int port)
     {
 	String tabName = getSelectedTab();
+	setInfoTabColor(tabName);
 	if(tmChannelTab.containsKey(tabName))
 	    {
 		ChannelTab channelTab = tmChannelTab.get(tabName);
@@ -687,7 +813,6 @@ public class TabGroup
     {
 	ChannelTab channelTab = tmChannelTab.get(channelName);
 	channelTab.setChanMembers(treemap);
-	
     }
 
     public void reInitialiseChannel(String channelName)
@@ -776,18 +901,21 @@ public class TabGroup
     {
 	System.out.println("In setDisconnectedText");
 	server_ta.setDisconnectedText(text);
+	setInfoTabColor(networkName);
 	existedChannels = channels;
 
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
 	for( int i = 0; i < channelTabs.size(); i++ )
 	    {
 		System.out.println("In setDisconnectedText, i = " + i);
+		setInfoTabColor(channels.elementAt(i));
 		channelTabs.elementAt(i).signalDisconnected(text);
 	    }
 
 	Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
 	for( int i = 0; i < privateMessageTabs.size(); i++ )
 	    {
+		setInfoTabColor(pms.elementAt(i));
 		System.out.println("In setDisconnectedText, i = " + i);
 		privateMessageTabs.elementAt(i).setDisconnectedText(text);
 	    }	
@@ -810,30 +938,36 @@ public class TabGroup
 
     public void setSelfAway()
     {
+	setInfoTabColor(networkName);
 	server_ta.setSelfUnAwayText("You have been marked as away.");
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
 	for(int i = 0; i < channelTabs.size(); i++ )
 	    {
+		setInfoTabColor(channels.elementAt(i));
 		channelTabs.elementAt(i).setSelfAway();
 	    }
 	Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
 	for(int i = 0; i < privateMessageTabs.size(); i++ )
 	    {
+		setInfoTabColor(pms.elementAt(i));
 		privateMessageTabs.elementAt(i).setSelfAwayText();
 	    }
     }
 
     public void setSelfUnAway()
     {
+	setInfoTabColor(networkName);
 	server_ta.setSelfUnAwayText("You have marked as unaway.");
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
 	for(int i = 0; i < channelTabs.size(); i++ )
 	    {
+		setInfoTabColor(channels.elementAt(i));
 		channelTabs.elementAt(i).setSelfUnAway();
 	    }
 	Vector<PrivateMessageTab> privateMessageTabs = new Vector<PrivateMessageTab>(tmPrivateMessageTab.values());
 	for(int i = 0; i < privateMessageTabs.size(); i++ )
 	    {
+		setInfoTabColor(pms.elementAt(i));
 		privateMessageTabs.elementAt(i).setSelfUnAwayText();
 	    }
     }

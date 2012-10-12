@@ -44,7 +44,7 @@ public class PrivateMessageTab extends JPanel
     private JPanel p4;
     private JPanel p5;
     private JPanel p6;
-    private JPanel p7;
+    private ButtonTabComponent p7;
 
     public PrivateMessageTab(String senderNickName, TabGroup tabGroup)
     {
@@ -76,6 +76,26 @@ public class PrivateMessageTab extends JPanel
     public void setKeyListener(KeyListener kl)
     {
 	this.keyListener = kl;
+    }
+
+    public void setMessageTabColor()
+    {
+	p7.setLabelColor(Color.MAGENTA);
+    }
+
+    public void setInfoTabColor()
+    {
+	p7.setLabelColor(new Color(102, 0, 102));
+    }
+
+    public void setHighlightedTabColor()
+    {
+	p7.setLabelColor(new Color(255,0,102));
+    }
+
+    public void setFocusTabColor()
+    {
+	p7.setFocusTabColor();
     }
 
     private void initialise()

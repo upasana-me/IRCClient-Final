@@ -696,7 +696,10 @@ public class Connection implements Runnable, IRCEventListener
 				ctcpString = ctcpString.substring("ACTION".length() + 1);
 				String text = nick + " " + ctcpString;
 				String channelName = channel.getName();
-				tabGroup.setText(channelName, text);
+				if( ifMessageContainsNick(text) )
+				    tabGroup.setHighlightedText(channelName, text);
+				else
+				    tabGroup.setText(channelName, text);
 			    }
 			else if( ctcpString.startsWith("VERSION"))
 			    {
@@ -773,6 +776,7 @@ public class Connection implements Runnable, IRCEventListener
 	catch(NullPointerException npe)
 	    {
 		connected = false;
+		npe.printStackTrace();
 		tabGroup.setDisconnectedText("Disconnected");
 	    }
     }
@@ -878,7 +882,7 @@ public class Connection implements Runnable, IRCEventListener
 	return status_2_members;
     }
 
-    private boolean ifMessageContainsNick(String message)
+    public boolean ifMessageContainsNick(String message)
     {
 	Pattern pattern = Pattern.compile(".*\\s" + nick_name + "\\W.*", Pattern.CASE_INSENSITIVE); //nick is anywhere in the message
 	Pattern pattern2 = Pattern.compile("^" + nick_name + "\\W.*", Pattern.CASE_INSENSITIVE); // nick is only at the beginning of the message

@@ -48,7 +48,7 @@ public class ChannelTab extends JPanel
     private JPanel p4;
     private JPanel p5;
     private JPanel p6;
-    private JPanel p7;
+    private ButtonTabComponent p7;
 	
     private String channelName;
     private String nickName;
@@ -122,11 +122,26 @@ public class ChannelTab extends JPanel
 	textPaneScroller.addKeyListener(keyListener);
 	textPane.addKeyListener(keyListener);
 	nicksList.addKeyListener(keyListener);
-	/*
-	p0.addKeyListener(keyListener);
-	p0.addKeyListener(keyListener);
-	p0.addKeyListener(keyListener);
-	*/
+    }
+
+    public void setMessageTabColor()
+    {
+	p7.setLabelColor(Color.MAGENTA);
+    }
+
+    public void setInfoTabColor()
+    {
+	p7.setLabelColor(new Color(102, 0, 102));
+    }
+
+    public void setHighlightedTabColor()
+    {
+	p7.setLabelColor(new Color(255, 0, 102));
+    }
+
+    public void setFocusTabColor()
+    {
+	p7.setFocusTabColor();
     }
 
     public void initialise()

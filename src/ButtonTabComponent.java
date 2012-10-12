@@ -28,6 +28,7 @@ public class ButtonTabComponent extends JPanel
     private final JTabbedPane pane;
     private TabGroup tabGroup;
     private String tabName;
+    private JLabel label;
 
     public ButtonTabComponent(final JTabbedPane pane, final String labelText, TabGroup tabGroup) 
     {
@@ -42,7 +43,7 @@ public class ButtonTabComponent extends JPanel
         setOpaque(false);
         
         //make JLabel read titles from JTabbedPane	
-        JLabel label = new JLabel(labelText);
+	label = new JLabel(labelText);
 	this.tabName = labelText;
 
         add(label);
@@ -138,6 +139,18 @@ public class ButtonTabComponent extends JPanel
             g2.drawLine(getWidth() - delta - 1, delta, delta, getHeight() - delta - 1);
             g2.dispose();
         }
+    }
+
+    public void setFocusTabColor()
+    {
+	label.setForeground(new Color(0, 0, 0));
+    }
+
+    public void setLabelColor(Color color)
+    {
+	Color labelColor = label.getForeground();
+	if( !labelColor.equals(new Color(255, 0, 102)) )
+	    label.setForeground(color);
     }
 
     private final static MouseListener buttonMouseListener = new MouseAdapter() 
