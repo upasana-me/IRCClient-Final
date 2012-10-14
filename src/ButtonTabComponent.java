@@ -29,11 +29,15 @@ public class ButtonTabComponent extends JPanel
     private TabGroup tabGroup;
     private String tabName;
     private JLabel label;
+    private BlinkingPanel blinkingPanel;
+    private Thread thread;
+
 
     public ButtonTabComponent(final JTabbedPane pane, final String labelText, TabGroup tabGroup) 
     {
         //unset default FlowLayout' gaps
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+	this.setOpaque(true);
         if (pane == null) {
             throw new NullPointerException("TabbedPane is null");
         }
@@ -44,15 +48,20 @@ public class ButtonTabComponent extends JPanel
         
         //make JLabel read titles from JTabbedPane	
 	label = new JLabel(labelText);
-	this.tabName = labelText;
 
+	this.tabName = labelText;
+	//	label.setOpaque(true);
         add(label);
         //add more space between the label and the button
         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
         //tab button
         JButton button = new TabButton();
         add(button);
+	//	button.setOpaque(true);
+	blinkingPanel = new BlinkingPanel( pane, tabName);
+	//	blinkingPanel.setHighlighted(false);
         //add more space to the top of the component
+       
         setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
     }
 
@@ -143,13 +152,24 @@ public class ButtonTabComponent extends JPanel
 
     public void setFocusTabColor()
     {
+	if( thread != null && thread.isAlive())
+	    blinkingPanel.setHighlighted(false);
 	label.setForeground(new Color(0, 0, 0));
+	//	pane.setBackgroundAt(pane.indexOfTab(tabName), null);
+	//	blinkingPanel.setHighlighted(false);
     }
 
     public void setLabelColor(Color color)
     {
 	Color labelColor = label.getForeground();
-	if( !labelColor.equals(new Color(255, 0, 102)) )
+	if( !blinkingPanel.isBlinking() )
+	    {
+		label.setForeground(Color.BLACK);
+		blinkingPanel.setHighlighted(true);
+		thread = new Thread(blinkingPanel);
+		thread.start();
+	    }
+	else if( thread == null || !thread.isAlive() )
 	    label.setForeground(color);
     }
 

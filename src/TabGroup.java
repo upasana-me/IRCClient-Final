@@ -121,9 +121,14 @@ public class TabGroup
 
     public String getSelectedTab()
     {
-	int selectedIndex = tabbedPane.getSelectedIndex();
-	String title = tabbedPane.getTitleAt(selectedIndex);
-	return title;
+	if( tabbedPane != null )
+	    {
+		int selectedIndex = tabbedPane.getSelectedIndex();
+		String title = tabbedPane.getTitleAt(selectedIndex);
+		return title;
+	    }
+	else
+	    return null;
     }
 
     public void setJTabbedPane(JTabbedPane tabbedPane)
@@ -262,6 +267,7 @@ public class TabGroup
 		    int index = jtp.getSelectedIndex();
 		    if( index >= 0 )
 			{
+			    //			    jtp.setBackgroundAt(index, Color.WHITE);
 			    String selectedTab = jtp.getTitleAt(index);
 			    setTextFieldFocus(selectedTab);
 			    if( connection.isConnected())
@@ -273,7 +279,8 @@ public class TabGroup
 			    if( selectedTab.equals(networkName)) 
 				mainWindow.setTitle("IRC CLient : " + nickName + " @ " + networkName );
 			    else 
-				mainWindow.setTitle("IRC CLient : " + nickName + " @ " + networkName + " / " + selectedTab );				
+				mainWindow.setTitle("IRC CLient : " + nickName + " @ " + networkName + " / " + selectedTab );	
+			    mainWindow.setAway(connection.isAway());
 			}
 		}
 	    });
@@ -287,6 +294,7 @@ public class TabGroup
 	channelTab.addKeyListeners();
 	tmChannelTab.put(channelName, channelTab);
 	channels.add(channelName);
+	//	tabbedPane.setBackgroundAt(tabbedPane.indexOfTab(channelName), Color.WHITE);
     }
 
     /**
@@ -309,6 +317,8 @@ public class TabGroup
 	privateMessageTab.addKeyListener(keyListener);
 	privateMessageTab.setMessage(senderNickName, message);
 	privateMessageTab.setHostName(hostname);
+	mainWindow.setHighlightedTabColor(networkName);
+	setHighlightedTabColor(senderNickName);
     }
 
     public Connection getConnection()
@@ -318,6 +328,7 @@ public class TabGroup
 
     public void setMessageTabColor(String tabname)
     {
+	mainWindow.setMessageTabColor(networkName);
 	String selectedTab = getSelectedTab();
 	if( selectedTab.equals(tabname))
 	    return;
@@ -342,6 +353,7 @@ public class TabGroup
 
     public void setInfoTabColor(String tabname)
     {
+	mainWindow.setInfoTabColor(networkName);
 	String selectedTab = getSelectedTab();
 	if( selectedTab.equals(tabname))
 	    return;
@@ -363,6 +375,7 @@ public class TabGroup
 
     public void setFocusTabColor(String tabname)
     {
+	mainWindow.setFocusTabColor(networkName);
 	if( tabname.equals(networkName) )
 	    {
 		p6.setFocusTabColor();
@@ -381,6 +394,7 @@ public class TabGroup
 
     public void setHighlightedTabColor(String tabname)
     {
+	mainWindow.setHighlightedTabColor(networkName);
 	String selectedTab = getSelectedTab();
 	if( selectedTab.equals(tabname))
 	    {
@@ -538,7 +552,16 @@ public class TabGroup
 		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabName);
 		privateMessageTab.setMessage(nick, message);		
 	    }
-	    
+    }
+
+    public void setPrivateMessage(String tabName, String nick, String message)
+    {
+	setHighlightedTabColor(tabName);
+	if( tmPrivateMessageTab.containsKey(tabName) )
+	    {
+		PrivateMessageTab privateMessageTab = tmPrivateMessageTab.get(tabName);
+		privateMessageTab.setMessage(nick, message);		
+	    }
     }
 
     public void setSelfNickChangeText(String newNick)
@@ -938,6 +961,7 @@ public class TabGroup
 
     public void setSelfAway()
     {
+	mainWindow.setAway(true);
 	setInfoTabColor(networkName);
 	server_ta.setSelfUnAwayText("You have been marked as away.");
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
@@ -956,6 +980,7 @@ public class TabGroup
 
     public void setSelfUnAway()
     {
+	mainWindow.setAway(false);
 	setInfoTabColor(networkName);
 	server_ta.setSelfUnAwayText("You have marked as unaway.");
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
@@ -975,7 +1000,7 @@ public class TabGroup
     public void setAway(String nick)
     {
 	System.out.println("In setAway.");
-	
+
 	Vector<ChannelTab> channelTabs = new Vector<ChannelTab>(tmChannelTab.values());
 	for(int i = 0; i < channelTabs.size(); i++ )
 	    {

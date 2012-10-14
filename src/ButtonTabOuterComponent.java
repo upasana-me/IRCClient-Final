@@ -30,6 +30,9 @@ public class ButtonTabOuterComponent extends JPanel
     private String tabName;
     private MainWindow mainWindow;
     private JPanel panel;
+    private JLabel label;
+    private BlinkingPanel blinkingPanel;
+    private Thread thread;
 
     public ButtonTabOuterComponent(final JTabbedPane pane, final String labelText, MainWindow mw) 
     {
@@ -46,15 +49,17 @@ public class ButtonTabOuterComponent extends JPanel
         setOpaque(false);
         
         //make JLabel read titles from JTabbedPane	
-        JLabel label = new JLabel(labelText);
+	label = new JLabel(labelText);
 	this.tabName = labelText;
-
+	//	label.setOpaque(true);
         add(label);
         //add more space between the label and the button
         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
         //tab button
         JButton button = new TabButton();
         add(button);
+	//	button.setOpaque(true);
+	blinkingPanel = new BlinkingPanel(pane, tabName);
         //add more space to the top of the component
         setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
     }
@@ -94,7 +99,7 @@ public class ButtonTabOuterComponent extends JPanel
 									    JOptionPane.QUESTION_MESSAGE);
 				if( yesOrNo == JOptionPane.YES_OPTION )
 				    {
-					Connection connection = mainWindow.getConnection(panel);
+					Connection connection = mainWindow.getConnection((ButtonTabOuterComponent)panel);
 					connection.quit(tabName);
 					int indexOfTab = pane.indexOfTabComponent(panel);
 					System.out.println("indexOfTab : " + indexOfTab);
@@ -145,6 +150,30 @@ public class ButtonTabOuterComponent extends JPanel
             g2.drawLine(getWidth() - delta - 1, delta, delta, getHeight() - delta - 1);
             g2.dispose();
         }
+    }
+
+    public void setFocusTabColor()
+    {
+	if( thread != null && thread.isAlive())
+	    blinkingPanel.setHighlighted(false);	
+	//	pane.setBackgroundAt(pane.indexOfTab(tabName), null);
+	label.setForeground(new Color(0, 0, 0));
+    }
+
+    public void setLabelColor(Color color)
+    {
+	Color labelColor = label.getForeground();
+	if( !blinkingPanel.isBlinking() )// color.equals(new Color(255, 0, 102 ) ) && !thread.isAlive() )
+	    {
+		label.setForeground(Color.BLACK);
+		thread = new Thread(blinkingPanel);
+		blinkingPanel.setHighlighted(true);
+		thread.start();
+	    }
+	else if( thread == null || !thread.isAlive() )
+	    {
+		label.setForeground(color);
+	    }
     }
 
     private final static MouseListener buttonMouseListener = new MouseAdapter() 

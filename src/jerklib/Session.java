@@ -381,7 +381,9 @@ public class Session extends RequestGenerator
 		if (isAway)
 		{
 			super.unSetAway();
+			System.out.println("In Session, unsetAway()");
 			isAway = false;
+			System.out.println("isAway : " + isAway);
 		}
 	}
 

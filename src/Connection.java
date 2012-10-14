@@ -189,7 +189,7 @@ public class Connection implements Runnable, IRCEventListener
 			String awayMessage = ae.getAwayMessage();
 			boolean isYou = ae.isYou();
 			boolean isAway = ae.isAway();
-			System.out.println("isAway : " + isAway + ", isYou : " + isYou);
+			//			System.out.println("isAway : " + isAway + ", isYou : " + isYou);
 			if( isYou )
 			    {
 				if( isAway )
@@ -454,7 +454,7 @@ public class Connection implements Runnable, IRCEventListener
 			    }
 			else
 			    {
-				tabGroup.setRegularMessage( nick, nick, message );
+				tabGroup.setPrivateMessage( nick, nick, message );
 			    }
 		    }
 		else if( e.getType() == Type.INVITE_EVENT )
@@ -697,7 +697,7 @@ public class Connection implements Runnable, IRCEventListener
 				String text = nick + " " + ctcpString;
 				String channelName = channel.getName();
 				if( ifMessageContainsNick(text) )
-				    tabGroup.setHighlightedText(channelName, text);
+				    tabGroup.setHighlightedText(channelName, "*", text);
 				else
 				    tabGroup.setText(channelName, text);
 			    }
@@ -773,7 +773,7 @@ public class Connection implements Runnable, IRCEventListener
 			    }
 		    }
 	    }
-	catch(NullPointerException npe)
+      	catch(NullPointerException npe)
 	    {
 		connected = false;
 		npe.printStackTrace();
@@ -1115,7 +1115,7 @@ public class Connection implements Runnable, IRCEventListener
 
     public void unSetAway()
     {
-	session.unSetAway();
+	session.unsetAway();
     }
 
     public void changeNick(String newNick)
@@ -1251,7 +1251,14 @@ public class Connection implements Runnable, IRCEventListener
 
     public boolean isAway()
     {
-	return session.isAway();
+	try
+	    {
+		return session.isAway();
+	    }
+	catch(NullPointerException npe)
+	    {
+		return false;
+	    }
     }
 
     //TODO later

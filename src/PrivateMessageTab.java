@@ -199,7 +199,7 @@ public class PrivateMessageTab extends JPanel
 	//	    System.err.println("Error in requestFocusInWindow()");
 	//	tp.addTab( nick_name, p );
 
-	tabbedPane.setSelectedComponent( this );
+	//	tabbedPane.setSelectedComponent( this );
     }
 
     public void addKeyListeners()
